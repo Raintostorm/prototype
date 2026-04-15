@@ -11,10 +11,6 @@ namespace SpinSquad.Scenes
 {
     public sealed class UpgradeSceneController : MonoBehaviour
     {
-        const float CardRowSpacing = 182f;
-        const float CardTopY = -332f;
-        static readonly Vector2 CardSize = new Vector2(300f, 170f);
-
         [SerializeField] string homepageSceneName = "Homepage";
         [SerializeField] string detailSceneName = "UpgradeDetail";
         Font _font;
@@ -64,10 +60,49 @@ namespace SpinSquad.Scenes
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            CreateText(canvasGo.transform, "Title", "Upgrade", 42, new Vector2(0f, -120f), new Vector2(900f, 100f));
-            _goldText = CreateText(canvasGo.transform, "Gold", string.Empty, 28, new Vector2(0f, -210f), new Vector2(900f, 80f));
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, 0);
+            AddHeaderStrip(canvasGo.transform);
+
+            CreateText(
+                canvasGo.transform,
+                "Title",
+                "Upgrade",
+                MetaHudTheme.FontTitle,
+                MetaHudTheme.TextPrimary,
+                new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f),
+                new Vector2(900f, 72f));
+            _goldText = CreateTopLeftGoldText(canvasGo.transform);
+
+            for (var line = 0; line < MetaProgressionStore.AllyLineCount; line++)
+            {
+                var cx = ColumnCenterX(line);
+                CreateText(
+                    canvasGo.transform,
+                    $"ColHeader_{line}",
+                    $"Line {line}",
+                    MetaHudTheme.FontSection,
+                    MetaHudTheme.SectionLabel,
+                    new Vector2(cx, MetaHudTheme.UpgradeColumnHeaderY),
+                    new Vector2(MetaHudTheme.UpgradeCardSize.x + 8f, 40f));
+            }
+
+            for (var step = 0; step < MetaProgressionStore.UpgradableRarityCount; step++)
+            {
+                var rowCenterY = RowCenterY(step);
+                var gridLeft = ColumnCenterX(0) - MetaHudTheme.UpgradeCardSize.x * 0.5f;
+                CreateText(
+                    canvasGo.transform,
+                    $"RowLabel_{step}",
+                    ((Rarity)step).ToString(),
+                    MetaHudTheme.FontSection,
+                    MetaHudTheme.SectionLabel,
+                    new Vector2(gridLeft - 10f, rowCenterY),
+                    new Vector2(132f, 40f),
+                    TextAnchor.MiddleRight);
+            }
 
             for (var line = 0; line < MetaProgressionStore.AllyLineCount; line++)
             {
@@ -77,8 +112,8 @@ namespace SpinSquad.Scenes
                     var idx = line * MetaProgressionStore.UpgradableRarityCount + step;
                     var lineCapture = line;
                     var rarityCapture = rarity;
-                    var x = -320f + line * 320f;
-                    var y = CardTopY - step * CardRowSpacing;
+                    var x = ColumnCenterX(line);
+                    var y = MetaHudTheme.UpgradeCardTopY - step * MetaHudTheme.UpgradeCardRowSpacing;
                     CreateUpgradeCard(
                         canvasGo.transform,
                         idx,
@@ -88,8 +123,43 @@ namespace SpinSquad.Scenes
                 }
             }
 
-            _hintText = CreateText(canvasGo.transform, "Hint", "Tap a card for stats and upgrade.", 22, new Vector2(0f, -1105f), new Vector2(980f, 90f));
-            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1245f), new Color(0.2f, 0.28f, 0.4f, 0.95f), BackToHomepage);
+            _hintText = CreateText(
+                canvasGo.transform,
+                "Hint",
+                "Tap a card for stats and upgrade.",
+                MetaHudTheme.FontHint,
+                MetaHudTheme.TextSecondary,
+                new Vector2(0f, -1120f),
+                new Vector2(980f, 90f));
+            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1268f), MetaHudTheme.ButtonBack, BackToHomepage);
+        }
+
+        static float ColumnCenterX(int line)
+        {
+            var n = MetaProgressionStore.AllyLineCount;
+            var dx = MetaHudTheme.UpgradeColumnSpacingX;
+            var start = -(n - 1) * 0.5f * dx;
+            return start + line * dx;
+        }
+
+        static float RowCenterY(int step) =>
+            MetaHudTheme.UpgradeCardTopY - step * MetaHudTheme.UpgradeCardRowSpacing - MetaHudTheme.UpgradeCardSize.y * 0.5f;
+
+        static void AddHeaderStrip(Transform parent)
+        {
+            var go = new GameObject("HeaderStrip");
+            go.transform.SetParent(parent, false);
+            go.transform.SetSiblingIndex(1);
+            var img = go.AddComponent<Image>();
+            img.sprite = MetaHudTheme.WhiteSprite();
+            img.color = MetaHudTheme.HeaderBand;
+            img.raycastTarget = false;
+            var rt = img.rectTransform;
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0f, 168f);
         }
 
         void OpenDetail(int line, Rarity rarity)
@@ -150,7 +220,15 @@ namespace SpinSquad.Scenes
             }
         }
 
-        Text CreateText(Transform parent, string name, string value, int size, Vector2 pos, Vector2 dim)
+        Text CreateText(
+            Transform parent,
+            string name,
+            string value,
+            int size,
+            Color color,
+            Vector2 pos,
+            Vector2 dim,
+            TextAnchor alignment = TextAnchor.MiddleCenter)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
@@ -158,14 +236,35 @@ namespace SpinSquad.Scenes
             t.font = _font;
             t.fontSize = size;
             t.text = value;
-            t.alignment = TextAnchor.MiddleCenter;
-            t.color = Color.white;
+            t.alignment = alignment;
+            t.color = color;
             t.raycastTarget = false;
             var rt = t.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
+            if (alignment == TextAnchor.MiddleRight || alignment == TextAnchor.UpperRight || alignment == TextAnchor.LowerRight)
+                rt.pivot = new Vector2(1f, 0.5f);
             rt.anchoredPosition = pos;
             rt.sizeDelta = dim;
+            return t;
+        }
+
+        Text CreateTopLeftGoldText(Transform parent)
+        {
+            var go = new GameObject("Gold");
+            go.transform.SetParent(parent, false);
+            var t = go.AddComponent<Text>();
+            t.font = _font;
+            t.fontSize = MetaHudTheme.FontResource;
+            t.alignment = TextAnchor.UpperLeft;
+            t.color = MetaHudTheme.TextPrimary;
+            t.raycastTarget = false;
+            var rt = t.rectTransform;
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0f, 1f);
+            rt.anchoredPosition = new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop);
+            rt.sizeDelta = new Vector2(640f, 96f);
             return t;
         }
 
@@ -174,8 +273,9 @@ namespace SpinSquad.Scenes
             var btnGo = new GameObject($"UpgradeCard_{idx}");
             btnGo.transform.SetParent(parent, false);
             var bg = btnGo.AddComponent<Image>();
-            bg.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+            bg.sprite = MetaHudTheme.WhiteSprite();
             bg.color = RarityPalette.UpgradeCardBackground(rarity);
+            MetaHudTheme.ApplyImageOutline(bg);
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = bg;
             btn.onClick.AddListener(onClick);
@@ -183,7 +283,7 @@ namespace SpinSquad.Scenes
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = CardSize;
+            rt.sizeDelta = MetaHudTheme.UpgradeCardSize;
 
             var portGo = new GameObject("Portrait");
             portGo.transform.SetParent(btnGo.transform, false);
@@ -200,9 +300,9 @@ namespace SpinSquad.Scenes
             nameGo.transform.SetParent(btnGo.transform, false);
             var nameText = nameGo.AddComponent<Text>();
             nameText.font = _font;
-            nameText.fontSize = 21;
+            nameText.fontSize = MetaHudTheme.FontHint;
             nameText.alignment = TextAnchor.MiddleCenter;
-            nameText.color = Color.white;
+            nameText.color = MetaHudTheme.TextPrimary;
             nameText.raycastTarget = false;
             nameText.horizontalOverflow = HorizontalWrapMode.Wrap;
             nameText.verticalOverflow = VerticalWrapMode.Truncate;
@@ -221,7 +321,7 @@ namespace SpinSquad.Scenes
             var go = new GameObject(label + "Button");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            image.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+            image.sprite = MetaHudTheme.WhiteSprite();
             image.color = color;
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
@@ -231,10 +331,10 @@ namespace SpinSquad.Scenes
             textGo.transform.SetParent(go.transform, false);
             var text = textGo.AddComponent<Text>();
             text.font = _font;
-            text.fontSize = 28;
+            text.fontSize = MetaHudTheme.FontButton;
             text.text = label;
             text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.white;
+            text.color = MetaHudTheme.TextPrimary;
             text.raycastTarget = false;
             var lrt = text.rectTransform;
             lrt.anchorMin = Vector2.zero;
@@ -246,7 +346,7 @@ namespace SpinSquad.Scenes
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(480f, 90f);
+            rt.sizeDelta = MetaHudTheme.CtaSize;
             return btn;
         }
     }

@@ -756,7 +756,8 @@ namespace SpinSquad.Core
             var metaPassives = MetaProgressionStore.GetTreasurePassiveTotals();
             RollWallet.ResetForNewBattle(startingRollCoins + metaPassives.StartRollCoinBonus);
 
-            currentLevel = Mathf.Clamp(MetaProgressionStore.SelectedLevel, 1, MaxLevels);
+            var maxPlayable = Mathf.Min(MaxLevels, MetaProgressionStore.UnlockedLevel);
+            currentLevel = Mathf.Clamp(MetaProgressionStore.SelectedLevel, 1, maxPlayable);
             currentWave = 1;
             BattleEnded = false;
             CombatStarted = false;

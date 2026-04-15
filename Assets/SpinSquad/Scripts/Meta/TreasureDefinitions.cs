@@ -37,8 +37,10 @@ namespace SpinSquad.Meta
 
     public static class TreasureDefinitions
     {
-        static readonly TreasureDefinition[] AllDefinitions = BuildDefinitions();
-
+        /// <summary>
+        /// Thứ tự khai báo quan trọng: <see cref="BuildDefinitions"/> chạy khi gán <see cref="AllDefinitions"/>,
+        /// nên mọi mảng/hằng dùng trong build phải khai báo *trước* <see cref="AllDefinitions"/>.
+        /// </summary>
         static readonly int[] RarityWeights = { 58, 28, 11, 3 };
 
         static readonly string[][] TierNames =
@@ -68,6 +70,8 @@ namespace SpinSquad.Meta
         static readonly float[] TierStrength = { 1f, 2.35f, 5.2f, 10.5f };
 
         static readonly string[] TierIdPrefix = { "c", "r", "e", "l" };
+
+        static readonly TreasureDefinition[] AllDefinitions = BuildDefinitions();
 
         public static IReadOnlyList<TreasureDefinition> All => AllDefinitions;
 

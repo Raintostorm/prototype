@@ -1,9 +1,10 @@
+using SpinSquad.Data;
+using SpinSquad.Meta;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-using SpinSquad.Meta;
 
 namespace SpinSquad.Scenes
 {
@@ -22,12 +23,6 @@ namespace SpinSquad.Scenes
         Text _levelText;
         GameObject _levelSelectRoot;
         readonly Button[] _levelPickButtons = new Button[3];
-        readonly Color[] _levelPickBaseColors =
-        {
-            new Color(0.18f, 0.48f, 0.62f, 0.98f),
-            new Color(0.2f, 0.45f, 0.75f, 0.98f),
-            new Color(0.45f, 0.28f, 0.62f, 0.98f),
-        };
 
         void Start()
         {
@@ -91,26 +86,63 @@ namespace SpinSquad.Scenes
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, 0);
+            AddHeaderStrip(canvasGo.transform);
+
             CreateTitle(canvasGo.transform);
             _resourceText = CreateTopLeftResourceText(canvasGo.transform);
-            _levelText = CreateInfoText(canvasGo.transform, "LevelText", new Vector2(0f, -240f), 26);
+            CreateSectionCaption(canvasGo.transform, "LevelNavCaption", "Level", new Vector2(0f, -208f));
+            _levelText = CreateInfoText(canvasGo.transform, "LevelText", new Vector2(0f, -252f), MetaHudTheme.FontBody);
 
-            CreateButton(canvasGo.transform, "<", new Vector2(-200f, -320f),
-                new Color(0.2f, 0.22f, 0.34f, 0.98f), DecreaseLevel)
-                .GetComponent<RectTransform>().sizeDelta = new Vector2(86f, 80f);
-            CreateButton(canvasGo.transform, ">", new Vector2(200f, -320f),
-                new Color(0.2f, 0.22f, 0.34f, 0.98f), IncreaseLevel)
-                .GetComponent<RectTransform>().sizeDelta = new Vector2(86f, 80f);
+            var navLeft = CreateButton(canvasGo.transform, "<", new Vector2(-210f, -332f), MetaHudTheme.ButtonNav, DecreaseLevel);
+            navLeft.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.NavArrowSize;
+            var navRight = CreateButton(canvasGo.transform, ">", new Vector2(210f, -332f), MetaHudTheme.ButtonNav, IncreaseLevel);
+            navRight.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.NavArrowSize;
 
-            CreateButton(canvasGo.transform, "Play", new Vector2(0f, 80f),
-                new Color(0.2f, 0.45f, 0.75f, 0.98f), OpenLevelSelect);
-            CreateButton(canvasGo.transform, "Upgrade", new Vector2(0f, -40f),
-                new Color(0.16f, 0.52f, 0.38f, 0.96f), LoadUpgrade);
-            CreateButton(canvasGo.transform, "Treasure", new Vector2(0f, -160f),
-                new Color(0.52f, 0.36f, 0.18f, 0.96f), LoadTreasure);
+            CreateButton(canvasGo.transform, "Play", new Vector2(0f, -32f), MetaHudTheme.ButtonPlay, OpenLevelSelect)
+                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
+            CreateButton(canvasGo.transform, "Upgrade", new Vector2(0f, -152f), MetaHudTheme.ButtonUpgrade, LoadUpgrade)
+                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
+            CreateButton(canvasGo.transform, "Treasure", new Vector2(0f, -272f), MetaHudTheme.ButtonTreasure, LoadTreasure)
+                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
             _levelSelectRoot = BuildLevelSelectOverlay(canvasGo.transform);
             _levelSelectRoot.SetActive(false);
             RefreshMetaTexts();
+        }
+
+        static void AddHeaderStrip(Transform parent)
+        {
+            var go = new GameObject("HeaderStrip");
+            go.transform.SetParent(parent, false);
+            go.transform.SetSiblingIndex(1);
+            var img = go.AddComponent<Image>();
+            img.sprite = MetaHudTheme.WhiteSprite();
+            img.color = MetaHudTheme.HeaderBand;
+            img.raycastTarget = false;
+            var rt = img.rectTransform;
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(1f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = Vector2.zero;
+            rt.sizeDelta = new Vector2(0f, 168f);
+        }
+
+        void CreateSectionCaption(Transform parent, string objectName, string caption, Vector2 pos)
+        {
+            var go = new GameObject(objectName);
+            go.transform.SetParent(parent, false);
+            var t = go.AddComponent<Text>();
+            t.font = _font;
+            t.fontSize = MetaHudTheme.FontSection;
+            t.text = caption;
+            t.alignment = TextAnchor.MiddleCenter;
+            t.color = MetaHudTheme.SectionLabel;
+            t.raycastTarget = false;
+            var rt = t.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
+            rt.pivot = new Vector2(0.5f, 1f);
+            rt.anchoredPosition = pos;
+            rt.sizeDelta = new Vector2(720f, 36f);
         }
 
         void CreateTitle(Transform parent)
@@ -120,15 +152,15 @@ namespace SpinSquad.Scenes
             var title = titleGo.AddComponent<Text>();
             title.font = _font;
             title.text = "Homepage";
-            title.fontSize = 42;
+            title.fontSize = MetaHudTheme.FontTitle;
             title.alignment = TextAnchor.MiddleCenter;
-            title.color = Color.white;
+            title.color = MetaHudTheme.TextPrimary;
             title.raycastTarget = false;
             var titleRt = title.rectTransform;
             titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 1f);
             titleRt.pivot = new Vector2(0.5f, 1f);
-            titleRt.anchoredPosition = new Vector2(0f, -120f);
-            titleRt.sizeDelta = new Vector2(900f, 100f);
+            titleRt.anchoredPosition = new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f);
+            titleRt.sizeDelta = new Vector2(900f, 72f);
         }
 
         void OpenLevelSelect()
@@ -167,7 +199,9 @@ namespace SpinSquad.Scenes
                 btn.interactable = unlocked;
                 var img = btn.GetComponent<Image>();
                 if (img != null)
-                    img.color = unlocked ? _levelPickBaseColors[i] : new Color(0.28f, 0.28f, 0.32f, 0.92f);
+                    img.color = unlocked
+                        ? RarityPalette.UpgradeCardBackground((Rarity)i)
+                        : new Color(0.28f, 0.28f, 0.32f, 0.92f);
                 var txt = btn.GetComponentInChildren<Text>();
                 if (txt != null)
                     txt.color = unlocked ? Color.white : new Color(0.62f, 0.62f, 0.65f, 1f);
@@ -192,8 +226,8 @@ namespace SpinSquad.Scenes
             dimRt.offsetMin = Vector2.zero;
             dimRt.offsetMax = Vector2.zero;
             var dimImg = dimGo.AddComponent<Image>();
-            dimImg.sprite = WhiteSprite();
-            dimImg.color = new Color(0f, 0f, 0f, 0.62f);
+            dimImg.sprite = MetaHudTheme.WhiteSprite();
+            dimImg.color = MetaHudTheme.OverlayDim;
             dimImg.raycastTarget = true;
             var dimBtn = dimGo.AddComponent<Button>();
             dimBtn.targetGraphic = dimImg;
@@ -212,9 +246,9 @@ namespace SpinSquad.Scenes
             var pickTitle = titleGo.AddComponent<Text>();
             pickTitle.font = _font;
             pickTitle.text = "Chọn level";
-            pickTitle.fontSize = 34;
+            pickTitle.fontSize = MetaHudTheme.FontOverlayTitle;
             pickTitle.alignment = TextAnchor.MiddleCenter;
-            pickTitle.color = Color.white;
+            pickTitle.color = MetaHudTheme.TextPrimary;
             pickTitle.raycastTarget = false;
             var pickTitleRt = pickTitle.rectTransform;
             pickTitleRt.anchorMin = pickTitleRt.anchorMax = new Vector2(0.5f, 0.5f);
@@ -232,12 +266,12 @@ namespace SpinSquad.Scenes
                     content.transform,
                     label,
                     new Vector2(0f, 190f - i * 150f),
-                    _levelPickBaseColors[i],
+                    RarityPalette.UpgradeCardBackground((Rarity)i),
                     () => PickLevelAndPlay(captureLv));
                 btn.GetComponent<RectTransform>().sizeDelta = new Vector2(580f, 112f);
                 var t = btn.GetComponentInChildren<Text>();
                 if (t != null)
-                    t.fontSize = 22;
+                    t.fontSize = MetaHudTheme.FontOverlayRow;
                 _levelPickButtons[i] = btn;
             }
 
@@ -245,7 +279,7 @@ namespace SpinSquad.Scenes
                 content.transform,
                 "Đóng",
                 new Vector2(0f, -320f),
-                new Color(0.32f, 0.32f, 0.38f, 0.96f),
+                MetaHudTheme.ButtonMuted,
                 CloseLevelSelect);
             closeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(320f, 80f);
 
@@ -314,7 +348,7 @@ namespace SpinSquad.Scenes
             text.font = _font;
             text.fontSize = fontSize;
             text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.white;
+            text.color = MetaHudTheme.TextSecondary;
             text.raycastTarget = false;
             var rt = text.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
@@ -330,15 +364,15 @@ namespace SpinSquad.Scenes
             go.transform.SetParent(parent, false);
             var text = go.AddComponent<Text>();
             text.font = _font;
-            text.fontSize = 28;
+            text.fontSize = MetaHudTheme.FontResource;
             text.alignment = TextAnchor.UpperLeft;
-            text.color = Color.white;
+            text.color = MetaHudTheme.TextPrimary;
             text.raycastTarget = false;
             var rt = text.rectTransform;
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(0f, 1f);
             rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(36f, -36f);
+            rt.anchoredPosition = new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop);
             rt.sizeDelta = new Vector2(640f, 96f);
             return text;
         }
@@ -349,7 +383,7 @@ namespace SpinSquad.Scenes
             btnGo.transform.SetParent(parent, false);
 
             var image = btnGo.AddComponent<Image>();
-            image.sprite = WhiteSprite();
+            image.sprite = MetaHudTheme.WhiteSprite();
             image.color = bg;
 
             var btn = btnGo.AddComponent<Button>();
@@ -361,9 +395,9 @@ namespace SpinSquad.Scenes
             var text = labelGo.AddComponent<Text>();
             text.font = _font;
             text.text = label;
-            text.fontSize = 30;
+            text.fontSize = MetaHudTheme.FontButton;
             text.alignment = TextAnchor.MiddleCenter;
-            text.color = Color.white;
+            text.color = MetaHudTheme.TextPrimary;
             text.raycastTarget = false;
 
             var labelRt = text.rectTransform;
@@ -376,15 +410,9 @@ namespace SpinSquad.Scenes
             btnRt.anchorMin = btnRt.anchorMax = new Vector2(0.5f, 0.5f);
             btnRt.pivot = new Vector2(0.5f, 0.5f);
             btnRt.anchoredPosition = anchoredPos;
-            btnRt.sizeDelta = new Vector2(480f, 92f);
+            btnRt.sizeDelta = MetaHudTheme.CtaSize;
 
             return btn;
-        }
-
-        static Sprite WhiteSprite()
-        {
-            var tex = Texture2D.whiteTexture;
-            return Sprite.Create(tex, new Rect(0f, 0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
         }
     }
 }
