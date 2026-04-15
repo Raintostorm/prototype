@@ -54,3 +54,6 @@ crashlytics-build.properties
 # macOS
 .DS_Store
 **/.DS_Store
+
+# Unity / tooling generated (local only)
+GeneratedAssets/
