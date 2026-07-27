@@ -11,6 +11,7 @@ namespace SpinSquad.EditorTools
         public const string HomepageScenePath = "Assets/SpinSquad/Scenes/Homepage.unity";
         public const string SampleScenePath = "Assets/SpinSquad/Scenes/SampleScene.unity";
         public const string DuelTestArenaPath = "Assets/SpinSquad/Scenes/DuelTestArena.unity";
+        public const string Duel25DVerticalSlicePath = "Assets/SpinSquad/Scenes/Duel25DVerticalSlice.unity";
         public const string KnightSpineAnimTestPath = "Assets/SpinSquad/Scenes/KnightSpineAnimTest.unity";
 
         [MenuItem("SpinSquad/Play/Open Homepage", priority = -5)]
@@ -61,7 +62,26 @@ namespace SpinSquad.EditorTools
             Debug.Log($"[SpinSquad] Đã mở {DuelTestArenaPath} — Knight Spine melee vs unit_enemy_knight; chọn preset rồi Áp dụng & reset trận.");
         }
 
-        [MenuItem("SpinSquad/Play/Open Knight Spine Anim Test", priority = 2)]
+        [MenuItem("SpinSquad/Play/Open 2.5D Vertical Slice", priority = 2)]
+        public static void OpenDuel25DVerticalSlice()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return;
+
+            if (!System.IO.File.Exists(Duel25DVerticalSlicePath))
+            {
+                Debug.LogError($"[SpinSquad] Không tìm thấy scene: {Duel25DVerticalSlicePath}");
+                return;
+            }
+
+            // This sandbox must play directly instead of being redirected by
+            // PlayModeStartHomepage's normal product-flow override.
+            EditorSceneManager.playModeStartScene = null;
+            EditorSceneManager.OpenScene(Duel25DVerticalSlicePath, OpenSceneMode.Single);
+            Debug.Log($"[SpinSquad] Đã mở {Duel25DVerticalSlicePath} — vertical slice 2.5D an toàn, không đổi luật combat.");
+        }
+
+        [MenuItem("SpinSquad/Play/Open Knight Spine Anim Test", priority = 3)]
         public static void OpenKnightSpineAnimTest()
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

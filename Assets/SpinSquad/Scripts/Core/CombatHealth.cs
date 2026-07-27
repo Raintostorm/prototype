@@ -24,6 +24,8 @@ namespace SpinSquad.Core
         public float Max => maxHitPoints;
         public bool IsDead => _current <= 0f;
 
+        /// <summary>Raised after valid damage is applied, including a killing hit.</summary>
+        public event Action<CombatHealth, float> Damaged;
         public event Action<CombatHealth> Died;
 
         private void Awake()
@@ -49,7 +51,9 @@ namespace SpinSquad.Core
             if (IsDead || amount <= 0f)
                 return;
 
+            var applied = Mathf.Min(_current, amount);
             _current -= amount;
+            Damaged?.Invoke(this, applied);
             if (_current <= 0f)
             {
                 _current = 0f;

@@ -27,6 +27,9 @@ EditorBuildSettings:
     path: Assets/SpinSquad/Scenes/DuelTestArena.unity
     guid: a7f91c2e836b04d1b8e4c9d0e1f2a3b4
   - enabled: 1
+    path: Assets/SpinSquad/Scenes/Duel25DVerticalSlice.unity
+    guid: 9761d257b7f645f2b81836f54c601995
+  - enabled: 1
     path: Assets/SpinSquad/Scenes/KnightSpineAnimTest.unity
     guid: e4d3c2b1a09876543210fedcba987654
   m_configObjects:
