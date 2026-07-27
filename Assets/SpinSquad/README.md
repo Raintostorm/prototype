@@ -2,6 +2,10 @@
 
 Mọi nội dung game nằm dưới folder này để dễ tìm và tránh rải rác ở root `Assets/`.
 
+## Chạy demo trong Editor (Play)
+
+Unity **Play** luôn chạy **scene đang mở** trong tab Scene — không tự mở scene đầu tiên trong Build Settings. Demo combat (`DuelDirector`, catalog unit) nằm trong **`Scenes/SampleScene.unity`**. Nếu bạn để scene trống kiểu *Untitled* chỉ có Main Camera rồi bấm Play, Game view sẽ chỉ thấy **màu nền camera (xanh)**. Cách nhanh: menu **SpinSquad → Play → Open Sample Scene**, sau đó bấm **Play**.
+
 ## Cây thư mục
 
 | Đường dẫn | Dùng cho |

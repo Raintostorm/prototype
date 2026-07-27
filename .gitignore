@@ -50,3 +50,14 @@ crashlytics-build.properties
 
 # Cursor / local IDE
 .cursor/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor backup files (e.g. Aseprite/GIMP)
+*~
+**/*~
+
+# Unity / tooling generated (local only)
+GeneratedAssets/

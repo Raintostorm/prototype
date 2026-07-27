@@ -6,8 +6,32 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/SpinSquad/Scenes/Homepage.unity
+    guid: 8f3c2a1e947b0470a9b5d8c6e7f4a302
+  - enabled: 1
     path: Assets/SpinSquad/Scenes/SampleScene.unity
     guid: 2cda990e2423bbf4892e6590ba056729
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/Upgrade.unity
+    guid: 6f5d028d126044839cb8c98f8d7d9aa1
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/UpgradeDetail.unity
+    guid: 8fc1cf22842f4930a70942363d9a8824
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/Treasure.unity
+    guid: a7c63df289a24eb0a4a9299e2f3dc581
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/TreasureDetail.unity
+    guid: 316d66eb206d4fc8b32e3fd8919a3f95
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/DuelTestArena.unity
+    guid: a7f91c2e836b04d1b8e4c9d0e1f2a3b4
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/Duel25DVerticalSlice.unity
+    guid: 9761d257b7f645f2b81836f54c601995
+  - enabled: 1
+    path: Assets/SpinSquad/Scenes/KnightSpineAnimTest.unity
+    guid: e4d3c2b1a09876543210fedcba987654
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 3590b91b4603b465dbb4216d601bff33, type: 3}

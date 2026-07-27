@@ -1,0 +1,139 @@
+
+skeleton.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+armor
+  rotate: false
+  xy: 234, 80
+  size: 146, 174
+  orig: 146, 174
+  offset: 0, 0
+  index: -1
+cloak
+  rotate: false
+  xy: 94, 78
+  size: 138, 176
+  orig: 138, 176
+  offset: 0, 0
+  index: -1
+head
+  rotate: true
+  xy: 562, 131
+  size: 123, 116
+  orig: 123, 116
+  offset: 0, 0
+  index: -1
+helve
+  rotate: false
+  xy: 382, 99
+  size: 56, 155
+  orig: 56, 155
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: false
+  xy: 292, 10
+  size: 63, 68
+  orig: 63, 68
+  offset: 0, 0
+  index: -1
+left_eye
+  rotate: false
+  xy: 718, 137
+  size: 33, 26
+  orig: 33, 26
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: true
+  xy: 357, 14
+  size: 64, 47
+  orig: 64, 47
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: true
+  xy: 680, 165
+  size: 89, 86
+  orig: 89, 86
+  offset: 0, 0
+  index: -1
+left_lower
+  rotate: false
+  xy: 67, 3
+  size: 60, 50
+  orig: 60, 50
+  offset: 0, 0
+  index: -1
+left_shoulder
+  rotate: true
+  xy: 485, 3
+  size: 114, 127
+  orig: 114, 128
+  offset: 0, 1
+  index: -1
+left_thigh
+  rotate: false
+  xy: 210, 7
+  size: 80, 69
+  orig: 80, 69
+  offset: 0, 0
+  index: -1
+right_arm
+  rotate: false
+  xy: 406, 4
+  size: 77, 93
+  orig: 77, 93
+  offset: 0, 0
+  index: -1
+right_eye
+  rotate: false
+  xy: 680, 135
+  size: 36, 28
+  orig: 36, 28
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: true
+  xy: 721, 73
+  size: 62, 47
+  orig: 62, 47
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: false
+  xy: 614, 17
+  size: 105, 112
+  orig: 105, 112
+  offset: 0, 0
+  index: -1
+right_lower
+  rotate: false
+  xy: 2, 2
+  size: 63, 51
+  orig: 63, 51
+  offset: 0, 0
+  index: -1
+right_shoulder
+  rotate: true
+  xy: 440, 119
+  size: 135, 120
+  orig: 135, 120
+  offset: 0, 0
+  index: -1
+right_thigh
+  rotate: false
+  xy: 129, 6
+  size: 79, 70
+  orig: 79, 70
+  offset: 0, 0
+  index: -1
+staff
+  rotate: false
+  xy: 2, 55
+  size: 90, 199
+  orig: 90, 199
+  offset: 0, 0
+  index: -1

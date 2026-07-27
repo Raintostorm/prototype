@@ -1,0 +1,153 @@
+
+skeleton.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+armor
+  rotate: false
+  xy: 510, 114
+  size: 137, 139
+  orig: 137, 139
+  offset: 0, 0
+  index: -1
+belt
+  rotate: true
+  xy: 708, 3
+  size: 120, 42
+  orig: 120, 42
+  offset: 0, 0
+  index: -1
+cap
+  rotate: true
+  xy: 307, 5
+  size: 84, 113
+  orig: 84, 113
+  offset: 0, 0
+  index: -1
+cloak
+  rotate: false
+  xy: 228, 91
+  size: 153, 162
+  orig: 153, 162
+  offset: 0, 0
+  index: -1
+head
+  rotate: true
+  xy: 591, 2
+  size: 110, 115
+  orig: 110, 115
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: false
+  xy: 843, 189
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+left_eye
+  rotate: false
+  xy: 45, 5
+  size: 39, 29
+  orig: 39, 29
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: true
+  xy: 828, 42
+  size: 64, 51
+  orig: 64, 51
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: false
+  xy: 506, 12
+  size: 83, 90
+  orig: 83, 90
+  offset: 0, 0
+  index: -1
+left_knee
+  rotate: true
+  xy: 886, 129
+  size: 58, 54
+  orig: 58, 54
+  offset: 0, 0
+  index: -1
+left_shoulder
+  rotate: true
+  xy: 649, 125
+  size: 128, 116
+  orig: 128, 117
+  offset: 0, 1
+  index: -1
+left_thigh
+  rotate: false
+  xy: 752, 46
+  size: 74, 77
+  orig: 74, 77
+  offset: 0, 0
+  index: -1
+right_arm
+  rotate: false
+  xy: 228, 4
+  size: 77, 85
+  orig: 77, 85
+  offset: 0, 0
+  index: -1
+right_eye
+  rotate: false
+  xy: 2, 4
+  size: 41, 30
+  orig: 41, 30
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: true
+  xy: 828, 108
+  size: 66, 56
+  orig: 66, 56
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: false
+  xy: 422, 2
+  size: 82, 100
+  orig: 82, 100
+  offset: 0, 0
+  index: -1
+right_knee
+  rotate: true
+  xy: 881, 45
+  size: 61, 55
+  orig: 61, 55
+  offset: 0, 0
+  index: -1
+right_shoulder
+  rotate: true
+  xy: 383, 104
+  size: 149, 125
+  orig: 149, 125
+  offset: 0, 0
+  index: -1
+right_thigh
+  rotate: false
+  xy: 767, 176
+  size: 74, 77
+  orig: 74, 77
+  offset: 0, 0
+  index: -1
+sheld
+  rotate: false
+  xy: 101, 43
+  size: 125, 210
+  orig: 125, 210
+  offset: 0, 0
+  index: -1
+weapon
+  rotate: false
+  xy: 2, 36
+  size: 97, 217
+  orig: 97, 217
+  offset: 0, 0
+  index: -1
