@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1e2f3a4b5c60718293a4b5c6d7e8f90, type: 3}
+  m_Name: unit_l0_common
+  m_EditorClassIdentifier: Assembly-CSharp::SpinSquad.Data.UnitDefinition
+  unitId: unit_l0_common
+  displayName: Recruit A
+  rarity: 0
+  maxHitPoints: 100
+  attack: 10
+  teamKind: 0
+  bodyShape: 0
+  battlePrefab: {fileID: 843839173774878869, guid: 13ca0695d04e7434f8a438f56ebb3024, type: 3}
+  portraitSprite: {fileID: 9016681206919788876, guid: f1b2196adcc1447169d0e547cef83d44, type: 3}
+  cardSprite: {fileID: 9016681206919788876, guid: f1b2196adcc1447169d0e547cef83d44, type: 3}
+  iconSprite: {fileID: 9016681206919788876, guid: f1b2196adcc1447169d0e547cef83d44, type: 3}
+  rangedAttack: 0
+  attackRange: 1.65
+  rangedShotIntervalSeconds: 0.52

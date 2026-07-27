@@ -12,7 +12,13 @@ namespace SpinSquad.Core
         public const float AllyMergeHpMultiplier = 3f;
         public const float AllyMergeAttackMultiplier = 3f;
 
-        public const int MaxStackPerCell = 3;
+        /// <summary>Mỗi ô ally tối đa 1 unit; gom 3 cùng line+rarity trên bàn để auto-merge.</summary>
+        public const int MaxStackPerCell = 1;
+
+        /// <summary>Enemy vẫn stack tối đa 3 trong một ô (merge tay / AI cũ).</summary>
+        public const int MaxEnemyStackPerCell = 3;
+
+        public const int AlliesRequiredForAutoMerge = 3;
 
         public static Rarity NextRarity(Rarity current)
         {

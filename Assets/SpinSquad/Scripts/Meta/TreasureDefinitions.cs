@@ -43,6 +43,8 @@ namespace SpinSquad.Meta
         /// </summary>
         static readonly int[] RarityWeights = { 58, 28, 11, 3 };
 
+        static readonly int[] TierCounts = { 10, 7, 4, 4 };
+
         static readonly string[][] TierNames =
         {
             new[]
@@ -53,17 +55,15 @@ namespace SpinSquad.Meta
             new[]
             {
                 "Amber Clip", "Tide Loop", "Glim Shard", "Coral Pin", "Brass Gear",
-                "Wind Key", "Salt Sigil", "Fume Coil", "Mica Bolt", "Verd Coil"
+                "Wind Key", "Salt Sigil"
             },
             new[]
             {
-                "Sun Fragment", "Void Spark", "Rune Prism", "Storm Core", "Frost Seal",
-                "Ember Lens", "Star Knot", "Tide Crown", "Iron Halo", "Sky Stamp"
+                "Sun Fragment", "Void Spark", "Rune Prism", "Storm Core"
             },
             new[]
             {
-                "Aurora Heart", "Eclipse Crest", "Genesis Coil", "Meridian Core", "Apogee Seal",
-                "Xylem Crown", "Zenith Band", "Oblivion Key", "Astral Forge", "Tempest Nexus"
+                "Aurora Heart", "Eclipse Crest", "Genesis Coil", "Meridian Core"
             }
         };
 
@@ -134,7 +134,8 @@ namespace SpinSquad.Meta
                 var rarity = (Rarity)tier;
                 var m = TierStrength[tier];
                 var prefix = TierIdPrefix[tier];
-                for (var i = 0; i < 10; i++)
+                var count = TierCounts[tier];
+                for (var i = 0; i < count; i++)
                 {
                     var kind = (TreasureEffectKind)(i % 6);
                     var bv = BaseValueFor(kind, m, i);

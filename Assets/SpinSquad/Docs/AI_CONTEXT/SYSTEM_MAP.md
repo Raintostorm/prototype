@@ -2,6 +2,8 @@
 
 Mục tiêu file này: giúp AI/đồng đội đọc nhanh logic cốt lõi trước khi sửa code.
 
+**HUD sprites (registry kỹ thuật):** [`UI_HUD_ASSET_MAP.md`](UI_HUD_ASSET_MAP.md) — 68 PNG dưới `Resources/UI/Hud/`, wiring runtime, mục GAP.
+
 ## 1) Điểm vào chính
 
 - `Assets/SpinSquad/Scripts/Core/DuelDirector.cs`
@@ -11,13 +13,13 @@ Mục tiêu file này: giúp AI/đồng đội đọc nhanh logic cốt lõi tr�
 - `Assets/SpinSquad/Scripts/Gacha/*`
   - Roll wallet, roll resolver, grant queue, payout.
 - `Assets/SpinSquad/Scripts/Data/AllyLineCatalog.cs`
-  - Map chuẩn line `0..2` <-> `UnitId`.
+  - Map chuẩn line `0..4` <-> `UnitId` (5 dòng ngũ hành starter + Knight).
 - `Assets/SpinSquad/Scripts/Meta/*`
   - Meta save persistent (`Gold`, `TreasureKey`, unlocked level, line upgrades, treasures).
 - `Assets/SpinSquad/Scripts/Scenes/HomepageHub.cs`
   - Trang Home runtime UI: Play / Upgrade / Treasure + chọn level.
 - `Assets/SpinSquad/Scripts/Scenes/UpgradeSceneController.cs`
-  - UI card list cho 3 line ally, click card để vào scene chi tiết.
+  - UI card list cho 5 line ally, click card để vào scene chi tiết.
 - `Assets/SpinSquad/Scripts/Scenes/UpgradeDetailSceneController.cs`
   - Scene chi tiết upgrade line (status/cost/chỉ số hiện tại & kế tiếp), nâng cấp trực tiếp.
 - `Assets/SpinSquad/Scripts/Scenes/TreasureSceneController.cs`
@@ -31,7 +33,7 @@ Mục tiêu file này: giúp AI/đồng đội đọc nhanh logic cốt lõi tr�
 
 Identity stack của ally dùng:
 
-- `AllyLineIndex` (0..2)
+- `AllyLineIndex` (0..4)
 - `RarityTier`
 
 Không gian này được dùng thống nhất cho:
@@ -46,11 +48,17 @@ Prep interaction ownership:
 - Chọn ô/menu merge theo **cell-first** (`AllyCellPicker` trên grid).
 - Unit collider chỉ hỗ trợ drag/va chạm; không còn là nguồn sự thật để chọn ô.
 
-Map line mặc định:
+Map line → `unitId` (nguồn sự thật: `AllyLineCatalog.UnitIdForLine` — mọi rarity dùng cùng `UnitDefinition` base; scaling theo `AllyStatScaling`):
 
-- Line 0 -> `unit_slip_slinger`
-- Line 1 -> `unit_brush_warden`
-- Line 2 -> `unit_ally_ranged`
+| Line | UnitId (element) |
+|------|------------------|
+| 0 | `ally_moc` (green Spine) |
+| 1 | `ally_hoa` (red Spine) |
+| 2 | `ally_kim` (white Spine) |
+| 3 | `ally_thuy` (blue Spine, ranged) |
+| 4 | `common_melee` (Knight) |
+
+Legacy ids (`unit_l0_*`, `unit_l1_*`, `unit_l2_*`, `unit_slip_slinger`, `unit_iron_guard`, `unit_ally_ranged`, `unit_brush_warden`) vẫn map về một line 0–4 qua `LineIndexFromUnitId` để save/stack cũ không vỡ.
 
 ## 3) Quy tắc roll và merge
 
@@ -58,7 +66,7 @@ Map line mặc định:
 
 - `SixSlotRollResolver` tạo ally grant với:
   - `RarityTier` theo kích thước cụm Ally (3/4/5/6)
-  - `AllyLineIndex` random trong `{0,1,2}`
+  - `AllyLineIndex` random trong `{0,1,2,3,4}`
 - `DuelDirector.DrainPendingRollAllyGrants()`:
   - đổi line -> `UnitId` qua `AllyLineCatalog`
   - tìm ô hợp lệ theo `(line, rarity)`
@@ -69,7 +77,7 @@ Map line mặc định:
 - Điều kiện merge: đúng 3 ally cùng ô, cùng `(line, rarity)`.
 - Kết quả:
   - `newRarity = NextRarity(oldRarity)`
-  - `line` random trong `{0,1,2}` (cùng resolver line như roll)
+  - `line` random trong `{0,1,2,3,4}` (cùng resolver line như roll)
   - `UnitId` suy từ line qua `AllyLineCatalog`.
 - Spawn sau merge:
   - ưu tiên ô đầu tiên (row->col) có partial stack cùng `(line, newRarity)` chưa đầy 3
@@ -96,7 +104,7 @@ Meta resources:
 - `Gold`: dùng trong scene Upgrade (`TryUpgradeLine(line, rarity)`).
 - `TreasureKey`: dùng trong scene Treasure (`TrySpendTreasureKey`).
 - Treasures là auto-passive persistent, stack theo level thông qua dupe shards.
-- Upgrade ally hiện là `12 entry` = `3 line x 4 rarity (Common..Legendary)`.
+- Upgrade ally hiện là `20 entry` = `5 line x 4 rarity (Common..Legendary)`.
 - Rule rarity cho upgrade:
   - flat buff: mỗi rarity +1 step => `x4`
   - % buff: mỗi rarity +1 step => `+0.2` điểm phần trăm
@@ -121,6 +129,6 @@ Run economy trong trận:
 2. Restart trận để reset wallet.
 3. Test các case:
    - Roll ra cùng `(line, rarity)` phải vào cùng stack nếu chưa đầy 3.
-   - Merge 3 con cùng stack phải lên rarity và random line trong `{0,1,2}`.
+   - Merge 3 con cùng stack phải lên rarity và random line trong `{0,1,2,3,4}`.
    - Sau merge, nếu đã có partial stack cùng `(line, rarity mới)` ở ô khác thì phải dồn vào đó.
    - Kéo stack A sang ô có stack B khác key thì A/B phải đổi chỗ cho nhau.

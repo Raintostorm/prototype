@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: cb6a9586f5d50432bbaeb55472ef57c0
+labels:
+- UnityAI
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -24,7 +26,7 @@ TextureImporter:
     heightScale: 0.25
     normalMapFilter: 0
     flipGreenChannel: 0
-  isReadable: 0
+  isReadable: 1
   streamingMipmaps: 0
   streamingMipmapsPriority: 0
   vTOnly: 0

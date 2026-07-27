@@ -14,10 +14,13 @@ namespace SpinSquad.Scenes
     {
         const string AllyMeleeId = "unit_slip_slinger";
         const string AllyRangedId = "unit_ally_ranged";
-        const string EnemyMeleeId = "unit_moss_oracle";
+        /// <summary>Same Spine knight as ally <c>common_melee</c>; enemy faction for facing/HP tests.</summary>
+        const string EnemyMeleeId = "unit_enemy_knight";
         const string EnemyRangedId = "unit_enemy_ranged";
 
         [SerializeField] private string hubSceneName = "Homepage";
+        [SerializeField] private string panelTitle = "Test combat";
+        [SerializeField] private string panelHint = "Preset: chọn loại mặc định rồi «Áp dụng & reset trận». Sandbox: thêm/xóa từng loại (chỉ khi chưa bấm Bắt đầu).";
 
         DuelDirector _director;
         string _allyId = AllyMeleeId;
@@ -66,10 +69,9 @@ namespace SpinSquad.Scenes
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
                 ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            CreateText(canvasGo.transform, font, "Test combat", 36, new Vector2(0f, -56f), new Vector2(960f, 56f)).color = Color.white;
+            CreateText(canvasGo.transform, font, panelTitle, 36, new Vector2(0f, -56f), new Vector2(960f, 56f)).color = Color.white;
 
-            CreateText(canvasGo.transform, font,
-                "Preset: chọn loại mặc định rồi «Áp dụng & reset trận». Sandbox: thêm/xóa từng loại (chỉ khi chưa bấm Bắt đầu).", 20,
+            CreateText(canvasGo.transform, font, panelHint, 20,
                 new Vector2(0f, -108f), new Vector2(1000f, 96f)).color = new Color(0.82f, 0.88f, 1f, 1f);
 
             CreateText(canvasGo.transform, font, "Preset — Ally", 24, new Vector2(0f, -200f), new Vector2(900f, 36f)).color = new Color(0.7f, 0.92f, 1f, 1f);

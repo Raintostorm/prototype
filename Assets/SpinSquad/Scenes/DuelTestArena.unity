@@ -176,7 +176,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 3.45
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -255,8 +255,14 @@ MonoBehaviour:
   allyStrikeDamage: 10
   enemyStrikeDamage: 5
   unitCatalog: {fileID: 11400000, guid: cccc0000000000000000000000000001, type: 2}
-  allyUnitId: unit_slip_slinger
-  enemyUnitId: unit_moss_oracle
+  allyUnitId: common_melee
+  enemyUnitId: unit_enemy_knight
+  waveEnemyMeleeCatalogId: unit_enemy_knight
+  waveEnemyRangedCatalogId: unit_enemy_ranged
+  applyLearningCampaignAllyInSampleScene: 0
+  line1BattleRigPrefab: {fileID: 0}
+  line1BattleRigVisualLocalOffset: {x: 0, y: 0, z: 0}
+  debugSpineBattleAnimatorLogs: 1
   waveCompleteDelaySeconds: 2
 --- !u!1 &777000001
 GameObject:
@@ -303,3 +309,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hubSceneName: Homepage
+  panelTitle: Knight Spine - test cận chiến
+  panelHint: common_melee vs unit_enemy_knight (cùng prefab). Prep nhìn nhau; Bắt đầu = walk/attack/die. Log Spine = debugSpineBattleAnimatorLogs trên DuelDirector.

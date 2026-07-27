@@ -30,42 +30,47 @@ Tài liệu được tạo tự động dựa trên workspace Unity `SpinSquad` 
 
 ---
 
-## 2. Project Unity trong workspace `c:\app\forUnity\SpinSquad`
+## 2. Project Unity trong workspace (**SpinSquadClone** — clone/học tại máy cục bộ)
+
+*(Đường dẫn máy của bạn có thể khác; nội dung dưới đây mô tả **trạng thái repo** hiện tại.)*
 
 ### 2.1 Xác nhận cấu hình
 
-- **Tên sản phẩm (Player Settings):** `SpinSquad` — khớp thư mục project.
+- **Tên sản phẩm (Player Settings):** `SpinSquad` — khớp thư mục `Assets/SpinSquad`.
 - **Phiên bản Unity:** `6000.4.1f1` (Unity 6, dòng 6000.x).
-- **Gói chính (`Packages/manifest.json`):** Feature 2D, **Input System** `1.19.0`, **UGUI** `2.0.0`, Timeline, Visual Scripting, Test Framework, Collab Proxy, IDE Rider/Visual Studio, v.v.
+- **Gói chính (`Packages/manifest.json`):** Feature 2D, **Input System** `1.19.0`, **UGUI** `2.0.0`, Timeline, Visual Scripting, Test Framework, Collab Proxy, IDE Rider/Visual Studio, AI Assistant inference package, v.v.
 
 ### 2.2 Nội dung thư mục `Assets` (thực tế trong repo)
 
-Chỉ có tài nguyên mặc định / tối thiểu:
+Dưới `Assets/SpinSquad/` hiện có **code gameplay + meta**, scene flow, và tài nguyên game (Sprites, Spine, prefab, ScriptableObject), ví dụ:
 
 | Đường dẫn | Vai trò |
 |-----------|---------|
-| `Assets/SpinSquad/Scenes/SampleScene.unity` | Scene mẫu mặc định |
-| `Assets/SpinSquad/Settings/InputSystem_Actions.inputactions` | Map input mẫu (Input System) |
-| Các file `.meta` | Metadata Unity |
+| `Assets/SpinSquad/Scripts/` | Core (`DuelDirector`, combat, grid, merge…), Data, `Gacha` (roll 6 ô), `Meta`, UI bridge, Scene controllers, Editor tiện ích |
+| `Assets/SpinSquad/Scenes/` | `SampleScene`, `DuelTestArena`, `Homepage`, `Upgrade`, `Treasure`, + scene detail |
+| `Assets/SpinSquad/Data/`, `Resources/` | Unit catalog, unit `.asset`, theme/palette |
+| `Assets/SpinSquad/README.md`, `Assets/SpinSquad/Docs/` | Cấy trúc & spec ally/enemy/meta + `AI_CONTEXT/SYSTEM_MAP.md` |
 
-**Không có:** thư mục `Scripts`, prefab gameplay, UI gacha, ScriptableObject tỉ lệ rơi, scene riêng cho spin, v.v.
+**Thêm:** `Assets/Spine/` là runtime Spine bên thứ ba.
+
+Tóm lại khác khúc §2 **cũ** (đã lỗi thời): repo **đã có** rollout gacha 6-slot trong trận, merge/stack ally, progression lưu `PlayerPrefs`, và campaign wave — xem **`AGENT_CONTEXT_SUMMARY.md`**, **`SPINSQUAD_LOGIC_ROADMAP.md`**, và **`SYSTEM_MAP.md`**.
 
 ### 2.3 Đánh giá trạng thái project
 
 | Tiêu chí | Mức độ | Ghi chú |
 |-----------|--------|---------|
-| **Mức độ hoàn thiện gameplay** | Rất sớm / template | Chưa có logic gacha hay bất kỳ gameplay tùy chỉnh nào trong `Assets`. |
-| **Khớp với game tham chiếu Spin Squad!** | Chỉ trùng **tên** | Project là shell Unity 6 + Input System + 2D; chưa thể hiện cơ chế roll/gacha. |
-| **Sẵn sàng mở rộng** | Cao | Unity 6, Input System và UGUI đã có — phù hợp làm nền cho UI quay thưởng và gameplay 2D sau này. |
-| **Rủi ro / lưu ý** | Repo nặng do cache | Thư mục `Library`, `Temp`, `Logs` thường không commit; nếu đang backup cả project, dung lượng lớn là bình thường. |
+| **Mức độ hoàn thiện gameplay** | Prototype/playable trong Editor | Duel + prep + roll + meta screens; không phải sản phẩm parity với Spin Squad!. |
+| **Khớp với game tham chiếu** | Theo **concept loop** được doc (roll → merge/stack → combat → meta); IP/UI/asset gốc **không** copy. |
+| **Sẵn sàng mở rộng** | Cao | Kiến trúc đã tách Data / Gacha / Meta / Duel; roadmap giai đoạn trong `SPINSQUAD_LOGIC_ROADMAP.md`. |
+| **Rủi ro / lưu ý** | Cache build | `Library`, `Temp`, `Logs` thường không commit; clone lần đầu cần mở Unity để tái `.meta` nếu thiếu. |
 
-**Kết luận:** Đây là **project Unity mới hoặc vừa đặt tên `SpinSquad`**, chưa triển khai phần lõi “roll gacha”. Để tiến gần game tham chiếu, cần thêm thiết kế hệ thống (bảng tỉ lệ, pool, pity, currency), UI spin, model dữ liệu đơn vị (Guardian-like), và vòng gameplay (merge, combat) — tất cả hiện **chưa có** trong `Assets`.
+**Kết luận:** Đây là **prototype Unity có đầy đủ lớp chính** (combat duel, máy roll 6 ô, merge/stack, persistence meta). Việc còn lại chủ yếu là chỉnh content, UX, balance, pity/banner riêng, và feature nằm ngoài scope hiện tại của roadmap — không còn mô tả “chưa có Scripts”.
 
 ---
 
 ## 3. Phân biệt rõ ràng
 
 - **Spin Squad!** (app store): sản phẩm thương mại của 111%, có gacha/loot box và meta phức tạp.
-- **Repo `SpinSquad` (Unity):** project cục bộ của bạn, cùng tên gói nhưng **chưa chứa** implementation tương ứng trong phần mã/tài nguyên đã quét.
+- **Repo clone Unity (workspace này):** học/cải tiến theo **thiết kế** tự quy định; một phần spec tham chiếu game gốc nằm trong các file `.md` — **triển khai code và asset là riêng** của project.
 
-Nếu bạn muốn bước tiếp theo trong code (ví dụ: prototype một `GachaController` + `ScriptableObject` pool + UI một nút Spin), có thể nói rõ platform mục tiêu (mobile / PC) và quy tắc tỉ lệ mong muốn.
+Để chỉnh tiếp (balance, pity, IAP, multiplayer…), nối vào các entry đã có (`DuelDirector`, `RollGachaSession`, `MetaProgressionStore`) và spec trong `Assets/SpinSquad/Docs/`.

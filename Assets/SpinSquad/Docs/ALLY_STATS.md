@@ -9,7 +9,7 @@ Nguồn dữ liệu trong repo:
 | Định nghĩa unit | `Assets/SpinSquad/Data/Units/*.asset` |
 | Catalog index | `Assets/SpinSquad/Resources/UnitCatalog_Main.asset` |
 | Fallback HP/ATK scene | `DuelDirector` — `allyMaxHp`, `allyStrikeDamage` (Inspector) |
-| Merge 3→1 ally | `DuelDirector.TryMergeAt` — xóa cả 3, tăng bậc `NextRarity`, random `line` trong `{0,1,2}` rồi map `line -> UnitId` qua `AllyLineCatalog`; HP/ATK dùng `AllyStatScaling.ScaleStats(def, tier)`; ưu tiên spawn vào ô đầu tiên (row→col) đã có stack cùng `(line, rarity)` chưa đầy, không thì ô vừa merge. `MaxStackPerCell` = 3 từ `AllyMergeRules` (enemy merge vẫn dùng `HpMultiplier` / `AttackMultiplier` riêng) |
+| Merge 3→1 ally | `DuelDirector.TryMergeAt` — xóa cả 3, tăng bậc `NextRarity`, random `line` trong `{0,1,2,3,4}` rồi map `line -> UnitId` qua `AllyLineCatalog`; HP/ATK dùng `AllyStatScaling.ScaleStats(def, tier)`; ưu tiên spawn vào ô đầu tiên (row→col) đã có stack cùng `(line, rarity)` chưa đầy, không thì ô vừa merge. `MaxStackPerCell` = 3 từ `AllyMergeRules` (enemy merge vẫn dùng `HpMultiplier` / `AttackMultiplier` riêng) |
 | Chọn ô thêm ally / roll | `TryPickRandomAllyCellForAdd` — ưu tiên stack chưa đầy, **ô đầu tiên** theo thứ tự `(row, col)` (không random) |
 | Hết wave (delay) | `DuelDirector.waveCompleteDelaySeconds` — scene demo ghi **2** giây |
 | Crit buff | `GetOutgoingDamageForAlly` — `CritChance` clamp 0–1, crit **×2** damage lên enemy |
@@ -40,7 +40,7 @@ Ghi chú:
 - **Triangle** = ranged; **Square**/**Circle** = melee (quy ước demo). `OnValidate` ép tam giác bật ranged.
 - Scale world trên lưới (`DuelDirector.ApplyAllyDefinitionVisualScale`): melee **0.55**, ranged tam giác **0.135**.
 - Chỉ số catalog ally (Common / Rare spawn) set **cao hơn** enemy melee Moss (88/15) và ranged Spore (52/6) ở bậc catalog tương ứng; bậc runtime cao hơn rarity trên def nhân **`AllyStatScaling.TierStepMultiplier` (3.5)** mỗi bậc chênh (`Pow(3.5, tier − def.Rarity)`).
-- Sau **merge** ally: **một** con mới bậc cao hơn một bậc (tới trước Legendary theo `AllyMergeRules`), `UnitId` random trong bộ line chuẩn `{0,1,2}` (chung với roll) rồi map qua `AllyLineCatalog`; HP/ATK theo `AllyStatScaling` tại bậc đó. Một ô chỉ chứa stack cùng `(line, rarity)`, tối đa **3** / ô.
+- Sau **merge** ally: **một** con mới bậc cao hơn một bậc (tới trước Legendary theo `AllyMergeRules`), `UnitId` random trong bộ line chuẩn `{0,1,2,3,4}` (chung với roll) rồi map qua `AllyLineCatalog`; HP/ATK theo `AllyStatScaling` tại bậc đó. Một ô chỉ chứa stack cùng `(line, rarity)`, tối đa **3** / ô.
 - Kéo stack ally trong prep: ô trống = move; ô cùng `(line, rarity)` = stack nếu chưa đầy; ô khác key = **swap** hai stack.
 
 ---

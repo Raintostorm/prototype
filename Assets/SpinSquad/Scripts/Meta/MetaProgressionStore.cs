@@ -32,11 +32,12 @@ namespace SpinSquad.Meta
         /// <summary>Key rương khi hoàn thành một campaign level (mỗi level).</summary>
         public static int LevelCompleteTreasureKeyReward() => 5;
 
-        public static int AllyLineCount => 3;
+        public static int AllyLineCount => 5;
         public static int UpgradableRarityCount => 4; // Common..Legendary
         public static Rarity DefaultUpgradeRarity => Rarity.Common;
         public static Rarity MaxUpgradableRarity => Rarity.Legendary;
         public static int MaxUpgradeLevel => 50;
+        public static int DefaultMaxEnergy => 100;
 
         public static int UnlockedLevel
         {
@@ -76,6 +77,27 @@ namespace SpinSquad.Meta
             set
             {
                 Data.TreasureKeys = Mathf.Max(0, value);
+                Save();
+            }
+        }
+
+        public static int Energy
+        {
+            get => Data.Energy;
+            set
+            {
+                Data.Energy = Mathf.Clamp(value, 0, MaxEnergy);
+                Save();
+            }
+        }
+
+        public static int MaxEnergy
+        {
+            get => Mathf.Max(1, Data.MaxEnergy);
+            set
+            {
+                Data.MaxEnergy = Mathf.Max(1, value);
+                Data.Energy = Mathf.Clamp(Data.Energy, 0, Data.MaxEnergy);
                 Save();
             }
         }
@@ -430,11 +452,13 @@ namespace SpinSquad.Meta
         {
             return new MetaSaveData
             {
-                Version = 2,
+                Version = 3,
                 UnlockedLevel = 1,
                 SelectedLevel = 1,
                 Gold = 0,
                 TreasureKeys = 0,
+                Energy = DefaultMaxEnergy,
+                MaxEnergy = DefaultMaxEnergy,
                 LineUpgradeLevels = new int[AllyLineCount],
                 LineRarityUpgradeLevels = new int[AllyLineCount * UpgradableRarityCount],
                 Treasures = new List<OwnedTreasureData>()
@@ -449,10 +473,38 @@ namespace SpinSquad.Meta
             data.SelectedLevel = Mathf.Clamp(data.SelectedLevel, 1, data.UnlockedLevel);
             data.Gold = Mathf.Max(0, data.Gold);
             data.TreasureKeys = Mathf.Max(0, data.TreasureKeys);
-            if (data.LineUpgradeLevels == null || data.LineUpgradeLevels.Length != AllyLineCount)
+            if (data.MaxEnergy < 1)
+                data.MaxEnergy = DefaultMaxEnergy;
+            if (data.Version < 3)
+            {
+                if (data.Energy <= 0)
+                    data.Energy = data.MaxEnergy > 0 ? data.MaxEnergy : DefaultMaxEnergy;
+                data.Version = 3;
+            }
+
+            data.Energy = Mathf.Clamp(data.Energy, 0, data.MaxEnergy);
+            if (data.LineUpgradeLevels == null)
                 data.LineUpgradeLevels = new int[AllyLineCount];
-            if (data.LineRarityUpgradeLevels == null || data.LineRarityUpgradeLevels.Length != AllyLineCount * UpgradableRarityCount)
-                data.LineRarityUpgradeLevels = new int[AllyLineCount * UpgradableRarityCount];
+            else if (data.LineUpgradeLevels.Length != AllyLineCount)
+            {
+                var old = data.LineUpgradeLevels;
+                data.LineUpgradeLevels = new int[AllyLineCount];
+                var n = Mathf.Min(old.Length, AllyLineCount);
+                for (var i = 0; i < n; i++)
+                    data.LineUpgradeLevels[i] = old[i];
+            }
+
+            var expectedRarityLen = AllyLineCount * UpgradableRarityCount;
+            if (data.LineRarityUpgradeLevels == null)
+                data.LineRarityUpgradeLevels = new int[expectedRarityLen];
+            else if (data.LineRarityUpgradeLevels.Length != expectedRarityLen)
+            {
+                var oldR = data.LineRarityUpgradeLevels;
+                data.LineRarityUpgradeLevels = new int[expectedRarityLen];
+                var n = Mathf.Min(oldR.Length, expectedRarityLen);
+                for (var i = 0; i < n; i++)
+                    data.LineRarityUpgradeLevels[i] = oldR[i];
+            }
 
             if (data.Version < 2)
             {

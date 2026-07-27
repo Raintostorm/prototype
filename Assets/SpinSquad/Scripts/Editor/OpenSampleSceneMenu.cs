@@ -11,6 +11,7 @@ namespace SpinSquad.EditorTools
         public const string HomepageScenePath = "Assets/SpinSquad/Scenes/Homepage.unity";
         public const string SampleScenePath = "Assets/SpinSquad/Scenes/SampleScene.unity";
         public const string DuelTestArenaPath = "Assets/SpinSquad/Scenes/DuelTestArena.unity";
+        public const string KnightSpineAnimTestPath = "Assets/SpinSquad/Scenes/KnightSpineAnimTest.unity";
 
         [MenuItem("SpinSquad/Play/Open Homepage", priority = -5)]
         public static void OpenHomepage()
@@ -57,7 +58,23 @@ namespace SpinSquad.EditorTools
             }
 
             EditorSceneManager.OpenScene(DuelTestArenaPath, OpenSceneMode.Single);
-            Debug.Log($"[SpinSquad] Đã mở {DuelTestArenaPath} — chọn melee/ranged rồi Áp dụng & reset trận.");
+            Debug.Log($"[SpinSquad] Đã mở {DuelTestArenaPath} — Knight Spine melee vs unit_enemy_knight; chọn preset rồi Áp dụng & reset trận.");
+        }
+
+        [MenuItem("SpinSquad/Play/Open Knight Spine Anim Test", priority = 2)]
+        public static void OpenKnightSpineAnimTest()
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+                return;
+
+            if (!System.IO.File.Exists(KnightSpineAnimTestPath))
+            {
+                Debug.LogError($"[SpinSquad] Không tìm thấy scene: {KnightSpineAnimTestPath}");
+                return;
+            }
+
+            EditorSceneManager.OpenScene(KnightSpineAnimTestPath, OpenSceneMode.Single);
+            Debug.Log($"[SpinSquad] Đã mở {KnightSpineAnimTestPath} — bấm Play: UI thử idle/walk/attack/died.");
         }
     }
 }

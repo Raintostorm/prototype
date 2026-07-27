@@ -31,15 +31,18 @@ namespace SpinSquad.Meta
     [Serializable]
     public sealed class MetaSaveData
     {
-        public int Version = 2;
+        public int Version = 3;
         public int UnlockedLevel = 1;
         public int SelectedLevel = 1;
         public int Gold;
         public int TreasureKeys;
+        /// <summary>Stub stamina — hiển thị HUD; gameplay spend chưa nối.</summary>
+        public int Energy = 100;
+        public int MaxEnergy = 100;
         // Legacy line-only upgrade data (kept for migration).
-        public int[] LineUpgradeLevels = new int[3];
-        // Current upgrade storage: 3 lines x 4 rarities (Common..Legendary) = 12 entries.
-        public int[] LineRarityUpgradeLevels = new int[12];
+        public int[] LineUpgradeLevels = new int[5];
+        // Current upgrade storage: 5 lines x 4 rarities (Common..Legendary) = 20 entries.
+        public int[] LineRarityUpgradeLevels = new int[20];
         public List<OwnedTreasureData> Treasures = new();
     }
 

@@ -1,6 +1,7 @@
 using System;
 using SpinSquad.Data;
 using SpinSquad.Meta;
+using SpinSquad.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -14,12 +15,14 @@ namespace SpinSquad.Scenes
         [SerializeField] string homepageSceneName = "Homepage";
         [SerializeField] string detailSceneName = "TreasureDetail";
         Font _font;
-        Text _resourceText;
+        MetaResourceHudBar _resourceHud;
         Text _resultText;
         Rarity _activeTab = Rarity.Common;
         readonly Image[] _tabImages = new Image[4];
         readonly Button[] _tabButtons = new Button[4];
+        readonly GameObject[] _cardRoots = new GameObject[10];
         readonly Image[] _cardImages = new Image[10];
+        readonly Image[] _cardIconImages = new Image[10];
         readonly Text[] _cardTexts = new Text[10];
         readonly System.Random _rng = new((int)(DateTime.UtcNow.Ticks ^ Guid.NewGuid().GetHashCode()));
 
@@ -27,13 +30,15 @@ namespace SpinSquad.Scenes
         {
             EnsureEventSystem();
             ResolveFont();
+            if (MetaUiSelectionContext.TryConsumeTreasureListReturnTab(out var returnTab))
+                _activeTab = returnTab;
             BuildUi();
             RefreshUi();
         }
 
         void OnEnable()
         {
-            if (_resourceText != null)
+            if (_resourceHud != null)
                 RefreshUi();
         }
 
@@ -61,15 +66,50 @@ namespace SpinSquad.Scenes
             var scaler = canvasGo.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
+            scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            CreateText(canvasGo.transform, "Title", "Treasure", 42, new Vector2(0f, -120f), new Vector2(900f, 100f));
-            _resourceText = CreateText(canvasGo.transform, "Keys", string.Empty, 28, new Vector2(0f, -210f), new Vector2(900f, 80f));
-            CreateButton(canvasGo.transform, "Roll (1 Key)", new Vector2(0f, -300f), new Color(0.48f, 0.34f, 0.17f, 0.96f), RollTreasure);
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, GameBackgroundUiSprites.Treasure, 0);
+            MetaHudTheme.AddHeaderStrip(canvasGo.transform);
 
-            _resultText = CreateText(canvasGo.transform, "Result", "Roll a treasure.", 24, new Vector2(0f, -400f), new Vector2(950f, 90f));
+            CreateText(
+                canvasGo.transform,
+                "Title",
+                "Treasure",
+                MetaHudTheme.FontTitle,
+                new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f),
+                new Vector2(900f, 72f));
 
-            var tabXs = new[] { -330f, -110f, 110f, 330f };
+            _resourceHud = new MetaResourceHudBar();
+            _resourceHud.Build(
+                canvasGo.transform,
+                _font,
+                new Vector2(MetaHudTheme.SafeEdgeX, -(MetaHudTheme.SafeEdgeYTop + 4f)));
+            MetaDebugGrantPanel.TryAttach(canvasGo.transform, _font, RefreshUi);
+
+            const float rollY = -200f;
+            var rollBtn = CreateButton(
+                canvasGo.transform,
+                "Roll (1 Key)",
+                new Vector2(0f, rollY),
+                new Color(0.48f, 0.34f, 0.17f, 0.96f),
+                RollTreasure);
+            rollBtn.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
+            var rollImg = rollBtn.GetComponent<Image>();
+            HudUiSprites.ApplyIcon(rollImg, HudUiSprites.MetaRewardButton, new Color(0.48f, 0.34f, 0.17f, 0.96f));
+            HudUiButtonHelper.SyncLabelVisibility(rollBtn.GetComponentInChildren<Text>(), HudUiSprites.MetaRewardButton, "Roll (1 Key)");
+
+            var gap = MetaHudTheme.ActionRowGap;
+            _resultText = CreateText(
+                canvasGo.transform,
+                "Result",
+                "Roll a treasure.",
+                MetaHudTheme.FontOverlayRow,
+                new Vector2(0f, rollY - MetaHudTheme.CtaSize.y - gap),
+                new Vector2(950f, 72f));
+
+            var tabY = rollY - MetaHudTheme.CtaSize.y - gap - 72f - MetaHudTheme.ActionRowGap * 2f;
+            var tabXs = new[] { -252f, -84f, 84f, 252f };
             for (var ti = 0; ti < 4; ti++)
             {
                 var rarity = (Rarity)ti;
@@ -81,34 +121,38 @@ namespace SpinSquad.Scenes
                     Rarity.Epic => "Epic",
                     _ => "Legendary"
                 };
-                var btn = CreateTabButton(canvasGo.transform, label, new Vector2(tabXs[ti], -498f), () => SelectTab(cap));
+                var btn = CreateTabButton(
+                    canvasGo.transform,
+                    label,
+                    new Vector2(tabXs[ti], tabY),
+                    HudUiSprites.TreasureTabSprite(ti),
+                    () => SelectTab(cap));
                 _tabButtons[ti] = btn;
                 _tabImages[ti] = btn.GetComponent<Image>();
-                var trt = btn.GetComponent<RectTransform>();
-                trt.sizeDelta = new Vector2(188f, 56f);
-                var txt = btn.GetComponentInChildren<Text>();
-                txt.fontSize = 22;
+                btn.GetComponent<RectTransform>().sizeDelta = new Vector2(156f, 64f);
             }
 
             CreateText(
                 canvasGo.transform,
                 "TabHint",
-                "Chọn bậc hiếm — mỗi bậc có 10 treasure. Bậc cao cho buff mạnh hơn.",
-                20,
-                new Vector2(0f, -568f),
-                new Vector2(980f, 70f));
+                "Common 10 · Rare 7 · Epic 4 · Legendary 4",
+                MetaHudTheme.FontHint,
+                new Vector2(0f, tabY - 64f - gap),
+                new Vector2(980f, 48f));
 
+            var cardTopY = tabY - 80f - gap;
+            var cardRowH = 112f + gap * 0.25f;
             for (var i = 0; i < 10; i++)
             {
                 var slot = i;
                 var col = i % 2;
                 var row = i / 2;
-                var x = col == 0 ? -230f : 230f;
-                var y = -648f - row * 118f;
+                var x = col == 0 ? -220f : 220f;
+                var y = cardTopY - row * cardRowH;
                 CreateTreasureCard(canvasGo.transform, slot, new Vector2(x, y), () => OpenDetail(slot));
             }
 
-            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1290f), new Color(0.2f, 0.28f, 0.4f, 0.95f), BackToHomepage);
+            MetaHudTheme.CreateFooterBackButton(canvasGo.transform, _font, BackToHomepage);
         }
 
         void SelectTab(Rarity rarity)
@@ -138,29 +182,38 @@ namespace SpinSquad.Scenes
 
         void RefreshUi()
         {
-            _resourceText.text = $"Treasure Keys: {MetaProgressionStore.TreasureKeys}";
-
+            _resourceHud?.Refresh();
             for (var ti = 0; ti < 4; ti++)
             {
                 var selected = (int)_activeTab == ti;
-                var tint = RarityPalette.UnitTint((Rarity)ti, UnitTeamKind.Ally);
-                _tabImages[ti].color = selected
-                    ? Color.Lerp(tint, Color.white, 0.22f)
-                    : Color.Lerp(tint, Color.black, 0.38f);
+                var tabSprite = HudUiSprites.TreasureTabSprite(ti);
+                var fallback = RarityPalette.UnitTint((Rarity)ti, UnitTeamKind.Ally);
+                HudUiSprites.ApplyIcon(_tabImages[ti], tabSprite, fallback);
+                _tabImages[ti].color = selected ? Color.white : new Color(0.72f, 0.72f, 0.76f, 0.92f);
             }
 
             var defs = TreasureDefinitions.DefinitionsOrderedForRarity(_activeTab);
             var bg = RarityPalette.UpgradeCardBackground(_activeTab);
+            var iconFallback = RarityPalette.UnitTint(_activeTab, UnitTeamKind.Ally);
             for (var i = 0; i < 10; i++)
             {
-                _cardImages[i].color = bg;
+                var visible = i < defs.Length;
+                if (_cardRoots[i] != null)
+                    _cardRoots[i].SetActive(visible);
+                if (!visible)
+                    continue;
+
                 var def = defs[i];
+                _cardImages[i].color = bg;
+                TreasureUiSprites.ApplyIcon(
+                    _cardIconImages[i],
+                    TreasureUiSprites.GetIconForDefinition(def),
+                    iconFallback);
                 var snap = MetaProgressionStore.GetTreasureSnapshot(def.Id);
-                var levelLabel = snap.IsOwned ? $"{snap.Level}/{snap.MaxLevel}" : $"0/{MetaProgressionStore.MaxUpgradeLevel}";
-                _cardTexts[i].text =
-                    $"<b>{def.Name}</b>\n" +
-                    $"<color=#D8E6F4>{ShortEffect(def.EffectKind)}</color>  ·  Lv {levelLabel}\n" +
-                    $"<size=18>{FormatTreasureStatus(snap)}</size>";
+                var levelLabel = snap.IsOwned
+                    ? $"Lv {snap.Level}/{snap.MaxLevel}"
+                    : "Chưa sở hữu";
+                _cardTexts[i].text = $"<b>{def.Name}</b>\n<size=20><color=#D0DCE8>{levelLabel}</color></size>";
             }
         }
 
@@ -173,7 +226,7 @@ namespace SpinSquad.Scenes
                 return;
             }
 
-            MetaUiSelectionContext.SetSelectedTreasure(defs[slotIndex].Id);
+            MetaUiSelectionContext.SetSelectedTreasure(defs[slotIndex].Id, _activeTab);
             if (Application.CanStreamedLevelBeLoaded(detailSceneName))
                 SceneManager.LoadScene(detailSceneName);
             else
@@ -181,28 +234,6 @@ namespace SpinSquad.Scenes
                 _resultText.text = $"Cannot load scene: {detailSceneName}";
                 Debug.LogWarning("[Treasure] Cannot load detail scene: " + detailSceneName);
             }
-        }
-
-        static string ShortEffect(TreasureEffectKind k) =>
-            k switch
-            {
-                TreasureEffectKind.AllyHpPct => "HP%",
-                TreasureEffectKind.AllyDmgPct => "ATK%",
-                TreasureEffectKind.AllyAtkSpeedPct => "ASPD%",
-                TreasureEffectKind.AllyCritChanceFlat => "Crit",
-                TreasureEffectKind.StartRollCoinBonus => "Start coin",
-                _ => "Wave coin"
-            };
-
-        static string FormatTreasureStatus(TreasureUpgradeSnapshot snap)
-        {
-            return snap.Status switch
-            {
-                TreasureUpgradeStatus.NotOwned => "Chưa sở hữu",
-                TreasureUpgradeStatus.MaxLevel => "Max level",
-                TreasureUpgradeStatus.OwnedCanLevelUp => "Có thể lên cấp",
-                _ => $"Cần thêm {snap.MissingDuplicates} bản trùng"
-            };
         }
 
         void BackToHomepage()
@@ -216,16 +247,16 @@ namespace SpinSquad.Scenes
             }
         }
 
-        Text CreateText(Transform parent, string name, string value, int size, Vector2 pos, Vector2 dim)
+        Text CreateText(Transform parent, string name, string value, int fontSize, Vector2 pos, Vector2 dim)
         {
             var go = new GameObject(name);
             go.transform.SetParent(parent, false);
             var t = go.AddComponent<Text>();
             t.font = _font;
-            t.fontSize = size;
+            t.fontSize = fontSize;
             t.text = value;
             t.alignment = TextAnchor.MiddleCenter;
-            t.color = Color.white;
+            t.color = MetaHudTheme.TextPrimary;
             t.raycastTarget = false;
             var rt = t.rectTransform;
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
@@ -235,13 +266,17 @@ namespace SpinSquad.Scenes
             return t;
         }
 
-        Button CreateTabButton(Transform parent, string label, Vector2 pos, UnityEngine.Events.UnityAction onClick)
+        Button CreateTabButton(
+            Transform parent,
+            string label,
+            Vector2 pos,
+            Sprite tabSprite,
+            UnityEngine.Events.UnityAction onClick)
         {
             var go = new GameObject(label + "Tab");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            image.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-            image.color = Color.gray;
+            HudUiSprites.ApplyIcon(image, tabSprite, MetaHudTheme.ButtonIconBar);
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
@@ -250,11 +285,12 @@ namespace SpinSquad.Scenes
             textGo.transform.SetParent(go.transform, false);
             var text = textGo.AddComponent<Text>();
             text.font = _font;
-            text.fontSize = 28;
+            text.fontSize = 22;
             text.text = label;
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
             text.raycastTarget = false;
+            text.gameObject.SetActive(tabSprite == null);
             var lrt = text.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
@@ -265,7 +301,7 @@ namespace SpinSquad.Scenes
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(188f, 56f);
+            rt.sizeDelta = new Vector2(188f, 72f);
             return btn;
         }
 
@@ -283,7 +319,18 @@ namespace SpinSquad.Scenes
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = pos;
-            rt.sizeDelta = new Vector2(340f, 108f);
+            rt.sizeDelta = new Vector2(340f, 100f);
+
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(btnGo.transform, false);
+            var iconImg = iconGo.AddComponent<Image>();
+            iconImg.raycastTarget = false;
+            var iconRt = iconImg.rectTransform;
+            iconRt.anchorMin = new Vector2(0f, 0.5f);
+            iconRt.anchorMax = new Vector2(0f, 0.5f);
+            iconRt.pivot = new Vector2(0f, 0.5f);
+            iconRt.anchoredPosition = new Vector2(10f, 0f);
+            iconRt.sizeDelta = new Vector2(72f, 72f);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(btnGo.transform, false);
@@ -291,17 +338,19 @@ namespace SpinSquad.Scenes
             text.font = _font;
             text.fontSize = 19;
             text.text = string.Empty;
-            text.alignment = TextAnchor.MiddleCenter;
+            text.alignment = TextAnchor.MiddleLeft;
             text.color = Color.white;
             text.supportRichText = true;
             text.raycastTarget = false;
             var lrt = text.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = new Vector2(8f, 6f);
+            lrt.offsetMin = new Vector2(88f, 6f);
             lrt.offsetMax = new Vector2(-8f, -6f);
 
+            _cardRoots[slotIndex] = btnGo;
             _cardImages[slotIndex] = bg;
+            _cardIconImages[slotIndex] = iconImg;
             _cardTexts[slotIndex] = text;
         }
 

@@ -2,23 +2,23 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - leg
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - rightarm
+  - righthand
+  - body
+  - leftarm
+  - lefthand
+  - rightshoulder
+  - leftshouder
+  - head
   - 
   - 
   - 
@@ -41,3 +41,33 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: leg
+    uniqueID: 3933720061
+    locked: 0
+  - name: rightarm
+    uniqueID: 647730863
+    locked: 0
+  - name: righthand
+    uniqueID: 2150919947
+    locked: 0
+  - name: body
+    uniqueID: 1722583973
+    locked: 0
+  - name: leftarm
+    uniqueID: 653289603
+    locked: 0
+  - name: lefthand
+    uniqueID: 3290182155
+    locked: 0
+  - name: rightshoulder
+    uniqueID: 1033524253
+    locked: 0
+  - name: leftshoulder
+    uniqueID: 4282436701
+    locked: 0
+  - name: head
+    uniqueID: 4163276079
+    locked: 0
+  m_RenderingLayers:
+  - Default
+  m_MigratedRenderPipelines: []

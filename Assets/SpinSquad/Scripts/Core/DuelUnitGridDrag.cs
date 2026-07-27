@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 namespace SpinSquad.Core
 {
     /// <summary>
-    /// Kéo unit trên lưới 4×4 đúng phe (ally chỉ lưới trái, enemy chỉ lưới phải). Chỉ khi chưa bấm Bắt đầu.
+    /// Kéo unit trên lưới đúng phe (ally chỉ lưới trái, enemy chỉ lưới phải). Chỉ khi chưa bấm Bắt đầu.
     /// Ally / enemy leader: nhấn ngắn = chọn ô (merge); giữ hoặc kéo = di chuyển stack. Follower: chạm = chọn ô stack.
     /// </summary>
     [RequireComponent(typeof(CombatHealth))]
@@ -178,7 +178,10 @@ namespace SpinSquad.Core
         {
             Vector3 snap;
             if (_health.Faction == CombatFaction.Ally)
+            {
                 snap = BattleGrid.SnapWorldToAllyGrid(world);
+                snap += BattleGrid.AllyUnitAnchorOffset;
+            }
             else
                 snap = BattleGrid.SnapWorldToEnemyGrid(world);
 

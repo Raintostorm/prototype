@@ -1,0 +1,160 @@
+
+skeleton.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+armor
+  rotate: false
+  xy: 322, 112
+  size: 132, 140
+  orig: 132, 140
+  offset: 0, 0
+  index: -1
+cap
+  rotate: true
+  xy: 609, 147
+  size: 105, 142
+  orig: 105, 142
+  offset: 0, 0
+  index: -1
+cloak
+  rotate: false
+  xy: 158, 60
+  size: 162, 192
+  orig: 162, 192
+  offset: 0, 0
+  index: -1
+head
+  rotate: false
+  xy: 862, 19
+  size: 108, 129
+  orig: 108, 129
+  offset: 0, 0
+  index: -1
+helve
+  rotate: true
+  xy: 2, 8
+  size: 31, 184
+  orig: 31, 184
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: true
+  xy: 447, 3
+  size: 62, 76
+  orig: 62, 79
+  offset: 0, 3
+  index: -1
+left_eye
+  rotate: true
+  xy: 426, 67
+  size: 43, 33
+  orig: 43, 33
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: false
+  xy: 316, 8
+  size: 67, 50
+  orig: 67, 50
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: false
+  xy: 740, 4
+  size: 75, 68
+  orig: 79, 93
+  offset: 0, 25
+  index: -1
+left_hand_finger
+  rotate: false
+  xy: 385, 4
+  size: 60, 54
+  orig: 60, 55
+  offset: 0, 1
+  index: -1
+left_lower
+  rotate: false
+  xy: 253, 3
+  size: 61, 55
+  orig: 61, 55
+  offset: 0, 0
+  index: -1
+left_shoulder
+  rotate: false
+  xy: 525, 2
+  size: 126, 127
+  orig: 126, 127
+  offset: 0, 0
+  index: -1
+left_thigh
+  rotate: true
+  xy: 866, 173
+  size: 79, 74
+  orig: 79, 74
+  offset: 0, 0
+  index: -1
+right_arm
+  rotate: true
+  xy: 653, 3
+  size: 69, 85
+  orig: 69, 85
+  offset: 0, 0
+  index: -1
+right_eye
+  rotate: true
+  xy: 391, 64
+  size: 46, 33
+  orig: 46, 33
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: false
+  xy: 322, 60
+  size: 67, 50
+  orig: 67, 50
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: true
+  xy: 753, 150
+  size: 102, 111
+  orig: 102, 111
+  offset: 0, 0
+  index: -1
+right_lower
+  rotate: false
+  xy: 188, 2
+  size: 63, 56
+  orig: 63, 56
+  offset: 0, 0
+  index: -1
+right_shoulder
+  rotate: false
+  xy: 456, 131
+  size: 151, 121
+  orig: 151, 121
+  offset: 0, 0
+  index: -1
+right_thigh
+  rotate: true
+  xy: 942, 185
+  size: 67, 74
+  orig: 67, 74
+  offset: 0, 0
+  index: -1
+shield
+  rotate: false
+  xy: 2, 41
+  size: 154, 211
+  orig: 154, 211
+  offset: 0, 0
+  index: -1
+spear
+  rotate: true
+  xy: 653, 74
+  size: 71, 207
+  orig: 71, 207
+  offset: 0, 0
+  index: -1

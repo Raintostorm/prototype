@@ -1,0 +1,139 @@
+
+skeleton.png
+size: 1024,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+chest_armor
+  rotate: true
+  xy: 322, 134
+  size: 111, 79
+  orig: 111, 79
+  offset: 0, 0
+  index: -1
+chest_shield
+  rotate: true
+  xy: 385, 27
+  size: 105, 82
+  orig: 105, 82
+  offset: 0, 0
+  index: -1
+cloak
+  rotate: false
+  xy: 2, 7
+  size: 164, 75
+  orig: 164, 75
+  offset: 0, 0
+  index: -1
+coronet
+  rotate: false
+  xy: 403, 151
+  size: 89, 94
+  orig: 90, 94
+  offset: 1, 0
+  index: -1
+eyes
+  rotate: false
+  xy: 119, 105
+  size: 62, 22
+  orig: 62, 22
+  offset: 0, 0
+  index: -1
+foot
+  rotate: false
+  xy: 706, 183
+  size: 60, 62
+  orig: 60, 62
+  offset: 0, 0
+  index: -1
+head
+  rotate: true
+  xy: 288, 20
+  size: 96, 95
+  orig: 96, 95
+  offset: 0, 0
+  index: -1
+head_hammer
+  rotate: true
+  xy: 168, 2
+  size: 101, 118
+  orig: 102, 118
+  offset: 1, 0
+  index: -1
+helve_hammer
+  rotate: true
+  xy: 119, 129
+  size: 116, 114
+  orig: 116, 114
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: false
+  xy: 628, 89
+  size: 66, 89
+  orig: 66, 89
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: true
+  xy: 661, 16
+  size: 71, 69
+  orig: 71, 69
+  offset: 0, 0
+  index: -1
+left_leg
+  rotate: true
+  xy: 552, 2
+  size: 63, 107
+  orig: 63, 107
+  offset: 0, 0
+  index: -1
+left_shoulder_armor
+  rotate: false
+  xy: 494, 170
+  size: 103, 75
+  orig: 103, 75
+  offset: 0, 0
+  index: -1
+neck_armor
+  rotate: true
+  xy: 235, 118
+  size: 127, 85
+  orig: 128, 85
+  offset: 1, 0
+  index: -1
+right_arm
+  rotate: false
+  xy: 552, 67
+  size: 74, 101
+  orig: 74, 101
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: false
+  xy: 696, 108
+  size: 62, 70
+  orig: 63, 70
+  offset: 1, 0
+  index: -1
+right_leg
+  rotate: true
+  xy: 599, 180
+  size: 65, 105
+  orig: 65, 105
+  offset: 0, 0
+  index: -1
+right_shoulder_armor
+  rotate: true
+  xy: 469, 46
+  size: 103, 81
+  orig: 103, 81
+  offset: 0, 0
+  index: -1
+shield
+  rotate: false
+  xy: 2, 84
+  size: 115, 161
+  orig: 115, 161
+  offset: 0, 0
+  index: -1

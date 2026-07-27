@@ -1,0 +1,176 @@
+================================================================================
+  SPINSQUAD — DANH SÁCH ASSET CẦN CHO TEAM ART / UI (BẢN DỄ ĐỌC)
+================================================================================
+
+Mục đích: liệt kê mọi thứ game cần để “có giao diện đẹp + âm thanh + hình chiến đấu
+đủ tốt”. Chi tiết kỹ thuật Unity (đường folder, Spine 3.8, script sync ally…) xem
+thêm file: ASSET_REQUEST.md (cùng thư mục Docs).
+
+Icon HUD đã import: Assets/SpinSquad/Resources/UI/Hud/Meta/ và .../Combat/
+(code: Scripts/UI/HudUiSprites.cs). Sổ đăng ký wiring + GAP: Docs/AI_CONTEXT/UI_HUD_ASSET_MAP.md
+
+--------------------------------------------------------------------------------
+NÚT CÒN DÙNG SPRITE MẶC ĐỊNH (ô trắng / màu phẳng — CHƯA gắn HUD pack)
+Cập nhật: sau khi dọn Homepage (bỏ Knight Test, CTA đồng kích thước).
+--------------------------------------------------------------------------------
+
+  ĐÃ CÓ HUD sprite (không cần làm lại trừ khi đổi art):
+  • Homepage: Play hero + bottom nav, icon Setting/Mail/Shop, Prev/Next, Back overlay
+  • Meta resource HUD: coin/key/energy bar + icon — `Resources/UI/Meta/Resource/` (sync `Tools/sync_bar_resource_from_root.sh`)
+  • Treasure: tab rarity, Roll Reward_button, icon list; Table_1 chỉ màn **detail**; portrait + stats trong detail
+  • Duel: Stop/Settings/Speed, bottom bar Thêm ally/Roll/Túi, pause Restart/Home, Merge/Sell
+
+  CÒN DEFAULT — nên gắn art hoặc chấp nhận panel phẳng:
+  • Homepage overlay chọn level: 3 nút level (hiện dùng Blue_button — có thể đổi art level riêng)
+  • Upgrade: 20 thẻ grid — nền Wood/Fire/…_card (đã có); portrait fallback = icon ngũ hành
+  • Treasure: thẻ list dùng icon C_/R_/E_/L_ (sync Tools/sync_treasures_from_root.sh); frame card riêng vẫn optional
+  • Upgrade detail: dải accent rarity (trang trí), nút Upgrade = Green_button (OK)
+  • Duel: nút Tiếp tục (pause) — màu xanh flat, chưa Orange/Green_button
+  • Duel: menu ô ally — nền panel + nút Đóng text (Merge/Sell đã có sprite)
+  • Duel: panel pause/settings — nền popup (không cần sprite nút, chỉ khung nếu muốn)
+  • Duel: banner prep coin — chỉ text
+
+  PACK HUD CHƯA DÙNG (có file, chưa có UI): xem UI_HUD_ASSET_MAP.md mục GAP
+  (Quest, Shop thật, Red_button, Ads, tab khác, …) — coin_bar/diamond_bar/energy_bar HUD cũ đã xóa
+
+  DEV-ONLY (không ship): KnightSpineAnimTest scene, DuelTestArena — toàn nút default.
+
+Màn hình tham chiếu: dọc ~1080 x 1920 (điện thoại), có vùng an toàn (safe area)
+để nút không bị tai thỏ / notch che.
+
+--------------------------------------------------------------------------------
+LAYOUT UI (LANES — CODE MetaHudTheme / HomepageHub / DuelDirector)
+--------------------------------------------------------------------------------
+
+  • Homepage: nút Play hero giữa + bottom nav 4 tab (Home / Upgrade / Battle / Treasure).
+    Chỉ màn Homepage có bottom nav; Upgrade/Treasure/Detail giữ nút Back đáy.
+  • Duel prep: thanh đáy ngang [Thêm ally | Roll/Bắt đầu | Túi]; coin + banner trên
+    info strip (không xen giữa nút). Bench world-space giữ nguyên; sync nền:
+    `bash Tools/sync_game_background_from_root.sh` (pre_battle cho prep).
+  • Khoảng cách nút: MetaHudTheme.ActionRowGap (24px giữa mép).
+
+--------------------------------------------------------------------------------
+1) CHỮ VÀ SỐ (FONT)
+--------------------------------------------------------------------------------
+
+  • Bộ chữ dùng trong game: Latin (hoa + thường) + số — rõ ràng, dễ đọc nhỏ.
+  • Quan trọng: hỗ trợ TIẾNG VIỆT (đầy đủ dấu) vì UI có thể hiển thị tiếng Việt.
+  • Gửi kèm: tên font, giấy phép (nếu mua), và bản mẫu chữ “Ă â Đ đ Ư ư” để test.
+
+--------------------------------------------------------------------------------
+2) ICON CÁC NÚT (ƯU TIÊN PNG TRONG SUỐT, NÊN CÓ NHIỀU TRẠNG THÁI)
+--------------------------------------------------------------------------------
+
+  Các nút sau nên có icon (có thể gửi bản: bình thường / nhấn / tắt hoặc mờ):
+
+  • Trang chủ (home)
+  • Tạm dừng (pause)
+  • Tốc độ x2 (x2 speed) — 
+  • Cài đặt (settings)
+  • Chơi lại / restart 
+  • Cửa hàng (shop) — 
+  • Thư / mail — 
+  • Âm thanh: bật / tắt (2 trạng thái)
+  • Âm lượng: như âm thanh
+  • Ghép ally (merge)
+  • Bán ally (sell)
+
+  Gợi ý thêm (game đang có hoặc sắp có): nút quay lại (back), nút Play / Upgrade /
+  Treasure trên hub — nếu art làm đồng bộ một bộ “nút CTA lớn” sẽ đẹp hơn chỉ
+  chữ trên nền màu.
+
+--------------------------------------------------------------------------------
+3) KHO BÁU (TREASURE) — HÌNH VẬT PHẨM + RƯƠNG
+--------------------------------------------------------------------------------
+
+  • Icon từng treasure: ĐÃ import 25 file (Common×10, Rare×7, Epic×4, Legendary×4)
+    → Resources/UI/Treasure/Icons/ (code: TreasureUiSprites.cs). Nguồn: repo treasures/.
+  • Hình rương (chest): đóng / mở — HUD Meta/Chest (hub), Advance_chest chưa dùng.
+  • Tab rarity Treasure: HUD All/Gear/Item/Material_tab (đã gắn).
+
+--------------------------------------------------------------------------------
+4) TÚI ĐỒ / GÓI (INVENTORY & PACKAGE UI)
+--------------------------------------------------------------------------------
+
+  • Giao diện “túi đồ ally” (nếu có màn hoặc popup chọn / xem ally).
+  • Giao diện “túi đồ item” (vật phẩm chung).
+  • Khung ô slot, viền chọn, nền danh sách — thống nhất style với phần 3.
+
+--------------------------------------------------------------------------------
+5) NỀN VÀ KHUNG UI CHUNG
+--------------------------------------------------------------------------------
+
+  • Background màn hình (menu, meta, chiến đấu nếu khác nhau).
+  • Khung panel: pause, settings, popup thông báo — NÊN là ảnh 9-slice (cắt góc
+    để kéo dài được nhiều kích thước mà không vỡ góc).
+  • Thanh header / dải trên cùng, làm mờ nền (dim) khi mở popup.
+  • Phụ kiện: đường viền, góc trang trí, chấm trang trí — tuỳ style game.
+
+--------------------------------------------------------------------------------
+6) MÀN CHIẾN ĐẤU — LƯỚI & ĐỊCH
+--------------------------------------------------------------------------------
+
+  • Ô đất / ô lưới dàn quân: nền ô, viền ô được chọn, highlight khi kéo thả /
+    merge (nếu art tách lớp riêng sẽ dễ chỉnh trong Unity).
+  • Enemy (trên sân): có thể là Spine hoặc sprite — nếu tách PARTS (đầu, thân,
+    vũ khí…) thì ghi rõ tên layer để animator dễ ghép.
+  • (Tuỳ ý) Khung / thanh máu phía trên đầu unit trên sân — nếu muốn skin riêng
+    thay vì chỉ thanh màu đơn giản.
+
+--------------------------------------------------------------------------------
+7) HIỆU ỨNG NHỎ (VFX — 2D)
+--------------------------------------------------------------------------------
+
+  • Đạn bắn (cho ally Thủy / ranged): một texture đẹp, nền trong suốt.
+  • Số sát thương / hit flash: style nhất quán (nếu có sprite riêng).
+  • Hiệu khi ghép ally (merge): chớp nhẹ, vòng sáng quanh ô — có thể chỉ là
+    vài frame hoặc một atlas hiệu ứng.
+  • Bảng roll / gacha (6 ô): khung ô, viền highlight khi trúng lớn.
+
+--------------------------------------------------------------------------------
+8) MÀN META — THẺ & CHỌN CẤP
+--------------------------------------------------------------------------------
+
+  • Thẻ nâng cấp theo dòng + theo bậc hiếm (màu viền có thể bám theo Common /
+    Rare / Epic / Legendary).
+  • Overlay chọn màn / chọn cấp độ (level) trên hub — nền, nút, danh sách.
+
+--------------------------------------------------------------------------------
+9) ÂM THANH (AUDIO)
+--------------------------------------------------------------------------------
+
+  • Nhạc nền menu (loop ngắn, không vỡ đoạn nối).
+  • Nhạc nền combat (nhẹ, không lấn SFX).
+  • SFX: bấm nút, bắn, trúng đòn, chết, thắng wave / thua — tách file theo loại.
+  • Nên gửi kèm bảng: “tên file.wav ↔ dùng khi nào trong game” để lập trình gắn
+    sau (hiện pipeline âm thanh tập trung có thể còn bổ sung trong code).
+
+--------------------------------------------------------------------------------
+10) NHÂN VẬT SPINE (TÓM TẮT — CHI TIẾT XEM ASSET_REQUEST.md)
+--------------------------------------------------------------------------------
+
+  • Bốn ally ngũ hành (Mộc / Hỏa / Kim / Thủy) + Knight — export Spine chuẩn;
+    phần gửi file thô có thể qua thư mục allies + script sync (dev làm bước Unity).
+  • Địch: melee + ranged tối thiểu; boss / knight địch nếu có màn test.
+
+--------------------------------------------------------------------------------
+11) ẢNH CHO STORE / MARKETING (TÙY LÚC LÊN STORE)
+--------------------------------------------------------------------------------
+
+  • Icon app 1024 x 1024.
+  • Ảnh splash / key art ngang 16:9 và bản crop dọc 9:16.
+  • Ảnh minh họa trên store (nếu publish).
+
+--------------------------------------------------------------------------------
+12) KHI GIAO FILE CHO DEV — NÊN NHỚ
+--------------------------------------------------------------------------------
+
+  • Định dạng: PNG (UI), có alpha nếu cần trong suốt.
+  • Nút quan trọng: nên có ít nhất trạng thái “bình thường” và “nhấn”; thêm
+    “tắt / mờ” nếu nút bị khóa.
+  • Đặt tên file rõ ràng (vd: icon_pause.png, icon_pause_pressed.png).
+  • Giữ nguyên file .meta nếu đã import trong project Unity (để không vỡ liên kết).
+
+================================================================================
+  Hết danh sách. Cập nhật file này khi thêm tính năng mới (shop thật, PvP, …).
+================================================================================

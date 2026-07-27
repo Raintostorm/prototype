@@ -1,0 +1,160 @@
+
+skeleton.png
+size: 2048,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+Background
+  rotate: true
+  xy: 405, 97
+  size: 157, 133
+  orig: 157, 133
+  offset: 0, 0
+  index: -1
+armor
+  rotate: true
+  xy: 540, 111
+  size: 143, 142
+  orig: 143, 142
+  offset: 0, 0
+  index: -1
+belt
+  rotate: false
+  xy: 220, 6
+  size: 124, 45
+  orig: 124, 45
+  offset: 0, 0
+  index: -1
+blade
+  rotate: false
+  xy: 154, 53
+  size: 98, 201
+  orig: 98, 201
+  offset: 0, 0
+  index: -1
+cap
+  rotate: true
+  xy: 619, 7
+  size: 102, 133
+  orig: 102, 133
+  offset: 0, 0
+  index: -1
+cloak
+  rotate: false
+  xy: 254, 76
+  size: 149, 178
+  orig: 149, 178
+  offset: 0, 0
+  index: -1
+head
+  rotate: true
+  xy: 754, 5
+  size: 119, 126
+  orig: 119, 126
+  offset: 0, 0
+  index: -1
+helve
+  rotate: false
+  xy: 684, 111
+  size: 60, 143
+  orig: 60, 143
+  offset: 0, 0
+  index: -1
+left_arm
+  rotate: true
+  xy: 346, 7
+  size: 67, 76
+  orig: 68, 77
+  offset: 0, 1
+  index: -1
+left_eye
+  rotate: true
+  xy: 2, 2
+  size: 40, 32
+  orig: 40, 32
+  offset: 0, 0
+  index: -1
+left_foot
+  rotate: true
+  xy: 966, 86
+  size: 82, 52
+  orig: 82, 52
+  offset: 0, 0
+  index: -1
+left_hand
+  rotate: false
+  xy: 870, 154
+  size: 84, 100
+  orig: 84, 100
+  offset: 0, 0
+  index: -1
+left_knee
+  rotate: false
+  xy: 882, 7
+  size: 64, 57
+  orig: 64, 57
+  offset: 0, 0
+  index: -1
+left_shoulder
+  rotate: true
+  xy: 746, 126
+  size: 128, 122
+  orig: 128, 122
+  offset: 0, 0
+  index: -1
+left_thigh
+  rotate: true
+  xy: 956, 170
+  size: 84, 81
+  orig: 84, 81
+  offset: 0, 0
+  index: -1
+right_arm
+  rotate: false
+  xy: 534, 5
+  size: 83, 90
+  orig: 83, 90
+  offset: 0, 0
+  index: -1
+right_eye
+  rotate: false
+  xy: 36, 10
+  size: 42, 32
+  orig: 42, 32
+  offset: 0, 0
+  index: -1
+right_foot
+  rotate: false
+  xy: 154, 2
+  size: 64, 49
+  orig: 64, 49
+  offset: 0, 0
+  index: -1
+right_hand
+  rotate: true
+  xy: 424, 4
+  size: 91, 108
+  orig: 91, 108
+  offset: 0, 0
+  index: -1
+right_knee
+  rotate: false
+  xy: 948, 10
+  size: 65, 54
+  orig: 65, 54
+  offset: 0, 0
+  index: -1
+right_thigh
+  rotate: true
+  xy: 882, 66
+  size: 86, 82
+  orig: 86, 82
+  offset: 0, 0
+  index: -1
+shield
+  rotate: false
+  xy: 2, 44
+  size: 150, 210
+  orig: 150, 210
+  offset: 0, 0
+  index: -1

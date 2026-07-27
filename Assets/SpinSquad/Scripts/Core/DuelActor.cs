@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace SpinSquad.Core
@@ -5,27 +6,29 @@ namespace SpinSquad.Core
     /// <summary>
     /// Ba nhánh combat (sau khi combat đã bắt đầu):
     /// <list type="bullet">
-    /// <item><b>Melee vs melee</b> — va chạm, bật, đổi sát thương đầy đủ (chỉ ally driver).</item>
+    /// <item><b>Melee vs melee</b> — va chạm, đổi sát thương theo chu kỳ; không bật lùi (clinch dính nhau).</item>
     /// <item><b>Mixed clinch</b> — không bounce: melee gõ <b>100% attackDamage</b> theo chu kỳ; melee phía enemy lên ally ranged cũng 100% theo chu kỳ (ally driver). Ranged vẫn bắn theo <c>_rangedInterval</c>.</item>
     /// <item><b>Ranged (xa / trong clinch)</b> — mỗi lượt chỉ lock target nhận <c>attackDamage</c> của shooter.</item>
     /// </list>
     /// </summary>
     public sealed class DuelActor : MonoBehaviour
     {
-        [SerializeField] float moveSpeed = 1.15f;
+        [SerializeField] float moveSpeed = 1.35f;
         [SerializeField] float contactSkinWidth = 0.02f;
         [SerializeField] float minContactRadius = 0.06f;
-        [SerializeField] float knockbackDistance = 0.48f;
-        [SerializeField] float touchReleasePadding = 0.06f;
+        [SerializeField] float touchStrikeInterval = 0.24f;
+        [SerializeField] float locomotionMoveThreshold = 0.001f;
+        [SerializeField] float locomotionHoldSeconds = 0.12f;
 
         [SerializeField] float attackDamage = 10f;
 
         [Tooltip("Chu kỳ nhát melee đầy đủ lên đối phương trong clinch mixed (không bounce).")]
-        [SerializeField] float mixedClinchMeleeStrikeInterval = 0.5f;
+        [SerializeField] float mixedClinchMeleeStrikeInterval = 0.45f;
 
         CombatHealth _health;
         SpriteRenderer _sprite;
         DuelDirector _director;
+        IBattleVisualDriver _battleVisual;
 
         CombatHealth _lockTarget;
 
@@ -34,10 +37,16 @@ namespace SpinSquad.Core
         float _rangedInterval = 0.52f;
         float _rangedCooldown;
 
-        bool _canDealTouchDamage = true;
+        string _rangedBoltTextureResourcesPath;
+
+        float _touchStrikeCooldown;
 
         float _mixedClinchAllyMeleeStrikeCd;
         float _mixedClinchEnemyMeleeOnAllyCd;
+        bool _idleLoopApplied;
+        bool _hasSentMovingState;
+        bool _lastSentMovingState;
+        float _movingLatchUntil;
 
         public CombatHealth Health => _health;
         public float AttackDamage => attackDamage;
@@ -47,14 +56,15 @@ namespace SpinSquad.Core
         {
             _health = GetComponent<CombatHealth>();
             _sprite = GetComponent<SpriteRenderer>();
+            _battleVisual = ResolveBattleVisualDriver();
         }
 
         public void Init(DuelDirector director)
         {
             _director = director;
             _lockTarget = null;
-            _canDealTouchDamage = true;
-            _rangedCooldown = Random.Range(0.04f, 0.2f);
+            _touchStrikeCooldown = 0f;
+            _rangedCooldown = UnityEngine.Random.Range(0.04f, 0.2f);
             ResetMixedClinchStrikeCooldowns(desync: true);
         }
 
@@ -62,13 +72,15 @@ namespace SpinSquad.Core
             float damage,
             bool ranged = false,
             float attackRange = 1.65f,
-            float rangedShotIntervalSeconds = 0.52f)
+            float rangedShotIntervalSeconds = 0.52f,
+            string rangedBoltTextureResourcesPath = null)
         {
             attackDamage = Mathf.Max(0.5f, damage);
             _ranged = ranged;
             _attackRange = Mathf.Max(0.4f, attackRange);
             _rangedInterval = Mathf.Max(0.12f, rangedShotIntervalSeconds);
-            _rangedCooldown = Random.Range(0.04f, 0.2f);
+            _rangedBoltTextureResourcesPath = rangedBoltTextureResourcesPath;
+            _rangedCooldown = UnityEngine.Random.Range(0.04f, 0.2f);
         }
 
         /// <summary>Reset chu kỳ mixed clinch về gốc trước khi áp buff AtkSpeed (tránh nhân chồng khi ConfigureAlly gọi lại).</summary>
@@ -90,12 +102,157 @@ namespace SpinSquad.Core
             return _director.GetOutgoingDamageForAlly(this, attackDamage);
         }
 
+        bool TryPlayLine1AttackAnimation(Action onHit, Action onComplete = null)
+        {
+            if (_health == null)
+                return false;
+            if (!TryGetBattleVisualDriver(out var visual))
+                return false;
+            // Entering attack range: switch immediately from walk to attack visual.
+            UpdateLine1Moving(false);
+            visual.PlayAttack(onHit, onComplete);
+            return true;
+        }
+
+        public void QueueAttackHit(Action onHit, Action onComplete = null)
+        {
+            TryPlayLine1AttackAnimation(onHit, onComplete);
+        }
+
+        void UpdateLine1Facing(float dirX)
+        {
+            if (_health == null)
+                return;
+            if (!TryGetBattleVisualDriver(out var visual))
+                return;
+            visual.UpdateFacing(dirX);
+        }
+
+        void UpdateLine1Moving(bool isMoving)
+        {
+            if (_health == null)
+                return;
+            if (_hasSentMovingState && _lastSentMovingState == isMoving)
+                return;
+            if (!TryGetBattleVisualDriver(out var visual))
+                return;
+            visual.SetMoving(isMoving);
+            _lastSentMovingState = isMoving;
+            _hasSentMovingState = true;
+        }
+
+        void ForceLine1IdleLoop()
+        {
+            if (_health == null)
+                return;
+            if (!TryGetBattleVisualDriver(out var visual))
+                return;
+            visual.ForceIdleLoop();
+        }
+
+        void AddLine1MoveDistance(float worldDistance)
+        {
+            if (_health == null)
+                return;
+            if (!TryGetBattleVisualDriver(out var visual))
+                return;
+            visual.AddMoveDistance(worldDistance);
+        }
+
+        IBattleVisualDriver ResolveBattleVisualDriver()
+        {
+            // Prefer root driver when present; fallback to child visual root/prefab setups.
+            var rootDriver = GetComponent<IBattleVisualDriver>();
+            if (rootDriver != null)
+                return rootDriver;
+            return GetComponentInChildren<IBattleVisualDriver>(true);
+        }
+
+        bool TryGetBattleVisualDriver(out IBattleVisualDriver visual)
+        {
+            if (!IsBattleVisualDriverAlive(_battleVisual))
+                _battleVisual = ResolveBattleVisualDriver();
+
+            if (!IsBattleVisualDriverAlive(_battleVisual))
+            {
+                visual = null;
+                return false;
+            }
+
+            visual = _battleVisual;
+            return true;
+        }
+
+        static bool IsBattleVisualDriverAlive(IBattleVisualDriver driver)
+        {
+            if (driver == null)
+                return false;
+            if (driver is UnityEngine.Object unityObject)
+                return unityObject;
+            return true;
+        }
+
+        bool IsOutgamePhase()
+        {
+            if (_director == null || Health.IsDead)
+                return false;
+            if (!_director.CombatStarted || _director.BattleEnded)
+                return true;
+            return !_director.CombatEngaged;
+        }
+
         public float ContactRadius()
         {
-            if (_sprite == null || _sprite.sprite == null)
+            if (_sprite != null && _sprite.sprite != null)
+            {
+                var e = _sprite.bounds.extents;
+                return Mathf.Min(0.4f, Mathf.Max(e.x, e.y));
+            }
+
+            var renderers = GetComponentsInChildren<SpriteRenderer>();
+            var hasBound = false;
+            var b = new Bounds(transform.position, Vector3.zero);
+            for (var i = 0; i < renderers.Length; i++)
+            {
+                if (renderers[i] == null || renderers[i].sprite == null)
+                    continue;
+                if (!hasBound)
+                {
+                    b = renderers[i].bounds;
+                    hasBound = true;
+                }
+                else
+                    b.Encapsulate(renderers[i].bounds);
+            }
+
+            if (!hasBound)
+            {
+                var meshes = GetComponentsInChildren<MeshRenderer>();
+                if (meshes != null && meshes.Length > 0)
+                {
+                    hasBound = false;
+                    for (var i = 0; i < meshes.Length; i++)
+                    {
+                        if (meshes[i] == null)
+                            continue;
+                        if (!hasBound)
+                        {
+                            b = meshes[i].bounds;
+                            hasBound = true;
+                        }
+                        else
+                            b.Encapsulate(meshes[i].bounds);
+                    }
+                    if (hasBound)
+                    {
+                        var me = b.extents;
+                        return Mathf.Min(0.4f, Mathf.Max(me.x, me.y));
+                    }
+                }
                 return Mathf.Max(0.02f, minContactRadius);
-            var e = _sprite.bounds.extents;
-            return Mathf.Min(0.4f, Mathf.Max(e.x, e.y));
+            }
+            var ext = b.extents;
+            return Mathf.Min(0.4f, Mathf.Max(ext.x, ext.y));
         }
 
         public float TouchDistanceTo(DuelActor other)
@@ -109,27 +266,61 @@ namespace SpinSquad.Core
 
         void Update()
         {
-            if (_director == null || _director.BattleEnded || Health.IsDead)
+            if (_director == null || Health.IsDead)
                 return;
 
-            if (!_director.CombatStarted)
-                return;
+            if (IsOutgamePhase())
+            {
+                UpdateLine1Moving(false);
+                // Apply idle loop once on phase entry to avoid restarting the same clip every frame.
+                if (!_idleLoopApplied)
+                {
+                    ForceLine1IdleLoop();
+                    _idleLoopApplied = true;
+                }
+                // Outgame: idle + quay mặt về phía phe đối diện (ally → phải, enemy → trái).
+                if (_health != null)
+                {
+                    if (_health.Faction == CombatFaction.Ally)
+                        UpdateLine1Facing(1f);
+                    else
+                        UpdateLine1Facing(-1f);
+                }
 
+                return;
+            }
             if (_lockTarget == null || _lockTarget.IsDead)
             {
                 _lockTarget = _health.Faction == CombatFaction.Ally
                     ? _director.FindNearestLivingEnemy(transform.position)
                     : _director.FindNearestLivingAlly(transform.position);
-                _canDealTouchDamage = true;
+                _touchStrikeCooldown = 0f;
                 ResetMixedClinchStrikeCooldowns(desync: true);
             }
 
             if (_lockTarget == null || _lockTarget.IsDead)
+            {
+                UpdateLine1Moving(false);
+                // Keep idle loop visible in-combat when no valid target exists.
+                if (!_idleLoopApplied)
+                {
+                    ForceLine1IdleLoop();
+                    _idleLoopApplied = true;
+                }
                 return;
+            }
 
             var otherActor = _lockTarget.GetComponent<DuelActor>();
             if (otherActor == null)
+            {
+                UpdateLine1Moving(false);
+                if (!_idleLoopApplied)
+                {
+                    ForceLine1IdleLoop();
+                    _idleLoopApplied = true;
+                }
                 return;
+            }
 
             var selfT = transform;
             var self = (Vector2)selfT.position;
@@ -137,18 +328,22 @@ namespace SpinSquad.Core
             var delta = targetPos - self;
             var dist = delta.magnitude;
             var dir = dist > 0.0001f ? delta / dist : Vector2.right;
+            UpdateLine1Facing(dir.x);
             var step = moveSpeed * Time.deltaTime;
             const float holdSlack = 0.03f;
+            var beforeMove = (Vector2)selfT.position;
 
             var touch = TouchDistanceTo(otherActor);
             var mixedPair = _ranged != otherActor.IsRangedCombat;
             var mixedClinch = mixedPair && dist <= touch;
             var pureMeleePair = !_ranged && !otherActor.IsRangedCombat;
 
+            var intentMoving = false;
             if (_ranged && !mixedClinch)
             {
                 if (dist > _attackRange + holdSlack)
                 {
+                    intentMoving = true;
                     var maxStep = Mathf.Min(step, dist - (_attackRange + holdSlack));
                     if (maxStep > 0f)
                     {
@@ -160,10 +355,30 @@ namespace SpinSquad.Core
             }
             else if (!_ranged)
             {
-                self += dir * step;
-                selfT.position = new Vector3(self.x, self.y, selfT.position.z);
-                ClampToArena(selfT);
+                // Avoid dead-zone: if touch < dist <= touch+holdSlack, old logic neither moved nor attacked.
+                // Melee should keep closing gap until true contact.
+                if (dist > touch)
+                {
+                    intentMoving = true;
+                    self += dir * step;
+                    selfT.position = new Vector3(self.x, self.y, selfT.position.z);
+                    ClampToArena(selfT);
+                }
             }
+
+            var moved = Vector2.Distance(beforeMove, (Vector2)selfT.position);
+            if (moved > Mathf.Max(0.00005f, locomotionMoveThreshold))
+                _movingLatchUntil = Time.time + Mathf.Max(0f, locomotionHoldSeconds);
+            var isMovingThisFrame = intentMoving || Time.time < _movingLatchUntil;
+            UpdateLine1Moving(isMovingThisFrame);
+            if (isMovingThisFrame)
+            {
+                _idleLoopApplied = false;
+                AddLine1MoveDistance(moved);
+            }
+
+            if (_touchStrikeCooldown > 0f)
+                _touchStrikeCooldown = Mathf.Max(0f, _touchStrikeCooldown - Time.deltaTime);
 
             delta = (Vector2)_lockTarget.transform.position - (Vector2)selfT.position;
             dist = delta.magnitude;
@@ -177,7 +392,7 @@ namespace SpinSquad.Core
             {
                 if (dist > touch + 0.04f)
                 {
-                    _canDealTouchDamage = true;
+                    _touchStrikeCooldown = 0f;
                     ResetMixedClinchStrikeCooldowns(desync: false);
                 }
 
@@ -188,7 +403,12 @@ namespace SpinSquad.Core
                 }
 
                 if (dist <= touch && mixedClinch)
-                    TryMixedClinchFullDamageStrikes(otherActor);
+                {
+                    // Revert mixed contact to classic collision behavior:
+                    // apply touch exchange once, then bounce both units apart.
+                    TryMeleeVsMeleeAsAlly(otherActor, dist, dir);
+                    return;
+                }
             }
 
             if (_ranged && dist <= _attackRange + holdSlack && !_lockTarget.IsDead)
@@ -206,8 +426,8 @@ namespace SpinSquad.Core
         {
             if (desync)
             {
-                _mixedClinchAllyMeleeStrikeCd = Random.Range(0.02f, 0.12f);
-                _mixedClinchEnemyMeleeOnAllyCd = Random.Range(0.06f, 0.18f);
+                _mixedClinchAllyMeleeStrikeCd = UnityEngine.Random.Range(0.02f, 0.12f);
+                _mixedClinchEnemyMeleeOnAllyCd = UnityEngine.Random.Range(0.06f, 0.18f);
             }
             else
             {
@@ -236,15 +456,20 @@ namespace SpinSquad.Core
 
                 var enemyHealth = _lockTarget.Faction == CombatFaction.Enemy ? _lockTarget : _health;
                 var dmg = AllyOutgoingTo(enemyHealth);
-                enemyHealth.TakeDamage(dmg);
-                if (enemyHealth.IsDead || _director.BattleEnded)
+                QueueAttackHit(() =>
                 {
-                    if (enemyHealth.IsDead)
-                        _director.ReportKillingHit(enemyHealth, dmg);
-                    return;
-                }
+                    if (_director == null || _director.BattleEnded || enemyHealth == null || enemyHealth.IsDead)
+                        return;
+                    enemyHealth.TakeDamage(dmg);
+                    if (enemyHealth.IsDead || _director.BattleEnded)
+                    {
+                        if (enemyHealth.IsDead)
+                            _director.ReportKillingHit(enemyHealth, dmg);
+                        return;
+                    }
 
-                _director.ReportHitExchange(0f, dmg, allyPos, enemyPos);
+                    _director.ReportHitExchange(0f, dmg, allyPos, enemyPos);
+                });
                 return;
             }
 
@@ -255,7 +480,55 @@ namespace SpinSquad.Core
                     return;
 
                 _mixedClinchEnemyMeleeOnAllyCd = period;
+                otherActor.QueueAttackHit(() =>
+                {
+                    if (_director == null || _director.BattleEnded || _health == null || Health.IsDead)
+                        return;
+                    _health.TakeDamage(otherActor.AttackDamage);
+                    if (Health.IsDead || _director.BattleEnded)
+                    {
+                        if (Health.IsDead)
+                            _director.ReportKillingHit(_health, otherActor.AttackDamage);
+                        return;
+                    }
 
+                    _director.ReportHitExchange(otherActor.AttackDamage, 0f, allyPos, enemyPos);
+                });
+            }
+        }
+
+        void TryMeleeVsMeleeAsAlly(DuelActor otherActor, float dist, Vector2 dir)
+        {
+            if (_touchStrikeCooldown > 0f)
+                return;
+
+            _touchStrikeCooldown = Mathf.Max(0.02f, touchStrikeInterval);
+
+            var enemyHealth = _lockTarget;
+            var allyDmg = AllyOutgoingTo(enemyHealth);
+            QueueAttackHit(() =>
+            {
+                if (_director == null || _director.BattleEnded || enemyHealth == null || enemyHealth.IsDead)
+                    return;
+                enemyHealth.TakeDamage(allyDmg);
+                if (enemyHealth.IsDead || _director.BattleEnded)
+                {
+                    if (enemyHealth.IsDead)
+                        _director.ReportKillingHit(enemyHealth, allyDmg);
+                    return;
+                }
+
+                _director.ReportHitExchange(
+                    0f,
+                    allyDmg,
+                    _health.transform.position,
+                    enemyHealth.transform.position);
+            });
+
+            otherActor.QueueAttackHit(() =>
+            {
+                if (_director == null || _director.BattleEnded || _health == null || Health.IsDead)
+                    return;
                 _health.TakeDamage(otherActor.AttackDamage);
                 if (Health.IsDead || _director.BattleEnded)
                 {
@@ -264,43 +537,12 @@ namespace SpinSquad.Core
                     return;
                 }
 
-                _director.ReportHitExchange(otherActor.AttackDamage, 0f, allyPos, enemyPos);
-            }
-        }
-
-        void TryMeleeVsMeleeAsAlly(DuelActor otherActor, float dist, Vector2 dir)
-        {
-            if (!_canDealTouchDamage)
-                return;
-
-            _canDealTouchDamage = false;
-
-            var enemyHealth = _lockTarget;
-            var allyDmg = AllyOutgoingTo(enemyHealth);
-            enemyHealth.TakeDamage(allyDmg);
-            if (enemyHealth.IsDead || _director.BattleEnded)
-            {
-                if (enemyHealth.IsDead)
-                    _director.ReportKillingHit(enemyHealth, allyDmg);
-                ApplyBounce(this, otherActor, dir);
-                return;
-            }
-
-            _health.TakeDamage(otherActor.AttackDamage);
-            if (Health.IsDead || _director.BattleEnded)
-            {
-                if (Health.IsDead)
-                    _director.ReportKillingHit(_health, otherActor.AttackDamage);
-                ApplyBounce(this, otherActor, dir);
-                return;
-            }
-
-            _director.ReportHitExchange(
-                otherActor.AttackDamage,
-                allyDmg,
-                _health.transform.position,
-                enemyHealth.transform.position);
-            ApplyBounce(this, otherActor, dir);
+                _director.ReportHitExchange(
+                    otherActor.AttackDamage,
+                    0f,
+                    _health.transform.position,
+                    enemyHealth != null ? enemyHealth.transform.position : _health.transform.position);
+            });
         }
 
         void TryRangedOneSidedShot()
@@ -312,41 +554,28 @@ namespace SpinSquad.Core
             var outgoing = _health.Faction == CombatFaction.Ally ? AllyOutgoingTo(targetHealth) : attackDamage;
             var fromW = _health.transform.position;
             var toW = targetHealth.transform.position;
-            targetHealth.TakeDamage(outgoing);
-            RangedShotVfx.Spawn(fromW, toW, _health.Faction);
-            if (targetHealth.IsDead || _director.BattleEnded)
+            QueueAttackHit(() =>
             {
-                if (targetHealth.IsDead)
-                    _director.ReportKillingHit(targetHealth, outgoing);
-                return;
-            }
+                if (_director == null || _director.BattleEnded || targetHealth == null || targetHealth.IsDead)
+                    return;
+                targetHealth.TakeDamage(outgoing);
+                if (targetHealth.IsDead || _director.BattleEnded)
+                {
+                    if (targetHealth.IsDead)
+                        _director.ReportKillingHit(targetHealth, outgoing);
+                    return;
+                }
 
-            var allyPos = _health.Faction == CombatFaction.Ally ? _health.transform.position : targetHealth.transform.position;
-            var enemyPos = _health.Faction == CombatFaction.Ally ? targetHealth.transform.position : _health.transform.position;
+                var allyPos = _health.Faction == CombatFaction.Ally ? _health.transform.position : targetHealth.transform.position;
+                var enemyPos = _health.Faction == CombatFaction.Ally ? targetHealth.transform.position : _health.transform.position;
 
-            if (_health.Faction == CombatFaction.Ally)
-                _director.ReportHitExchange(0f, outgoing, allyPos, enemyPos);
-            else
-                _director.ReportHitExchange(outgoing, 0f, allyPos, enemyPos);
-        }
-
-        static void ApplyBounce(DuelActor selfActor, DuelActor otherActor, Vector2 dirFromSelfToOther)
-        {
-            var selfT = selfActor.transform;
-            var otherT = otherActor.transform;
-            var dist = Vector2.Distance(selfT.position, otherT.position);
-            var touch = selfActor.TouchDistanceTo(otherActor);
-            var needGap = touch + selfActor.touchReleasePadding - dist;
-            var perSide = selfActor.knockbackDistance * 0.56f;
-            if (needGap > 0f)
-                perSide = Mathf.Max(perSide, needGap * 0.5f + 0.02f);
-
-            var a = (Vector2)selfT.position - dirFromSelfToOther * perSide;
-            var e = (Vector2)otherT.position + dirFromSelfToOther * perSide;
-            selfT.position = new Vector3(a.x, a.y, selfT.position.z);
-            otherT.position = new Vector3(e.x, e.y, otherT.position.z);
-            ClampToArena(selfT);
-            ClampToArena(otherT);
+                if (_health.Faction == CombatFaction.Ally)
+                    _director.ReportHitExchange(0f, outgoing, allyPos, enemyPos);
+                else
+                    _director.ReportHitExchange(outgoing, 0f, allyPos, enemyPos);
+            });
+            var boltSprite = RangedShotVfx.GetOrCreateBoltSprite(_rangedBoltTextureResourcesPath);
+            RangedShotVfx.Spawn(fromW, toW, _health.Faction, boltSprite);
         }
 
         static void ClampToArena(Transform t)

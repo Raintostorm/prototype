@@ -2,6 +2,7 @@ using System.Text;
 using SpinSquad.Core;
 using SpinSquad.Data;
 using SpinSquad.Meta;
+using SpinSquad.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -18,11 +19,13 @@ namespace SpinSquad.Scenes
         int _lineIndex;
         Rarity _rarityTier;
         bool _hasValidSelection;
-        Text _goldText;
+        MetaResourceHudBar _resourceHud;
         Text _detailText;
         Text _statusText;
         Button _upgradeButton;
         Image _portraitImage;
+        AllyUiAnimatorBridge _portraitAnimatorBridge;
+        bool _playedRevealOnce;
 
         void Start()
         {
@@ -84,13 +87,20 @@ namespace SpinSquad.Scenes
             accentRt.sizeDelta = new Vector2(920f, 12f);
 
             CreateText(canvasGo.transform, "Title", $"Upgrade Detail - L{_lineIndex} {_rarityTier}", 36, new Vector2(0f, -120f), new Vector2(980f, 100f));
-            _goldText = CreateText(canvasGo.transform, "Gold", string.Empty, 28, new Vector2(0f, -210f), new Vector2(940f, 80f));
+            _resourceHud = new MetaResourceHudBar();
+            _resourceHud.Build(
+                canvasGo.transform,
+                _font,
+                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop));
+            MetaDebugGrantPanel.TryAttach(canvasGo.transform, _font, RefreshUi);
 
             var portraitGo = new GameObject("DetailPortrait");
             portraitGo.transform.SetParent(canvasGo.transform, false);
             _portraitImage = portraitGo.AddComponent<Image>();
             _portraitImage.raycastTarget = false;
             _portraitImage.preserveAspect = true;
+            portraitGo.AddComponent<Animator>();
+            _portraitAnimatorBridge = portraitGo.AddComponent<AllyUiAnimatorBridge>();
             var portRt = _portraitImage.rectTransform;
             portRt.anchorMin = portRt.anchorMax = new Vector2(0.5f, 1f);
             portRt.pivot = new Vector2(0.5f, 1f);
@@ -106,26 +116,37 @@ namespace SpinSquad.Scenes
             _statusText = CreateText(canvasGo.transform, "Status", string.Empty, 24, new Vector2(0f, -880f), new Vector2(980f, 120f));
             _statusText.alignment = TextAnchor.MiddleCenter;
 
-            _upgradeButton = CreateButton(canvasGo.transform, "Upgrade", new Vector2(0f, -1050f), new Color(0.2f, 0.58f, 0.34f, 0.95f), OnUpgradeClicked);
-            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1200f), new Color(0.2f, 0.28f, 0.4f, 0.95f), BackToList);
+            _upgradeButton = CreateButton(
+                canvasGo.transform,
+                "Upgrade",
+                new Vector2(0f, -1050f),
+                new Color(0.2f, 0.58f, 0.34f, 0.95f),
+                OnUpgradeClicked);
+            var upgradeImg = _upgradeButton.GetComponent<Image>();
+            HudUiSprites.ApplyIcon(upgradeImg, HudUiSprites.MetaGreenButton, new Color(0.2f, 0.58f, 0.34f, 0.95f));
+            HudUiButtonHelper.SyncLabelVisibility(_upgradeButton.GetComponentInChildren<Text>(), HudUiSprites.MetaGreenButton, "Upgrade");
+            MetaHudTheme.CreateFooterBackButton(canvasGo.transform, _font, BackToList);
         }
 
         void OnUpgradeClicked()
         {
             if (!_hasValidSelection)
                 return;
-            MetaProgressionStore.TryUpgradeLine(_lineIndex, _rarityTier);
+            var upgraded = MetaProgressionStore.TryUpgradeLine(_lineIndex, _rarityTier);
+            if (upgraded)
+                _portraitAnimatorBridge?.PlayUpgrade();
             RefreshUi();
         }
 
         void RefreshUi()
         {
+            _resourceHud?.Refresh();
             if (!_hasValidSelection)
             {
-                _goldText.text = $"Gold: {MetaProgressionStore.Gold}";
                 _detailText.text = "Invalid selection context.\nOpen this page from the Upgrade card list.";
                 _statusText.text = "Status: InvalidSelection";
                 _upgradeButton.interactable = false;
+                _playedRevealOnce = false;
                 if (_portraitImage != null)
                     _portraitImage.gameObject.SetActive(false);
                 return;
@@ -135,7 +156,7 @@ namespace SpinSquad.Scenes
                 _portraitImage.gameObject.SetActive(true);
 
             var snap = MetaProgressionStore.GetLineUpgradeSnapshot(_lineIndex, _rarityTier);
-            var id = AllyLineCatalog.UnitIdForLine(_lineIndex);
+            var id = AllyLineCatalog.UnitIdForLine(_lineIndex, _rarityTier);
             var allyName = id;
             var allyShape = "Unknown";
             UnitDefinition def = null;
@@ -160,11 +181,36 @@ namespace SpinSquad.Scenes
             if (_portraitImage != null)
             {
                 var shape = def != null ? def.BodyShape : UnitBodyShape.Square;
-                _portraitImage.sprite = UnitSpriteFactory.GetSprite(shape);
-                _portraitImage.color = RarityPalette.UnitTint(_rarityTier, UnitTeamKind.Ally);
+                var resolvedPortrait = (Sprite)null;
+                if (def != null)
+                {
+                    var allowCustomVisualAtThisTier = _rarityTier >= def.Rarity;
+                    if (allowCustomVisualAtThisTier)
+                        resolvedPortrait = def.PortraitSprite != null ? def.PortraitSprite : def.CardSprite;
+                }
+                if (resolvedPortrait != null)
+                {
+                    _portraitImage.sprite = resolvedPortrait;
+                    _portraitImage.color = Color.white;
+                }
+                else
+                {
+                    _portraitImage.sprite = UnitSpriteFactory.GetSprite(shape);
+                    _portraitImage.color = RarityPalette.UnitTint(_rarityTier, UnitTeamKind.Ally);
+                }
             }
 
-            _goldText.text = $"Gold: {MetaProgressionStore.Gold}";
+            _portraitAnimatorBridge?.ConfigureForUnit(def, _rarityTier);
+            if (!_playedRevealOnce)
+            {
+                _portraitAnimatorBridge?.PlayReveal();
+                _playedRevealOnce = true;
+            }
+            else
+            {
+                _portraitAnimatorBridge?.PlayIdle();
+            }
+
             _detailText.text = BuildDetailLayout(
                 allyName,
                 id,

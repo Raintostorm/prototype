@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using SpinSquad.Data;
+using SpinSquad.UI;
 using SpinSquad.Meta;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,10 +21,11 @@ namespace SpinSquad.Scenes
         [SerializeField] string treasureSceneName = "Treasure";
 
         Font _font;
-        Text _resourceText;
+        MetaResourceHudBar _resourceHud;
         Text _levelText;
         GameObject _levelSelectRoot;
         readonly Button[] _levelPickButtons = new Button[3];
+        readonly Image[] _bottomNavTabImages = new Image[4];
 
         void Start()
         {
@@ -86,25 +89,29 @@ namespace SpinSquad.Scenes
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, 0);
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, GameBackgroundUiSprites.Home, 0);
             AddHeaderStrip(canvasGo.transform);
 
             CreateTitle(canvasGo.transform);
-            _resourceText = CreateTopLeftResourceText(canvasGo.transform);
-            CreateSectionCaption(canvasGo.transform, "LevelNavCaption", "Level", new Vector2(0f, -208f));
-            _levelText = CreateInfoText(canvasGo.transform, "LevelText", new Vector2(0f, -252f), MetaHudTheme.FontBody);
+            _resourceHud = new MetaResourceHudBar();
+            _resourceHud.Build(
+                canvasGo.transform,
+                _font,
+                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop));
+            MetaDebugGrantPanel.TryAttach(canvasGo.transform, _font, RefreshMetaTexts);
+            BuildMetaStubTopRow(canvasGo.transform);
+            CreateSectionCaption(canvasGo.transform, "LevelNavCaption", "Level", new Vector2(0f, -218f));
+            _levelText = CreateInfoText(canvasGo.transform, "LevelText", new Vector2(0f, -262f), MetaHudTheme.FontBody);
 
-            var navLeft = CreateButton(canvasGo.transform, "<", new Vector2(-210f, -332f), MetaHudTheme.ButtonNav, DecreaseLevel);
+            var navLeft = CreateButton(canvasGo.transform, "<", new Vector2(-210f, -342f), MetaHudTheme.ButtonNav, DecreaseLevel);
             navLeft.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.NavArrowSize;
-            var navRight = CreateButton(canvasGo.transform, ">", new Vector2(210f, -332f), MetaHudTheme.ButtonNav, IncreaseLevel);
+            ApplyNavButtonSprite(navLeft, HudUiSprites.MetaPrev);
+            var navRight = CreateButton(canvasGo.transform, ">", new Vector2(210f, -342f), MetaHudTheme.ButtonNav, IncreaseLevel);
             navRight.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.NavArrowSize;
+            ApplyNavButtonSprite(navRight, HudUiSprites.MetaNext);
 
-            CreateButton(canvasGo.transform, "Play", new Vector2(0f, -32f), MetaHudTheme.ButtonPlay, OpenLevelSelect)
-                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
-            CreateButton(canvasGo.transform, "Upgrade", new Vector2(0f, -152f), MetaHudTheme.ButtonUpgrade, LoadUpgrade)
-                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
-            CreateButton(canvasGo.transform, "Treasure", new Vector2(0f, -272f), MetaHudTheme.ButtonTreasure, LoadTreasure)
-                .GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
+            BuildPlayHeroButton(canvasGo.transform);
+            BuildBottomNav(canvasGo.transform);
             _levelSelectRoot = BuildLevelSelectOverlay(canvasGo.transform);
             _levelSelectRoot.SetActive(false);
             RefreshMetaTexts();
@@ -161,6 +168,102 @@ namespace SpinSquad.Scenes
             titleRt.pivot = new Vector2(0.5f, 1f);
             titleRt.anchoredPosition = new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f);
             titleRt.sizeDelta = new Vector2(900f, 72f);
+        }
+
+        void BuildPlayHeroButton(Transform parent)
+        {
+            var btn = CreateHudCtaButton(
+                parent,
+                "Play",
+                Vector2.zero,
+                MetaHudTheme.ButtonPlay,
+                HudUiSprites.MetaBattleButton,
+                OpenLevelSelect);
+            var rt = btn.GetComponent<RectTransform>();
+            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
+            rt.pivot = new Vector2(0.5f, 0f);
+            rt.sizeDelta = MetaHudTheme.CtaHeroSize;
+            rt.anchoredPosition = new Vector2(0f, MetaHudTheme.BottomNavHeight + 28f);
+        }
+
+        void BuildBottomNav(Transform parent)
+        {
+            var lane = MetaHudTheme.CreateBottomLanePanel(
+                parent, MetaHudTheme.BottomNavHeight, MetaHudTheme.BottomLaneBand, "BottomNav");
+            var row = MetaHudTheme.CreateHorizontalRowParent(lane, 12f);
+
+            var home = CreateBottomNavTab(row, "Home", HudUiSprites.CombatHomeInBattle, OnBottomNavHome);
+            var upgrade = CreateBottomNavTab(row, "Upgrade", HudUiSprites.MetaGreenButton, LoadUpgrade);
+            var battle = CreateBottomNavTab(row, "Battle", HudUiSprites.MetaBattleButton, OpenLevelSelect);
+            var treasure = CreateBottomNavTab(row, "Treasure", HudUiSprites.MetaChest, LoadTreasure);
+
+            var rts = new List<RectTransform> { home, upgrade, battle, treasure };
+            var fracs = new List<float> { 0.22f, 0.26f, 0.26f, 0.26f };
+            MetaHudTheme.LayoutHorizontalRow(row, MetaHudTheme.ActionRowGap, rts, fracs);
+            SetBottomNavActive(0);
+        }
+
+        void OnBottomNavHome()
+        {
+            RefreshMetaTexts();
+        }
+
+        RectTransform CreateBottomNavTab(
+            RectTransform row,
+            string label,
+            Sprite icon,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            var btnGo = new GameObject(label + "NavTab");
+            var image = btnGo.AddComponent<Image>();
+            image.sprite = MetaHudTheme.WhiteSprite();
+            image.color = MetaHudTheme.BottomNavTabIdle;
+            HudUiSprites.ApplyIcon(image, icon, MetaHudTheme.BottomNavTabIdle);
+            image.preserveAspect = true;
+
+            var btn = btnGo.AddComponent<Button>();
+            btn.targetGraphic = image;
+            btn.onClick.AddListener(onClick);
+
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(btnGo.transform, false);
+            var text = labelGo.AddComponent<Text>();
+            text.font = _font;
+            text.text = label;
+            text.fontSize = MetaHudTheme.FontHint;
+            text.alignment = TextAnchor.LowerCenter;
+            text.color = MetaHudTheme.TextSecondary;
+            text.raycastTarget = false;
+            var labelRt = text.rectTransform;
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = new Vector2(4f, 4f);
+            labelRt.offsetMax = new Vector2(-4f, -8f);
+            HudUiButtonHelper.SyncLabelVisibility(text, icon, label);
+
+            var idx = label switch
+            {
+                "Home" => 0,
+                "Upgrade" => 1,
+                "Battle" => 2,
+                "Treasure" => 3,
+                _ => -1
+            };
+            if (idx >= 0)
+                _bottomNavTabImages[idx] = image;
+
+            return btnGo.GetComponent<RectTransform>();
+        }
+
+        void SetBottomNavActive(int index)
+        {
+            for (var i = 0; i < _bottomNavTabImages.Length; i++)
+            {
+                var img = _bottomNavTabImages[i];
+                if (img == null)
+                    continue;
+                img.color = i == index ? MetaHudTheme.BottomNavTabActive : MetaHudTheme.BottomNavTabIdle;
+            }
         }
 
         void OpenLevelSelect()
@@ -262,26 +365,28 @@ namespace SpinSquad.Scenes
                 var g = MetaProgressionStore.LevelCompleteGoldReward(captureLv);
                 var k = MetaProgressionStore.LevelCompleteTreasureKeyReward();
                 var label = $"Level {captureLv}\n+{g} Gold   +{k} Keys";
-                var btn = CreateButton(
+                var btn = CreateHudCtaButton(
                     content.transform,
                     label,
                     new Vector2(0f, 190f - i * 150f),
                     RarityPalette.UpgradeCardBackground((Rarity)i),
+                    HudUiSprites.CombatBlueButton,
                     () => PickLevelAndPlay(captureLv));
-                btn.GetComponent<RectTransform>().sizeDelta = new Vector2(580f, 112f);
+                btn.GetComponent<RectTransform>().sizeDelta = new Vector2(520f, MetaHudTheme.CtaSize.y);
                 var t = btn.GetComponentInChildren<Text>();
                 if (t != null)
                     t.fontSize = MetaHudTheme.FontOverlayRow;
                 _levelPickButtons[i] = btn;
             }
 
-            var closeBtn = CreateButton(
+            var closeBtn = CreateHudCtaButton(
                 content.transform,
-                "Đóng",
+                "",
                 new Vector2(0f, -320f),
                 MetaHudTheme.ButtonMuted,
+                HudUiSprites.CombatBack,
                 CloseLevelSelect);
-            closeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(320f, 80f);
+            closeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(120f, 120f);
 
             return root;
         }
@@ -334,8 +439,7 @@ namespace SpinSquad.Scenes
 
         void RefreshMetaTexts()
         {
-            if (_resourceText != null)
-                _resourceText.text = $"Gold: {MetaProgressionStore.Gold}   Key: {MetaProgressionStore.TreasureKeys}";
+            _resourceHud?.Refresh();
             if (_levelText != null)
                 _levelText.text = $"Level: {MetaProgressionStore.SelectedLevel}/{MetaProgressionStore.UnlockedLevel} (selected/unlocked)";
         }
@@ -358,23 +462,96 @@ namespace SpinSquad.Scenes
             return text;
         }
 
-        Text CreateTopLeftResourceText(Transform parent)
+        static void ApplyNavButtonSprite(Button btn, Sprite sprite)
         {
-            var go = new GameObject("ResourcesText");
-            go.transform.SetParent(parent, false);
-            var text = go.AddComponent<Text>();
+            if (btn == null)
+                return;
+            var image = btn.GetComponent<Image>();
+            HudUiSprites.ApplyIcon(image, sprite, MetaHudTheme.ButtonNav);
+            var label = btn.GetComponentInChildren<Text>();
+            HudUiButtonHelper.SyncLabelVisibility(label, sprite, null);
+        }
+
+        void BuildMetaStubTopRow(Transform canvasParent)
+        {
+            var w = MetaHudTheme.IconBarButtonSize.x;
+            var h = MetaHudTheme.IconBarButtonSize.y;
+            var gap = MetaHudTheme.IconBarGap;
+            var insetX = MetaHudTheme.SafeEdgeX + MetaHudTheme.TopIconBarExtraInsetX;
+            var px = -insetX - w * 0.5f;
+            var rowTop = MetaHudTheme.HomepageTitleBottomFromTop + MetaHudTheme.HomepageStubRowGapBelowTitle;
+            var py = -rowTop - h * 0.5f;
+
+            CreateMetaTopBarButton(canvasParent, "", "home_settings_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("settings"), HudUiSprites.MetaSetting);
+            px -= w + gap;
+            CreateMetaTopBarButton(canvasParent, "", "home_mail_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("mail"), HudUiSprites.MetaMail);
+            px -= w + gap;
+            CreateMetaTopBarButton(canvasParent, "", "home_shop_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("shop"), HudUiSprites.CombatShop);
+        }
+
+        void CreateMetaTopBarButton(
+            Transform canvasParent,
+            string label,
+            string hierarchyName,
+            Vector2 anchoredTopRight,
+            UnityEngine.Events.UnityAction onClick,
+            Sprite iconSprite = null)
+        {
+            var btnGo = new GameObject(hierarchyName);
+            btnGo.transform.SetParent(canvasParent, false);
+
+            var image = btnGo.AddComponent<Image>();
+            HudUiSprites.ApplyIcon(image, iconSprite, MetaHudTheme.ButtonIconBar);
+
+            var btn = btnGo.AddComponent<Button>();
+            btn.targetGraphic = image;
+            var colors = btn.colors;
+            colors.highlightedColor = MetaHudTheme.ButtonIconBar * 1.12f;
+            colors.pressedColor = MetaHudTheme.ButtonIconBar * 0.82f;
+            btn.colors = colors;
+            btn.onClick.AddListener(onClick);
+
+            var labelGo = new GameObject("Label");
+            labelGo.transform.SetParent(btnGo.transform, false);
+            var text = labelGo.AddComponent<Text>();
             text.font = _font;
-            text.fontSize = MetaHudTheme.FontResource;
-            text.alignment = TextAnchor.UpperLeft;
+            text.text = label;
+            text.fontSize = MetaHudTheme.FontHint;
+            text.alignment = TextAnchor.MiddleCenter;
             text.color = MetaHudTheme.TextPrimary;
             text.raycastTarget = false;
-            var rt = text.rectTransform;
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop);
-            rt.sizeDelta = new Vector2(640f, 96f);
-            return text;
+            labelGo.SetActive(iconSprite == null || !string.IsNullOrEmpty(label));
+
+            var labelRt = text.rectTransform;
+            labelRt.anchorMin = Vector2.zero;
+            labelRt.anchorMax = Vector2.one;
+            labelRt.offsetMin = Vector2.zero;
+            labelRt.offsetMax = Vector2.zero;
+
+            var btnRt = btnGo.GetComponent<RectTransform>();
+            btnRt.anchorMin = btnRt.anchorMax = new Vector2(1f, 1f);
+            btnRt.pivot = new Vector2(1f, 1f);
+            btnRt.anchoredPosition = anchoredTopRight;
+            btnRt.sizeDelta = MetaHudTheme.IconBarButtonSize;
+        }
+
+        Button CreateHudCtaButton(
+            Transform parent,
+            string label,
+            Vector2 anchoredPos,
+            Color fallbackBg,
+            Sprite hudSprite,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            var btn = CreateButton(parent, label, anchoredPos, fallbackBg, onClick);
+            var rt = btn.GetComponent<RectTransform>();
+            rt.sizeDelta = MetaHudTheme.CtaSize;
+            var image = btn.GetComponent<Image>();
+            HudUiSprites.ApplyIcon(image, hudSprite, fallbackBg);
+            image.preserveAspect = true;
+            var text = btn.GetComponentInChildren<Text>();
+            HudUiButtonHelper.SyncLabelVisibility(text, hudSprite, label);
+            return btn;
         }
 
         Button CreateButton(Transform parent, string label, Vector2 anchoredPos, Color bg, UnityEngine.Events.UnityAction onClick)

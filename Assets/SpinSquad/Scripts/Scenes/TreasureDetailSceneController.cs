@@ -1,5 +1,6 @@
 using SpinSquad.Data;
 using SpinSquad.Meta;
+using SpinSquad.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -14,6 +15,9 @@ namespace SpinSquad.Scenes
         Font _font;
         TreasureDefinition _def;
         bool _hasValidSelection;
+        MetaResourceHudBar _resourceHud;
+        Image _portraitImage;
+        Image _typeBadgeImage;
         Text _detailText;
         Text _statusText;
 
@@ -70,32 +74,89 @@ namespace SpinSquad.Scenes
             scaler.referenceResolution = new Vector2(1080, 1920);
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            CreateText(canvasGo.transform, "Title", $"Treasure Detail", 40, new Vector2(0f, -120f), new Vector2(980f, 100f));
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, GameBackgroundUiSprites.Treasure, 0);
+            MetaHudTheme.AddHeaderStrip(canvasGo.transform);
+
+            CreateText(canvasGo.transform, "Title", "Treasure Detail", 40, new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f), new Vector2(980f, 72f));
+            _resourceHud = new MetaResourceHudBar();
+            _resourceHud.Build(
+                canvasGo.transform,
+                _font,
+                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop));
+            MetaDebugGrantPanel.TryAttach(canvasGo.transform, _font, RefreshUi);
+
+            var tableGo = new GameObject("TreasureDetailTable");
+            tableGo.transform.SetParent(canvasGo.transform, false);
+            var tableRt = tableGo.AddComponent<RectTransform>();
+            tableRt.anchorMin = tableRt.anchorMax = new Vector2(0.5f, 1f);
+            tableRt.pivot = new Vector2(0.5f, 1f);
+            tableRt.anchoredPosition = new Vector2(0f, -200f);
+            tableRt.sizeDelta = new Vector2(1000f, 1180f);
+            var tableImg = tableGo.AddComponent<Image>();
+            TreasureUiSprites.ApplyIcon(tableImg, TreasureUiSprites.TableBackground, new Color(0.1f, 0.12f, 0.18f, 0.92f));
+            tableImg.raycastTarget = false;
+
             if (_hasValidSelection)
             {
-                var accentGo = new GameObject("RarityAccent");
-                accentGo.transform.SetParent(canvasGo.transform, false);
-                var accentImg = accentGo.AddComponent<Image>();
-                accentImg.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-                accentImg.color = RarityPalette.UnitTint(_def.Rarity, UnitTeamKind.Ally);
-                accentImg.raycastTarget = false;
-                var accentRt = accentImg.rectTransform;
-                accentRt.anchorMin = accentRt.anchorMax = new Vector2(0.5f, 1f);
-                accentRt.pivot = new Vector2(0.5f, 1f);
-                accentRt.anchoredPosition = new Vector2(0f, -168f);
-                accentRt.sizeDelta = new Vector2(920f, 12f);
+                var portraitGo = new GameObject("Portrait");
+                portraitGo.transform.SetParent(tableGo.transform, false);
+                _portraitImage = portraitGo.AddComponent<Image>();
+                _portraitImage.raycastTarget = false;
+                var portraitRt = _portraitImage.rectTransform;
+                portraitRt.anchorMin = portraitRt.anchorMax = new Vector2(0.5f, 1f);
+                portraitRt.pivot = new Vector2(0.5f, 1f);
+                portraitRt.anchoredPosition = new Vector2(0f, -72f);
+                portraitRt.sizeDelta = new Vector2(240f, 240f);
+                TreasureUiSprites.ApplyIcon(
+                    _portraitImage,
+                    TreasureUiSprites.GetIconForDefinition(_def),
+                    RarityPalette.UnitTint(_def.Rarity, UnitTeamKind.Ally));
+
+                var typeGo = new GameObject("EffectTypeBadge");
+                typeGo.transform.SetParent(portraitGo.transform, false);
+                _typeBadgeImage = typeGo.AddComponent<Image>();
+                _typeBadgeImage.raycastTarget = false;
+                var typeRt = _typeBadgeImage.rectTransform;
+                typeRt.anchorMin = typeRt.anchorMax = new Vector2(1f, 0f);
+                typeRt.pivot = new Vector2(1f, 0f);
+                typeRt.anchoredPosition = new Vector2(10f, -10f);
+                typeRt.sizeDelta = new Vector2(64f, 64f);
+                TreasureUiSprites.ApplyIcon(
+                    _typeBadgeImage,
+                    TreasureUiSprites.EffectTypeIcon(_def.EffectKind),
+                    new Color(0.35f, 0.42f, 0.55f, 0.95f));
             }
 
-            _detailText = CreateText(canvasGo.transform, "Detail", string.Empty, 26, new Vector2(0f, -470f), new Vector2(980f, 520f));
+            _detailText = CreateText(tableGo.transform, "Detail", string.Empty, 26, new Vector2(0f, -340f), new Vector2(900f, 560f));
             _detailText.supportRichText = true;
             _detailText.alignment = TextAnchor.UpperLeft;
-            _statusText = CreateText(canvasGo.transform, "Status", string.Empty, 24, new Vector2(0f, -900f), new Vector2(980f, 130f));
-            CreateText(canvasGo.transform, "Hint", "Upgrade treasure level by rolling duplicates in Treasure scene.", 22, new Vector2(0f, -1020f), new Vector2(980f, 100f));
-            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1180f), new Color(0.2f, 0.28f, 0.4f, 0.95f), BackToList);
+            _statusText = CreateText(tableGo.transform, "Status", string.Empty, 24, new Vector2(0f, -920f), new Vector2(900f, 120f));
+            CreateText(
+                tableGo.transform,
+                "Hint",
+                "Lên cấp bằng cách roll trùng treasure ở màn Treasure.",
+                22,
+                new Vector2(0f, -1040f),
+                new Vector2(900f, 80f));
+            MetaHudTheme.CreateFooterBackButton(canvasGo.transform, _font, BackToList);
         }
 
         void RefreshUi()
         {
+            _resourceHud?.Refresh();
+            if (_hasValidSelection && _portraitImage != null)
+            {
+                TreasureUiSprites.ApplyIcon(
+                    _portraitImage,
+                    TreasureUiSprites.GetIconForDefinition(_def),
+                    RarityPalette.UnitTint(_def.Rarity, UnitTeamKind.Ally));
+                if (_typeBadgeImage != null)
+                    TreasureUiSprites.ApplyIcon(
+                        _typeBadgeImage,
+                        TreasureUiSprites.EffectTypeIcon(_def.EffectKind),
+                        new Color(0.35f, 0.42f, 0.55f, 0.95f));
+            }
+
             if (!_hasValidSelection)
             {
                 _detailText.text = "Invalid selection context.\nOpen this page from the Treasure card list.";

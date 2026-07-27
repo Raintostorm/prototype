@@ -7,6 +7,20 @@ namespace SpinSquad.Data
         static Color Soften(Color c, float toWhite = 0.08f) =>
             Color.Lerp(c, Color.white, toWhite);
 
+        /// <summary>Vòng nền dưới chân — bốn tông theo phẩm chất: Trắng (Common), Lam (Rare), Tím (Epic), Vàng (Legendary). Mythic tạm dùng vàng.</summary>
+        public static Color FootGroundRingColor(Rarity rarity)
+        {
+            return rarity switch
+            {
+                Rarity.Common => new Color(0.96f, 0.97f, 1f, 0.58f),
+                Rarity.Rare => new Color(0.18f, 0.52f, 0.98f, 0.58f),
+                Rarity.Epic => new Color(0.62f, 0.28f, 0.95f, 0.58f),
+                Rarity.Legendary => new Color(1f, 0.78f, 0.18f, 0.62f),
+                Rarity.Mythic => new Color(1f, 0.78f, 0.18f, 0.62f),
+                _ => new Color(0.96f, 0.97f, 1f, 0.58f)
+            };
+        }
+
         /// <summary>Nền thẻ / panel meta upgrade — cùng tông <see cref="UnitTint"/> nhưng tối hơn cho chữ trắng.</summary>
         public static Color UpgradeCardBackground(Rarity rarity)
         {

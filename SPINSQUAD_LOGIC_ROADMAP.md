@@ -15,7 +15,7 @@ Tham chiếu nội bộ: `SPINSQUAD_TONG_HOP.md` (tóm tắt game 111% + link st
 | **Cấu trúc** | Nội dung game dưới `Assets/SpinSquad/` — folder `Scripts/Gacha`, `Scripts/Data`, … đã **đặt tên sẵn**, phần lớn **chưa có logic** |
 | **Scene** | `Assets/SpinSquad/Scenes/SampleScene.unity` — có prototype **đấu 1v1** (học tập), **không** phải loop gacha |
 | **Code gameplay** | `Scripts/Core/`: `CombatHealth`, `DuelActor`, `DuelDirector` — hai phe chạy vào nhau, thắng/thua theo faction |
-| **Code khác** | `Scripts/UI/UiButtonDemo.cs` — demo nút log; `Scripts/Editor/GameViewIPhoneXOnPlay.cs` — preset Game view mobile |
+| **Code khác** | `Scripts/Editor/GameViewIPhoneXOnPlay.cs` — preset Game view mobile; `Scripts/Editor/OpenSampleSceneMenu.cs` — mở nhanh SampleScene / DuelTestArena |
 | **Gacha / Guardian / merge / chapter** | **Chưa có** implementation tương ứng |
 
 **Kết luận:** Repo là **nền Unity 6 + khung thư mục + prototype combat tối giản**. Để “giống logic” game tham chiếu, cần xây **các hệ thống** dưới đây theo từng giai đoạn.

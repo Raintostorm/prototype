@@ -55,5 +55,9 @@ crashlytics-build.properties
 .DS_Store
 **/.DS_Store
 
+# Editor backup files (e.g. Aseprite/GIMP)
+*~
+**/*~
+
 # Unity / tooling generated (local only)
 GeneratedAssets/

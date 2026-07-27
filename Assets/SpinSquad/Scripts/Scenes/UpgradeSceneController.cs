@@ -1,6 +1,7 @@
 using SpinSquad.Core;
 using SpinSquad.Data;
 using SpinSquad.Meta;
+using SpinSquad.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -15,9 +16,10 @@ namespace SpinSquad.Scenes
         [SerializeField] string detailSceneName = "UpgradeDetail";
         Font _font;
         UnitCatalog _unitCatalog;
-        Text _goldText;
+        MetaResourceHudBar _resourceHud;
         Text[] _cardNameTexts = new Text[MetaProgressionStore.AllyLineCount * MetaProgressionStore.UpgradableRarityCount];
         Image[] _cardPortraits = new Image[MetaProgressionStore.AllyLineCount * MetaProgressionStore.UpgradableRarityCount];
+        readonly GameObject[] _cardLockOverlays = new GameObject[MetaProgressionStore.AllyLineCount * MetaProgressionStore.UpgradableRarityCount];
         Text _hintText;
 
         void Start()
@@ -30,7 +32,7 @@ namespace SpinSquad.Scenes
 
         void OnEnable()
         {
-            if (_goldText != null)
+            if (_resourceHud != null)
                 RefreshUi();
         }
 
@@ -63,8 +65,8 @@ namespace SpinSquad.Scenes
             scaler.matchWidthOrHeight = 0.5f;
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, 0);
-            AddHeaderStrip(canvasGo.transform);
+            MetaHudTheme.AddFullScreenBackdrop(canvasGo.transform, GameBackgroundUiSprites.Inventory, 0);
+            MetaHudTheme.AddHeaderStrip(canvasGo.transform);
 
             CreateText(
                 canvasGo.transform,
@@ -74,7 +76,12 @@ namespace SpinSquad.Scenes
                 MetaHudTheme.TextPrimary,
                 new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f),
                 new Vector2(900f, 72f));
-            _goldText = CreateTopLeftGoldText(canvasGo.transform);
+            _resourceHud = new MetaResourceHudBar();
+            _resourceHud.Build(
+                canvasGo.transform,
+                _font,
+                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop));
+            MetaDebugGrantPanel.TryAttach(canvasGo.transform, _font, RefreshUi);
 
             for (var line = 0; line < MetaProgressionStore.AllyLineCount; line++)
             {
@@ -117,21 +124,23 @@ namespace SpinSquad.Scenes
                     CreateUpgradeCard(
                         canvasGo.transform,
                         idx,
+                        lineCapture,
                         new Vector2(x, y),
                         rarity,
                         () => OpenDetail(lineCapture, rarityCapture));
                 }
             }
 
+            var footerTop = MetaHudTheme.GetSafeContentBottomInset(false);
             _hintText = CreateText(
                 canvasGo.transform,
                 "Hint",
                 "Tap a card for stats and upgrade.",
                 MetaHudTheme.FontHint,
                 MetaHudTheme.TextSecondary,
-                new Vector2(0f, -1120f),
+                new Vector2(0f, -(footerTop + 100f)),
                 new Vector2(980f, 90f));
-            CreateButton(canvasGo.transform, "Back", new Vector2(0f, -1268f), MetaHudTheme.ButtonBack, BackToHomepage);
+            MetaHudTheme.CreateFooterBackButton(canvasGo.transform, _font, BackToHomepage);
         }
 
         static float ColumnCenterX(int line)
@@ -144,23 +153,6 @@ namespace SpinSquad.Scenes
 
         static float RowCenterY(int step) =>
             MetaHudTheme.UpgradeCardTopY - step * MetaHudTheme.UpgradeCardRowSpacing - MetaHudTheme.UpgradeCardSize.y * 0.5f;
-
-        static void AddHeaderStrip(Transform parent)
-        {
-            var go = new GameObject("HeaderStrip");
-            go.transform.SetParent(parent, false);
-            go.transform.SetSiblingIndex(1);
-            var img = go.AddComponent<Image>();
-            img.sprite = MetaHudTheme.WhiteSprite();
-            img.color = MetaHudTheme.HeaderBand;
-            img.raycastTarget = false;
-            var rt = img.rectTransform;
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(1f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(0f, 168f);
-        }
 
         void OpenDetail(int line, Rarity rarity)
         {
@@ -182,22 +174,48 @@ namespace SpinSquad.Scenes
 
         void RefreshUi()
         {
-            _goldText.text = $"Gold: {MetaProgressionStore.Gold}";
+            _resourceHud?.Refresh();
             for (var line = 0; line < MetaProgressionStore.AllyLineCount; line++)
             {
                 for (var step = 0; step < MetaProgressionStore.UpgradableRarityCount; step++)
                 {
                     var rarity = (Rarity)step;
                     var idx = line * MetaProgressionStore.UpgradableRarityCount + step;
-                    var id = AllyLineCatalog.UnitIdForLine(line);
+                    var id = AllyLineCatalog.UnitIdForLine(line, rarity);
                     var allyName = ResolveAllyDisplayName(id);
                     _cardNameTexts[idx].text = allyName;
                     var shape = UnitBodyShape.Square;
+                    Sprite resolvedCardSprite = null;
                     if (_unitCatalog != null && _unitCatalog.TryGet(id, out var def))
+                    {
                         shape = def.BodyShape;
+                        var allowCustomVisualAtThisTier = rarity >= def.Rarity;
+                        if (allowCustomVisualAtThisTier)
+                            resolvedCardSprite = def.CardSprite != null ? def.CardSprite : def.PortraitSprite;
+                    }
                     var port = _cardPortraits[idx];
-                    port.sprite = UnitSpriteFactory.GetSprite(shape);
-                    port.color = RarityPalette.UnitTint(rarity, UnitTeamKind.Ally);
+                    if (resolvedCardSprite != null)
+                    {
+                        port.sprite = resolvedCardSprite;
+                        port.color = Color.white;
+                    }
+                    else if (HudUiSprites.LineIcon(line) != null)
+                    {
+                        port.sprite = HudUiSprites.LineIcon(line);
+                        port.color = Color.white;
+                    }
+                    else
+                    {
+                        port.sprite = UnitSpriteFactory.GetSprite(shape);
+                        port.color = RarityPalette.UnitTint(rarity, UnitTeamKind.Ally);
+                    }
+
+                    var lockOverlay = _cardLockOverlays[idx];
+                    if (lockOverlay != null)
+                    {
+                        var status = MetaProgressionStore.GetLineUpgradeStatus(line, rarity);
+                        lockOverlay.SetActive(status == LineUpgradeStatus.NeedGold);
+                    }
                 }
             }
         }
@@ -249,32 +267,30 @@ namespace SpinSquad.Scenes
             return t;
         }
 
-        Text CreateTopLeftGoldText(Transform parent)
-        {
-            var go = new GameObject("Gold");
-            go.transform.SetParent(parent, false);
-            var t = go.AddComponent<Text>();
-            t.font = _font;
-            t.fontSize = MetaHudTheme.FontResource;
-            t.alignment = TextAnchor.UpperLeft;
-            t.color = MetaHudTheme.TextPrimary;
-            t.raycastTarget = false;
-            var rt = t.rectTransform;
-            rt.anchorMin = new Vector2(0f, 1f);
-            rt.anchorMax = new Vector2(0f, 1f);
-            rt.pivot = new Vector2(0f, 1f);
-            rt.anchoredPosition = new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop);
-            rt.sizeDelta = new Vector2(640f, 96f);
-            return t;
-        }
-
-        void CreateUpgradeCard(Transform parent, int idx, Vector2 pos, Rarity rarity, UnityEngine.Events.UnityAction onClick)
+        void CreateUpgradeCard(
+            Transform parent,
+            int idx,
+            int line,
+            Vector2 pos,
+            Rarity rarity,
+            UnityEngine.Events.UnityAction onClick)
         {
             var btnGo = new GameObject($"UpgradeCard_{idx}");
             btnGo.transform.SetParent(parent, false);
             var bg = btnGo.AddComponent<Image>();
-            bg.sprite = MetaHudTheme.WhiteSprite();
-            bg.color = RarityPalette.UpgradeCardBackground(rarity);
+            var lineCard = HudUiSprites.LineCardSprite(line);
+            if (lineCard != null)
+            {
+                bg.sprite = lineCard;
+                bg.color = Color.Lerp(Color.white, RarityPalette.UpgradeCardBackground(rarity), 0.35f);
+                bg.preserveAspect = true;
+            }
+            else
+            {
+                bg.sprite = MetaHudTheme.WhiteSprite();
+                bg.color = RarityPalette.UpgradeCardBackground(rarity);
+            }
+
             MetaHudTheme.ApplyImageOutline(bg);
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = bg;
@@ -311,6 +327,19 @@ namespace SpinSquad.Scenes
             nrt.anchorMax = new Vector2(0.94f, 0.32f);
             nrt.offsetMin = Vector2.zero;
             nrt.offsetMax = Vector2.zero;
+
+            var lockGo = new GameObject("LockOverlay");
+            lockGo.transform.SetParent(btnGo.transform, false);
+            var lockImg = lockGo.AddComponent<Image>();
+            HudUiSprites.ApplyIcon(lockImg, HudUiSprites.MetaLock, new Color(0.2f, 0.2f, 0.24f, 0.85f));
+            lockImg.raycastTarget = false;
+            var lockRt = lockImg.rectTransform;
+            lockRt.anchorMin = new Vector2(0.72f, 0.72f);
+            lockRt.anchorMax = new Vector2(0.96f, 0.96f);
+            lockRt.offsetMin = Vector2.zero;
+            lockRt.offsetMax = Vector2.zero;
+            lockGo.SetActive(false);
+            _cardLockOverlays[idx] = lockGo;
 
             _cardPortraits[idx] = portImg;
             _cardNameTexts[idx] = nameText;

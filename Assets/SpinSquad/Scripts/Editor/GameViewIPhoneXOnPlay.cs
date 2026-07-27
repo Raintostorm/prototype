@@ -54,7 +54,7 @@ namespace SpinSquad.EditorTools
 
         static bool TryApplyViaPlayModeWindow()
         {
-            var t = typeof(Editor).Assembly.GetType("UnityEditor.PlayModeWindow");
+            var t = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.PlayModeWindow");
             if (t == null)
                 return false;
 
@@ -74,7 +74,7 @@ namespace SpinSquad.EditorTools
 
         static void ApplyViaLegacyGameViewReflection()
         {
-            var gameViewType = typeof(Editor).Assembly.GetType("UnityEditor.GameView");
+            var gameViewType = typeof(UnityEditor.Editor).Assembly.GetType("UnityEditor.GameView");
             if (gameViewType == null)
             {
                 Debug.LogWarning("[SpinSquad] UnityEditor.GameView type not found.");
