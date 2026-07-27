@@ -4,6 +4,7 @@ using SpinSquad.Data;
 using SpinSquad.UI;
 using SpinSquad.Gacha;
 using SpinSquad.Meta;
+using SpinSquad.Presentation;
 using SpinSquad.Scenes;
 using Spine;
 using Spine.Unity;
@@ -1416,11 +1417,17 @@ namespace SpinSquad.Core
 
             var allyPop = Vector3.Lerp(mid, allyWorldPos, 0.4f) + Vector3.up * 0.12f;
             var enemyPop = Vector3.Lerp(mid, enemyWorldPos, 0.4f) + Vector3.up * 0.12f;
+            var totalDamage = Mathf.Max(damageAllyReceived, damageEnemyReceived);
+            var strong = totalDamage >= 18f;
+            var impactScale = strong ? 0.54f : 0.38f;
+            CombatImpactVfx.SpawnSlash(mid + Vector3.up * 0.06f, new Color(1f, 0.86f, 0.34f, 0.95f), impactScale);
+            CombatImpactVfx.SpawnSpark(mid + Vector3.up * 0.08f, Color.white, impactScale * 0.72f);
+            PlayCombatImpactFeedback(totalDamage, strong);
 
             if (damageAllyReceived > 0.0001f)
-                FloatingDamagePopup.SpawnAt(allyPop, damageAllyReceived, new Color(0.55f, 0.88f, 1f, 1f));
+                FloatingDamagePopup.SpawnAt(allyPop, damageAllyReceived, new Color(0.55f, 0.88f, 1f, 1f), strong);
             if (damageEnemyReceived > 0.0001f)
-                FloatingDamagePopup.SpawnAt(enemyPop, damageEnemyReceived, new Color(1f, 0.4f, 0.32f, 1f));
+                FloatingDamagePopup.SpawnAt(enemyPop, damageEnemyReceived, new Color(1f, 0.4f, 0.32f, 1f), strong);
         }
 
         /// <summary>Nhát làm đối thủ chết — trước đây không qua <see cref="ReportHitExchange"/>.</summary>
@@ -1431,10 +1438,26 @@ namespace SpinSquad.Core
 
             var pos = victim.transform.position + Vector3.up * 0.12f;
             var enemyHit = victim.Faction == CombatFaction.Enemy;
+            CombatImpactVfx.SpawnSlash(pos, new Color(1f, 0.92f, 0.48f, 1f), 0.68f);
+            CombatImpactVfx.SpawnSpark(pos, new Color(1f, 1f, 1f, 0.96f), 0.52f);
+            PlayCombatImpactFeedback(damageDealt, true);
             FloatingDamagePopup.SpawnAt(
                 pos,
                 damageDealt,
-                enemyHit ? new Color(1f, 0.4f, 0.32f, 1f) : new Color(0.55f, 0.88f, 1f, 1f));
+                enemyHit ? new Color(1f, 0.4f, 0.32f, 1f) : new Color(0.55f, 0.88f, 1f, 1f),
+                true);
+        }
+
+        static void PlayCombatImpactFeedback(float damage, bool strong)
+        {
+            var cam = Camera.main;
+            if (cam == null)
+                return;
+            var feedback = BattleCameraFeedback25D.Active ?? BattleCameraFeedback25D.Ensure(cam);
+            if (feedback == null)
+                return;
+            var amplitude = Mathf.Clamp(0.012f + damage * 0.00075f, 0.014f, strong ? 0.05f : 0.032f);
+            feedback.PlayImpact(amplitude, strong);
         }
 
         void TeardownFighters()
