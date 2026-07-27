@@ -98,7 +98,7 @@ namespace SpinSquad.Scenes
             _resourceHud.Build(
                 safeRoot,
                 _font,
-                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop));
+                new Vector2(MetaHudTheme.SafeEdgeX, -MetaHudTheme.SafeEdgeYTop - 6f));
             BuildMetaStubTopRow(safeRoot);
             BuildCampaignSelector(safeRoot);
             BuildPlayHeroButton(safeRoot);
@@ -135,7 +135,7 @@ namespace SpinSquad.Scenes
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(0f, 300f);
+            rt.sizeDelta = new Vector2(0f, 282f);
         }
 
         void BuildCampaignSelector(Transform parent)
@@ -149,10 +149,10 @@ namespace SpinSquad.Scenes
             card.raycastTarget = false;
 
             var cardRt = card.rectTransform;
-            cardRt.anchorMin = cardRt.anchorMax = new Vector2(0.5f, 0.56f);
+            cardRt.anchorMin = cardRt.anchorMax = new Vector2(0.5f, 0.51f);
             cardRt.pivot = new Vector2(0.5f, 0.5f);
-            cardRt.anchoredPosition = new Vector2(0f, 36f);
-            cardRt.sizeDelta = new Vector2(790f, 270f);
+            cardRt.anchoredPosition = new Vector2(0f, 10f);
+            cardRt.sizeDelta = new Vector2(700f, 230f);
 
             var captionGo = new GameObject("CampaignCaption");
             captionGo.transform.SetParent(cardGo.transform, false);
@@ -174,13 +174,13 @@ namespace SpinSquad.Scenes
             levelRt.anchorMin = levelRt.anchorMax = new Vector2(0.5f, 0.5f);
             levelRt.pivot = new Vector2(0.5f, 0.5f);
             levelRt.anchoredPosition = new Vector2(0f, -2f);
-            levelRt.sizeDelta = new Vector2(470f, 118f);
+            levelRt.sizeDelta = new Vector2(410f, 108f);
 
-            var navLeft = CreatePolishedIconButton(cardGo.transform, "Prev", MetaHomeUiSprites.PrevIcon, new Vector2(-314f, -4f), DecreaseLevel);
-            navLeft.GetComponent<RectTransform>().sizeDelta = new Vector2(104f, 104f);
+            var navLeft = CreatePolishedIconButton(cardGo.transform, "Prev", MetaHomeUiSprites.PrevIcon, new Vector2(-270f, -4f), DecreaseLevel);
+            navLeft.GetComponent<RectTransform>().sizeDelta = new Vector2(88f, 88f);
 
-            var navRight = CreatePolishedIconButton(cardGo.transform, "Next", MetaHomeUiSprites.NextIcon, new Vector2(314f, -4f), IncreaseLevel);
-            navRight.GetComponent<RectTransform>().sizeDelta = new Vector2(104f, 104f);
+            var navRight = CreatePolishedIconButton(cardGo.transform, "Next", MetaHomeUiSprites.NextIcon, new Vector2(270f, -4f), IncreaseLevel);
+            navRight.GetComponent<RectTransform>().sizeDelta = new Vector2(88f, 88f);
         }
 
         void CreateTitle(Transform parent)
@@ -197,8 +197,8 @@ namespace SpinSquad.Scenes
             var titleRt = title.rectTransform;
             titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 1f);
             titleRt.pivot = new Vector2(0.5f, 1f);
-            titleRt.anchoredPosition = new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 8f);
-            titleRt.sizeDelta = new Vector2(900f, 72f);
+            titleRt.anchoredPosition = new Vector2(106f, -MetaHudTheme.SafeEdgeYTop - 10f);
+            titleRt.sizeDelta = new Vector2(520f, 72f);
         }
 
         void BuildPlayHeroButton(Transform parent)
@@ -221,7 +221,7 @@ namespace SpinSquad.Scenes
         {
             var lane = MetaHudTheme.CreateBottomLanePanel(
                 parent, MetaHudTheme.BottomNavHeight, MetaHudTheme.BottomLaneBand, "BottomNav");
-            var row = MetaHudTheme.CreateHorizontalRowParent(lane, 12f);
+            var row = MetaHudTheme.CreateHorizontalRowParent(lane, 14f);
 
             var home = CreateBottomNavTab(row, "Home", MetaHomeUiSprites.HomeIcon, OnBottomNavHome);
             var upgrade = CreateBottomNavTab(row, "Upgrade", MetaHomeUiSprites.UpgradeIcon, LoadUpgrade);
@@ -234,7 +234,7 @@ namespace SpinSquad.Scenes
 
             var rts = new List<RectTransform> { home, upgrade, treasure, settings };
             var fracs = new List<float> { 0.25f, 0.25f, 0.25f, 0.25f };
-            MetaHudTheme.LayoutHorizontalRow(row, MetaHudTheme.ActionRowGap, rts, fracs);
+            MetaHudTheme.LayoutHorizontalRow(row, 14f, rts, fracs);
             SetBottomNavActive(0);
         }
 
@@ -529,7 +529,7 @@ namespace SpinSquad.Scenes
             var gap = MetaHudTheme.IconBarGap;
             var insetX = MetaHudTheme.SafeEdgeX + MetaHudTheme.TopIconBarExtraInsetX;
             var px = -insetX - w * 0.5f;
-            var rowTop = MetaHudTheme.HomepageTitleBottomFromTop + 38f;
+            var rowTop = MetaHudTheme.SafeEdgeYTop + 108f;
             var py = -rowTop - h * 0.5f;
 
             CreateMetaTopBarButton(canvasParent, "Mail", "home_mail_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("mail"), MetaHomeUiSprites.MailIcon);

@@ -8,10 +8,10 @@ namespace SpinSquad.UI
     /// <summary>Gold / Keys / Energy bar for the meta screens.</summary>
     public sealed class MetaResourceHudBar
     {
-        const float RowWidth = 300f;
-        const float RowHeight = 64f;
-        const float RowGap = 10f;
-        const float ValueLeftPad = 86f;
+        const float RowWidth = 270f;
+        const float RowHeight = 54f;
+        const float RowGap = 8f;
+        const float ValueLeftPad = 76f;
 
         Text _goldValue;
         Text _keysValue;
@@ -82,14 +82,14 @@ namespace SpinSquad.UI
             var iconRt = icon.rectTransform;
             iconRt.anchorMin = iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(12f, 0f);
-            iconRt.sizeDelta = new Vector2(56f, 56f);
+            iconRt.anchoredPosition = new Vector2(10f, 0f);
+            iconRt.sizeDelta = new Vector2(46f, 46f);
 
             var valueGo = new GameObject("Value");
             valueGo.transform.SetParent(rowGo.transform, false);
             var value = valueGo.AddComponent<Text>();
             value.font = font;
-            value.fontSize = 26;
+            value.fontSize = 23;
             value.fontStyle = FontStyle.Bold;
             value.alignment = TextAnchor.MiddleRight;
             value.color = MetaHudTheme.TextPrimary;
