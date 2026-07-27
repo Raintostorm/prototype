@@ -1623,6 +1623,7 @@ namespace SpinSquad.Core
                 return;
 
             _waveCompletePending = true;
+            SetBanner("Wave clear! Đang tổng kết...");
             _waveCompleteRoutine = StartCoroutine(WaveCompleteAfterDelayRoutine());
         }
 
@@ -1634,7 +1635,7 @@ namespace SpinSquad.Core
 
             for (var n = steps; n >= 1; n--)
             {
-                SetBanner(n.ToString());
+                SetBanner($"Wave clear! {n}");
                 yield return new WaitForSeconds(dt);
             }
 
