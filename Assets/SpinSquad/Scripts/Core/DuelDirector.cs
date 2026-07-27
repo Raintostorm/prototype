@@ -3168,6 +3168,13 @@ namespace SpinSquad.Core
         {
             _alliesBagExpanded = !_alliesBagExpanded;
             RefreshAlliesBagVisibility();
+
+            if (!SandboxCanMutateUnits)
+                return;
+
+            SetBanner(_alliesBagExpanded
+                ? "Túi allies đã mở — chạm ally dự bị để đưa lên ô trống."
+                : "Túi allies đã đóng. Sắp xếp đội hình rồi bấm Bắt đầu.");
         }
 
         void RefreshAlliesBagVisibility()

@@ -13,13 +13,13 @@ namespace SpinSquad.Core
         public const int CellCount = Rows * Cols;
         public const float Cell = 0.62f;
 
-        /// <summary>Bench 2×8 dưới lưới ally (cùng bề ngang 2 cột).</summary>
-        public const int InventoryRows = 8;
-        public const int InventoryCols = 2;
+        /// <summary>Compact 4×4 allies bag shown below the battle grids.</summary>
+        public const int InventoryRows = 4;
+        public const int InventoryCols = 4;
         public const int InventorySlotCount = InventoryRows * InventoryCols;
-        public const float InventoryCell = Cell * 0.5f;
+        public const float InventoryCell = Cell * 0.42f;
 
-        const float InventoryGapBelowAllyGrid = 0.14f;
+        const float InventoryGapBelowAllyGrid = 0.16f;
 
         static Transform _allyGridLinesRoot;
         static Transform _enemyGridLinesRoot;
@@ -68,10 +68,12 @@ namespace SpinSquad.Core
 
         static void ConfigureInventoryOrigin()
         {
-            var allyW = Cols * Cell;
             var invW = InventoryCols * InventoryCell;
-            var invX = AllyOrigin.x + (allyW - invW) * 0.5f;
-            var invY = AllyOrigin.y - Rows * Cell - InventoryGapBelowAllyGrid - InventoryRows * InventoryCell;
+            var invH = InventoryRows * InventoryCell;
+            var boardMinX = AllyOrigin.x;
+            var boardMaxX = EnemyOrigin.x + Cols * Cell;
+            var invX = (boardMinX + boardMaxX - invW) * 0.5f;
+            var invY = AllyOrigin.y - invH - InventoryGapBelowAllyGrid;
             InventoryOrigin = new Vector3(invX, invY, 0f);
         }
 
@@ -201,7 +203,7 @@ namespace SpinSquad.Core
                 _enemyGridLinesRoot.gameObject.SetActive(false);
         }
 
-        /// <summary>Ẩn/hiện khung inventory 4×4 (prep).</summary>
+        /// <summary>Hide/show compact allies bag section during prep.</summary>
         public static void SetInventorySectionVisible(bool visible)
         {
             if (_inventoryPrepMarkersRoot != null)
@@ -224,12 +226,12 @@ namespace SpinSquad.Core
             var sr = rootGo.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = 2;
-            sr.color = new Color(0.08f, 0.1f, 0.16f, 0.72f);
+            sr.color = new Color(0.06f, 0.08f, 0.13f, 0.78f);
             if (sprite != null)
             {
                 var bounds = sprite.bounds.size;
-                var scaleX = size.x / Mathf.Max(0.01f, bounds.x) * 1.04f;
-                var scaleY = size.y / Mathf.Max(0.01f, bounds.y) * 1.04f;
+                var scaleX = size.x / Mathf.Max(0.01f, bounds.x) * 1.1f;
+                var scaleY = size.y / Mathf.Max(0.01f, bounds.y) * 1.1f;
                 rootGo.transform.localScale = new Vector3(scaleX, scaleY, 1f);
             }
         }
@@ -310,12 +312,12 @@ namespace SpinSquad.Core
                 var sr = slot.AddComponent<SpriteRenderer>();
                 sr.sprite = sprite;
                 sr.sortingOrder = 3;
-                sr.color = new Color(1f, 1f, 1f, 0.82f);
+                sr.color = new Color(0.88f, 0.95f, 1f, 0.74f);
 
                 if (sprite != null)
                 {
                     var bounds = sprite.bounds.size;
-                    var target = InventoryCell * 1.02f;
+                    var target = InventoryCell * 0.98f;
                     var scale = target / Mathf.Max(bounds.x, bounds.y);
                     slot.transform.localScale = Vector3.one * scale;
                 }
