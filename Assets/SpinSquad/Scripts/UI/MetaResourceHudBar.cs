@@ -5,13 +5,13 @@ using UnityEngine.UI;
 
 namespace SpinSquad.UI
 {
-    /// <summary>Gold / Keys / Energy — chỉ dùng bar (icon đã nằm trong art bar); số là Text runtime.</summary>
+    /// <summary>Gold / Keys / Energy bar for the meta screens.</summary>
     public sealed class MetaResourceHudBar
     {
         const float RowWidth = 300f;
-        const float RowHeight = 76f;
-        const float RowGap = 8f;
-        const float ValueLeftPad = 118f;
+        const float RowHeight = 64f;
+        const float RowGap = 10f;
+        const float ValueLeftPad = 86f;
 
         Text _goldValue;
         Text _keysValue;
@@ -28,18 +28,18 @@ namespace SpinSquad.UI
             rootRt.anchoredPosition = topLeftAnchoredPosition;
             rootRt.sizeDelta = new Vector2(RowWidth, RowHeight * 3f + RowGap * 2f);
 
-            _goldValue = CreateRow(rootGo.transform, font, "GoldRow", MetaResourceUiSprites.CoinBar, 0f);
+            _goldValue = CreateRow(rootGo.transform, font, "GoldRow", MetaHomeUiSprites.CoinIcon, 0f);
             _keysValue = CreateRow(
                 rootGo.transform,
                 font,
                 "KeysRow",
-                MetaResourceUiSprites.KeyBar,
+                MetaHomeUiSprites.KeyIcon,
                 -(RowHeight + RowGap));
             _energyValue = CreateRow(
                 rootGo.transform,
                 font,
                 "EnergyRow",
-                MetaResourceUiSprites.EnergyBar,
+                MetaHomeUiSprites.EnergyIcon,
                 -(RowHeight + RowGap) * 2f);
         }
 
@@ -47,7 +47,7 @@ namespace SpinSquad.UI
             Transform parent,
             Font font,
             string rowName,
-            Sprite barSprite,
+            Sprite iconSprite,
             float yOffset)
         {
             var rowGo = new GameObject(rowName);
@@ -62,7 +62,9 @@ namespace SpinSquad.UI
             var barGo = new GameObject("Bar");
             barGo.transform.SetParent(rowGo.transform, false);
             var barImg = barGo.AddComponent<Image>();
-            MetaResourceUiSprites.ApplyIcon(barImg, barSprite, MetaHudTheme.ButtonIconBar);
+            barImg.sprite = MetaHomeUiSprites.ResourcePill;
+            barImg.type = Image.Type.Sliced;
+            barImg.color = Color.white;
             barImg.raycastTarget = false;
             var barRt = barImg.rectTransform;
             barRt.anchorMin = Vector2.zero;
@@ -70,11 +72,25 @@ namespace SpinSquad.UI
             barRt.offsetMin = Vector2.zero;
             barRt.offsetMax = Vector2.zero;
 
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(rowGo.transform, false);
+            var icon = iconGo.AddComponent<Image>();
+            icon.sprite = iconSprite;
+            icon.color = Color.white;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var iconRt = icon.rectTransform;
+            iconRt.anchorMin = iconRt.anchorMax = new Vector2(0f, 0.5f);
+            iconRt.pivot = new Vector2(0f, 0.5f);
+            iconRt.anchoredPosition = new Vector2(12f, 0f);
+            iconRt.sizeDelta = new Vector2(56f, 56f);
+
             var valueGo = new GameObject("Value");
             valueGo.transform.SetParent(rowGo.transform, false);
             var value = valueGo.AddComponent<Text>();
             value.font = font;
-            value.fontSize = MetaHudTheme.FontResource;
+            value.fontSize = 26;
+            value.fontStyle = FontStyle.Bold;
             value.alignment = TextAnchor.MiddleRight;
             value.color = MetaHudTheme.TextPrimary;
             value.raycastTarget = false;

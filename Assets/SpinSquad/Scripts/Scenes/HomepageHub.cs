@@ -143,16 +143,16 @@ namespace SpinSquad.Scenes
             var cardGo = new GameObject("CampaignSelector");
             cardGo.transform.SetParent(parent, false);
             var card = cardGo.AddComponent<Image>();
-            card.sprite = MetaHudTheme.WhiteSprite();
-            card.color = new Color(0.035f, 0.075f, 0.14f, 0.78f);
+            card.sprite = MetaHomeUiSprites.CampaignPanel;
+            card.color = Color.white;
+            card.type = Image.Type.Sliced;
             card.raycastTarget = false;
-            MetaHudTheme.ApplyImageOutline(card);
 
             var cardRt = card.rectTransform;
             cardRt.anchorMin = cardRt.anchorMax = new Vector2(0.5f, 0.56f);
             cardRt.pivot = new Vector2(0.5f, 0.5f);
             cardRt.anchoredPosition = new Vector2(0f, 36f);
-            cardRt.sizeDelta = new Vector2(760f, 250f);
+            cardRt.sizeDelta = new Vector2(790f, 270f);
 
             var captionGo = new GameObject("CampaignCaption");
             captionGo.transform.SetParent(cardGo.transform, false);
@@ -173,16 +173,14 @@ namespace SpinSquad.Scenes
             var levelRt = _levelText.rectTransform;
             levelRt.anchorMin = levelRt.anchorMax = new Vector2(0.5f, 0.5f);
             levelRt.pivot = new Vector2(0.5f, 0.5f);
-            levelRt.anchoredPosition = new Vector2(0f, -8f);
-            levelRt.sizeDelta = new Vector2(430f, 112f);
+            levelRt.anchoredPosition = new Vector2(0f, -2f);
+            levelRt.sizeDelta = new Vector2(470f, 118f);
 
-            var navLeft = CreateButton(cardGo.transform, "<", new Vector2(-292f, -8f), MetaHudTheme.ButtonNav, DecreaseLevel);
+            var navLeft = CreatePolishedIconButton(cardGo.transform, "Prev", MetaHomeUiSprites.PrevIcon, new Vector2(-314f, -4f), DecreaseLevel);
             navLeft.GetComponent<RectTransform>().sizeDelta = new Vector2(104f, 104f);
-            ApplyNavButtonSprite(navLeft, HudUiSprites.MetaPrev);
 
-            var navRight = CreateButton(cardGo.transform, ">", new Vector2(292f, -8f), MetaHudTheme.ButtonNav, IncreaseLevel);
+            var navRight = CreatePolishedIconButton(cardGo.transform, "Next", MetaHomeUiSprites.NextIcon, new Vector2(314f, -4f), IncreaseLevel);
             navRight.GetComponent<RectTransform>().sizeDelta = new Vector2(104f, 104f);
-            ApplyNavButtonSprite(navRight, HudUiSprites.MetaNext);
         }
 
         void CreateTitle(Transform parent)
@@ -210,7 +208,7 @@ namespace SpinSquad.Scenes
                 "BATTLE",
                 Vector2.zero,
                 MetaHudTheme.ButtonPlay,
-                HudUiSprites.MetaBattleButton,
+                MetaHomeUiSprites.SwordIcon,
                 OpenLevelSelect);
             var rt = btn.GetComponent<RectTransform>();
             rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0f);
@@ -225,13 +223,13 @@ namespace SpinSquad.Scenes
                 parent, MetaHudTheme.BottomNavHeight, MetaHudTheme.BottomLaneBand, "BottomNav");
             var row = MetaHudTheme.CreateHorizontalRowParent(lane, 12f);
 
-            var home = CreateBottomNavTab(row, "Home", HudUiSprites.CombatHomeInBattle, OnBottomNavHome);
-            var upgrade = CreateBottomNavTab(row, "Upgrade", HudUiSprites.MetaGreenButton, LoadUpgrade);
-            var treasure = CreateBottomNavTab(row, "Treasure", HudUiSprites.MetaChest, LoadTreasure);
+            var home = CreateBottomNavTab(row, "Home", MetaHomeUiSprites.HomeIcon, OnBottomNavHome);
+            var upgrade = CreateBottomNavTab(row, "Upgrade", MetaHomeUiSprites.UpgradeIcon, LoadUpgrade);
+            var treasure = CreateBottomNavTab(row, "Treasure", MetaHomeUiSprites.TreasureIcon, LoadTreasure);
             var settings = CreateBottomNavTab(
                 row,
                 "Settings",
-                HudUiSprites.MetaSetting,
+                MetaHomeUiSprites.SettingsIcon,
                 () => StubHudFeedback.LogComingSoon("settings"));
 
             var rts = new List<RectTransform> { home, upgrade, treasure, settings };
@@ -253,8 +251,9 @@ namespace SpinSquad.Scenes
         {
             var btnGo = new GameObject(label + "NavTab");
             var background = btnGo.AddComponent<Image>();
-            background.sprite = MetaHudTheme.WhiteSprite();
-            background.color = MetaHudTheme.BottomNavTabIdle;
+            background.sprite = MetaHomeUiSprites.NavTab;
+            background.type = Image.Type.Sliced;
+            background.color = Color.white;
 
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = background;
@@ -269,8 +268,8 @@ namespace SpinSquad.Scenes
             var iconRt = iconImage.rectTransform;
             iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 1f);
             iconRt.pivot = new Vector2(0.5f, 1f);
-            iconRt.anchoredPosition = new Vector2(0f, -10f);
-            iconRt.sizeDelta = new Vector2(62f, 62f);
+            iconRt.anchoredPosition = new Vector2(0f, -8f);
+            iconRt.sizeDelta = new Vector2(66f, 66f);
 
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(btnGo.transform, false);
@@ -285,7 +284,7 @@ namespace SpinSquad.Scenes
             labelRt.anchorMin = new Vector2(0f, 0f);
             labelRt.anchorMax = new Vector2(1f, 0f);
             labelRt.pivot = new Vector2(0.5f, 0f);
-            labelRt.anchoredPosition = new Vector2(0f, 7f);
+            labelRt.anchoredPosition = new Vector2(0f, 8f);
             labelRt.sizeDelta = new Vector2(0f, 34f);
 
             var idx = label switch
@@ -309,7 +308,8 @@ namespace SpinSquad.Scenes
                 var img = _bottomNavTabImages[i];
                 if (img == null)
                     continue;
-                img.color = i == index ? MetaHudTheme.BottomNavTabActive : MetaHudTheme.BottomNavTabIdle;
+                img.sprite = i == index ? MetaHomeUiSprites.NavTabActive : MetaHomeUiSprites.NavTab;
+                img.color = Color.white;
             }
         }
 
@@ -349,13 +349,24 @@ namespace SpinSquad.Scenes
                 btn.interactable = unlocked;
                 var img = btn.GetComponent<Image>();
                 if (img != null)
-                    img.color = unlocked
-                        ? RarityPalette.UpgradeCardBackground((Rarity)i)
-                        : new Color(0.28f, 0.28f, 0.32f, 0.92f);
+                {
+                    img.sprite = unlocked ? LevelButtonSprite(i) : MetaHomeUiSprites.DarkButton;
+                    img.color = Color.white;
+                }
                 var txt = btn.GetComponentInChildren<Text>();
                 if (txt != null)
                     txt.color = unlocked ? Color.white : new Color(0.62f, 0.62f, 0.65f, 1f);
             }
+        }
+
+        static Sprite LevelButtonSprite(int index)
+        {
+            return index switch
+            {
+                1 => MetaHomeUiSprites.GreenButton,
+                2 => MetaHomeUiSprites.GoldButton,
+                _ => MetaHomeUiSprites.BlueButton
+            };
         }
 
         GameObject BuildLevelSelectOverlay(Transform canvasTransform)
@@ -417,7 +428,7 @@ namespace SpinSquad.Scenes
                     label,
                     new Vector2(0f, 190f - i * 150f),
                     RarityPalette.UpgradeCardBackground((Rarity)i),
-                    HudUiSprites.CombatBlueButton,
+                    MetaHomeUiSprites.SwordIcon,
                     () => PickLevelAndPlay(captureLv));
                 btn.GetComponent<RectTransform>().sizeDelta = new Vector2(520f, MetaHudTheme.CtaSize.y);
                 var t = btn.GetComponentInChildren<Text>();
@@ -431,7 +442,7 @@ namespace SpinSquad.Scenes
                 "",
                 new Vector2(0f, -320f),
                 MetaHudTheme.ButtonMuted,
-                HudUiSprites.CombatBack,
+                MetaHomeUiSprites.CloseIcon,
                 CloseLevelSelect);
             closeBtn.GetComponent<RectTransform>().sizeDelta = new Vector2(120f, 120f);
 
@@ -511,16 +522,6 @@ namespace SpinSquad.Scenes
             return text;
         }
 
-        static void ApplyNavButtonSprite(Button btn, Sprite sprite)
-        {
-            if (btn == null)
-                return;
-            var image = btn.GetComponent<Image>();
-            HudUiSprites.ApplyIcon(image, sprite, MetaHudTheme.ButtonNav);
-            var label = btn.GetComponentInChildren<Text>();
-            HudUiButtonHelper.SyncLabelVisibility(label, sprite, null);
-        }
-
         void BuildMetaStubTopRow(Transform canvasParent)
         {
             var w = MetaHudTheme.IconBarButtonSize.x;
@@ -531,9 +532,9 @@ namespace SpinSquad.Scenes
             var rowTop = MetaHudTheme.HomepageTitleBottomFromTop + 38f;
             var py = -rowTop - h * 0.5f;
 
-            CreateMetaTopBarButton(canvasParent, "", "home_mail_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("mail"), HudUiSprites.MetaMail);
+            CreateMetaTopBarButton(canvasParent, "Mail", "home_mail_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("mail"), MetaHomeUiSprites.MailIcon);
             px -= w + gap;
-            CreateMetaTopBarButton(canvasParent, "", "home_shop_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("shop"), HudUiSprites.CombatShop);
+            CreateMetaTopBarButton(canvasParent, "Shop", "home_shop_stub", new Vector2(px, py), () => StubHudFeedback.LogComingSoon("shop"), MetaHomeUiSprites.ShopIcon);
         }
 
         void CreateMetaTopBarButton(
@@ -548,7 +549,9 @@ namespace SpinSquad.Scenes
             btnGo.transform.SetParent(canvasParent, false);
 
             var image = btnGo.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(image, iconSprite, MetaHudTheme.ButtonIconBar);
+            image.sprite = MetaHomeUiSprites.SmallIconButton;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
 
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = image;
@@ -557,6 +560,18 @@ namespace SpinSquad.Scenes
             colors.pressedColor = MetaHudTheme.ButtonIconBar * 0.82f;
             btn.colors = colors;
             btn.onClick.AddListener(onClick);
+
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(btnGo.transform, false);
+            var icon = iconGo.AddComponent<Image>();
+            HudUiSprites.ApplyIcon(icon, iconSprite, Color.white);
+            icon.raycastTarget = false;
+            icon.preserveAspect = true;
+            var iconRt = icon.rectTransform;
+            iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = Vector2.zero;
+            iconRt.sizeDelta = new Vector2(58f, 58f);
 
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(btnGo.transform, false);
@@ -567,7 +582,7 @@ namespace SpinSquad.Scenes
             text.alignment = TextAnchor.MiddleCenter;
             text.color = MetaHudTheme.TextPrimary;
             text.raycastTarget = false;
-            labelGo.SetActive(iconSprite == null || !string.IsNullOrEmpty(label));
+            labelGo.SetActive(iconSprite == null && !string.IsNullOrEmpty(label));
 
             var labelRt = text.rectTransform;
             labelRt.anchorMin = Vector2.zero;
@@ -594,10 +609,73 @@ namespace SpinSquad.Scenes
             var rt = btn.GetComponent<RectTransform>();
             rt.sizeDelta = MetaHudTheme.CtaSize;
             var image = btn.GetComponent<Image>();
-            HudUiSprites.ApplyIcon(image, hudSprite, fallbackBg);
-            image.preserveAspect = true;
+            image.sprite = string.Equals(label, "BATTLE", System.StringComparison.Ordinal)
+                ? MetaHomeUiSprites.CtaButton
+                : MetaHomeUiSprites.BlueButton;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
+
+            if (hudSprite != null)
+            {
+                var iconGo = new GameObject("Icon");
+                iconGo.transform.SetParent(btn.transform, false);
+                var icon = iconGo.AddComponent<Image>();
+                HudUiSprites.ApplyIcon(icon, hudSprite, Color.white);
+                icon.raycastTarget = false;
+                icon.preserveAspect = true;
+                var iconRt = icon.rectTransform;
+                iconRt.anchorMin = iconRt.anchorMax = string.IsNullOrEmpty(label)
+                    ? new Vector2(0.5f, 0.5f)
+                    : new Vector2(0f, 0.5f);
+                iconRt.pivot = string.IsNullOrEmpty(label)
+                    ? new Vector2(0.5f, 0.5f)
+                    : new Vector2(0f, 0.5f);
+                iconRt.anchoredPosition = string.IsNullOrEmpty(label)
+                    ? Vector2.zero
+                    : new Vector2(48f, 0f);
+                iconRt.sizeDelta = string.IsNullOrEmpty(label) ? new Vector2(62f, 62f) : new Vector2(72f, 72f);
+            }
+
             var text = btn.GetComponentInChildren<Text>();
-            HudUiButtonHelper.SyncLabelVisibility(text, hudSprite, label);
+            HudUiButtonHelper.SyncLabelVisibility(text, null, label);
+            if (text != null)
+            {
+                text.fontStyle = FontStyle.Bold;
+                var labelRt = text.rectTransform;
+                labelRt.offsetMin = string.IsNullOrEmpty(label) ? Vector2.zero : new Vector2(112f, 0f);
+                labelRt.offsetMax = string.IsNullOrEmpty(label) ? Vector2.zero : new Vector2(-28f, 0f);
+            }
+            return btn;
+        }
+
+        Button CreatePolishedIconButton(
+            Transform parent,
+            string hierarchyName,
+            Sprite iconSprite,
+            Vector2 anchoredPos,
+            UnityEngine.Events.UnityAction onClick)
+        {
+            var btn = CreateButton(parent, "", anchoredPos, MetaHudTheme.ButtonNav, onClick);
+            btn.gameObject.name = hierarchyName + "Button";
+            var image = btn.GetComponent<Image>();
+            image.sprite = MetaHomeUiSprites.SmallIconButton;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
+            var label = btn.GetComponentInChildren<Text>();
+            if (label != null)
+                label.gameObject.SetActive(false);
+
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(btn.transform, false);
+            var icon = iconGo.AddComponent<Image>();
+            HudUiSprites.ApplyIcon(icon, iconSprite, Color.white);
+            icon.raycastTarget = false;
+            icon.preserveAspect = true;
+            var iconRt = icon.rectTransform;
+            iconRt.anchorMin = iconRt.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRt.pivot = new Vector2(0.5f, 0.5f);
+            iconRt.anchoredPosition = Vector2.zero;
+            iconRt.sizeDelta = new Vector2(64f, 64f);
             return btn;
         }
 

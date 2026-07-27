@@ -55,7 +55,10 @@ namespace SpinSquad.EditorTools
                 Require(safe.GetComponent<SafeAreaFitter>() != null, "SafeAreaFitter is missing.");
 
                 var campaign = Find(safe, "CampaignSelector");
-                Require(campaign.GetComponent<Image>() != null, "Campaign selector card is missing.");
+                var campaignImage = campaign.GetComponent<Image>();
+                Require(campaignImage != null, "Campaign selector card is missing.");
+                Require(campaignImage.sprite == MetaHomeUiSprites.CampaignPanel,
+                    "Campaign selector should use the polished procedural panel sprite.");
 
                 var bottomNav = Find(safe, "BottomNav").GetComponent<RectTransform>();
                 Require(bottomNav != null, "Bottom navigation RectTransform is missing.");
@@ -77,6 +80,11 @@ namespace SpinSquad.EditorTools
 
                 var battleCta = Find(safe, "BATTLEButton").GetComponent<Button>();
                 Require(battleCta != null, "Main Battle CTA is missing.");
+                var battleImage = battleCta.GetComponent<Image>();
+                Require(battleImage != null && battleImage.sprite == MetaHomeUiSprites.CtaButton,
+                    "Main Battle CTA should use the polished CTA sprite.");
+                Require(battleCta.transform.Find("Icon")?.GetComponent<Image>() != null,
+                    "Main Battle CTA should have a separate icon layer.");
 
                 var overlay = Find(root.transform, "LevelSelectOverlay");
                 Require(!overlay.gameObject.activeSelf, "Level selection overlay must start closed.");
@@ -96,7 +104,12 @@ namespace SpinSquad.EditorTools
         {
             var tab = Find(row, name);
             Require(tab.GetComponent<Button>() != null, $"{name} has no Button.");
-            Require(tab.Find("Icon")?.GetComponent<Image>() != null, $"{name} has no icon layer.");
+            var bg = tab.GetComponent<Image>();
+            Require(bg != null && bg.sprite != null && bg.sprite.name.StartsWith("MetaHomeUI_nav", StringComparison.Ordinal),
+                $"{name} must use the polished nav tab sprite.");
+            var icon = tab.Find("Icon")?.GetComponent<Image>();
+            Require(icon != null && icon.sprite != null && icon.sprite.name.StartsWith("MetaHomeUI_icon", StringComparison.Ordinal),
+                $"{name} has no polished icon layer.");
             var label = tab.Find("Label")?.GetComponent<Text>();
             Require(label != null && label.gameObject.activeSelf && !string.IsNullOrWhiteSpace(label.text),
                 $"{name} label must remain visible.");
