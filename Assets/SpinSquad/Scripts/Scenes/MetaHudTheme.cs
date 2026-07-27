@@ -227,7 +227,7 @@ namespace SpinSquad.Scenes
             go.transform.SetParent(parent, false);
             var rt = go.AddComponent<RectTransform>();
             rt.anchorMin = Vector2.zero;
-            rt.anchorMax = Vector2.one;
+            rt.anchorMax = new Vector2(1f, 0f);
             rt.pivot = new Vector2(0.5f, 0f);
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(0f, height);
