@@ -186,6 +186,13 @@ namespace SpinSquad.Core
 
         public string CurrentEnemyUnitId => enemyUnitId;
 
+        enum RewardPrimaryAction
+        {
+            Close,
+            Restart,
+            Home
+        }
+
         /// <summary>Wave chẵn → enemy ranged tam giác; wave lẻ → melee vuông.</summary>
         public static bool WaveUsesRangedEnemy(int wave) =>
             Mathf.Clamp(wave, 1, MaxWaves) % 2 == 0;
@@ -559,6 +566,13 @@ namespace SpinSquad.Core
         bool _speed2xActive;
         GameObject _pauseOverlayRoot;
         Button _pauseResumeButton;
+        GameObject _rewardOverlayRoot;
+        Text _rewardTitleText;
+        Text _rewardBodyText;
+        Button _rewardPrimaryButton;
+        Button _rewardSecondaryButton;
+        RewardPrimaryAction _rewardPrimaryAction;
+        RewardPrimaryAction _rewardSecondaryAction;
         GameObject _settingsStubRoot;
         Button _settingsStubCloseButton;
         readonly List<Line1BattleSpriteAnimator> _animationTestTargets = new();
@@ -836,6 +850,7 @@ namespace SpinSquad.Core
         {
             ClosePauseAndRestoreTimeScale();
             CloseSettingsStubPanel();
+            CloseRewardOverlay();
             ResetSpeed2x();
             CancelPendingWaveComplete();
             IsDraggingGridUnit = false;
@@ -1517,6 +1532,10 @@ namespace SpinSquad.Core
                 _pauseResumeButton.onClick.RemoveListener(OnPauseResumeClicked);
             if (_settingsStubCloseButton != null)
                 _settingsStubCloseButton.onClick.RemoveListener(OnSettingsStubCloseClicked);
+            if (_rewardPrimaryButton != null)
+                _rewardPrimaryButton.onClick.RemoveListener(OnRewardPrimaryClicked);
+            if (_rewardSecondaryButton != null)
+                _rewardSecondaryButton.onClick.RemoveListener(OnRewardSecondaryClicked);
             if (_speed2xStubButton != null)
                 _speed2xStubButton.onClick.RemoveListener(OnSpeed2xClicked);
             _speed2xActive = false;
@@ -1675,6 +1694,13 @@ namespace SpinSquad.Core
             SetBanner("Thua! (Ally đã gục)");
             if (_startCombatButton != null)
                 _startCombatButton.gameObject.SetActive(false);
+            ShowRewardOverlay(
+                "Defeat",
+                $"Level {currentLevel} - Wave {currentWave}\nĐội hình đã gục. Chơi lại để thử sắp xếp khác hoặc roll khác.",
+                "Chơi lại",
+                false,
+                "Home",
+                true);
         }
 
         void EndBattleWaveWin()
@@ -1705,16 +1731,17 @@ namespace SpinSquad.Core
                 RefreshBattleGridPrepVisuals();
                 _prepSnapReadyForAddAlly = true;
 
-                if (Application.CanStreamedLevelBeLoaded(homepageSceneName))
-                {
-                    SceneManager.LoadScene(homepageSceneName);
-                    return;
-                }
-
                 ReviveAlliesFromLastWaveLayout();
                 SetBanner($"Hoàn thành level {currentLevel}! +{goldReward} Gold, +{keyReward} Key.");
                 if (_startCombatButton != null)
                     _startCombatButton.gameObject.SetActive(false);
+                ShowRewardOverlay(
+                    $"Level {currentLevel} Clear!",
+                    $"+{goldReward} Gold\n+{keyReward} Treasure Keys\nLevel tiếp theo đã mở nếu còn trong prototype.",
+                    "Về Home",
+                    true,
+                    "Chơi lại",
+                    false);
                 return;
             }
 
@@ -1735,6 +1762,13 @@ namespace SpinSquad.Core
 
             BuildWaveIntroBannerText();
             SetBanner($"Thắng L{currentLevel}-W{completed}! Chuẩn bị wave {currentWave}. {_bannerIntroText}  Nhấn Bắt đầu.");
+            ShowRewardOverlay(
+                $"Wave {completed} Clear",
+                $"+{wavePrepRollCoinGrant + waveCoinBonus} roll coin\nWave {currentWave} đã sẵn sàng. Roll/sắp đội hình rồi tiếp tục.",
+                "Tiếp tục",
+                false,
+                null,
+                false);
 
             _prepSnapReadyForAddAlly = true;
 
@@ -1803,6 +1837,7 @@ namespace SpinSquad.Core
             _buffStatusText = CreateTopBuffStatusText(canvasGo.transform, _banner.font);
             BuildDuelTopBar(canvasGo.transform, _banner.font);
             BuildPauseOverlay(canvasGo.transform, _banner.font);
+            BuildRewardOverlay(canvasGo.transform, _banner.font);
             BuildSettingsStubPanel(canvasGo.transform, _banner.font);
 
             BuildDuelBottomUi(canvasGo.transform, _banner.font);
@@ -2772,6 +2807,163 @@ namespace SpinSquad.Core
             _pauseOverlayRoot.SetActive(false);
         }
 
+        void BuildRewardOverlay(Transform canvasParent, Font font)
+        {
+            _rewardOverlayRoot = new GameObject("RewardOverlay");
+            _rewardOverlayRoot.transform.SetParent(canvasParent, false);
+            var rootRt = _rewardOverlayRoot.AddComponent<RectTransform>();
+            rootRt.anchorMin = Vector2.zero;
+            rootRt.anchorMax = Vector2.one;
+            rootRt.offsetMin = Vector2.zero;
+            rootRt.offsetMax = Vector2.zero;
+
+            var dimGo = new GameObject("Dim");
+            dimGo.transform.SetParent(_rewardOverlayRoot.transform, false);
+            var dimRt = dimGo.AddComponent<RectTransform>();
+            dimRt.anchorMin = Vector2.zero;
+            dimRt.anchorMax = Vector2.one;
+            dimRt.offsetMin = Vector2.zero;
+            dimRt.offsetMax = Vector2.zero;
+            var dimImg = dimGo.AddComponent<Image>();
+            dimImg.sprite = CreateWhiteSprite();
+            dimImg.color = new Color(0f, 0f, 0f, 0.5f);
+            dimImg.raycastTarget = true;
+
+            var panelGo = new GameObject("RewardPanel");
+            panelGo.transform.SetParent(_rewardOverlayRoot.transform, false);
+            var panelRt = panelGo.AddComponent<RectTransform>();
+            panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRt.pivot = new Vector2(0.5f, 0.5f);
+            panelRt.anchoredPosition = new Vector2(0f, 42f);
+            panelRt.sizeDelta = new Vector2(640f, 520f);
+            var panelBg = panelGo.AddComponent<Image>();
+            panelBg.sprite = CreateWhiteSprite();
+            panelBg.color = new Color(0.07f, 0.1f, 0.16f, 0.97f);
+            panelBg.raycastTarget = true;
+
+            _rewardTitleText = CreateCtxLabel(panelGo.transform, font, "Wave Clear", 36, new Vector2(0f, 184f), new Vector2(580f, 58f));
+            _rewardTitleText.color = new Color(1f, 0.86f, 0.32f, 1f);
+
+            _rewardBodyText = CreateCtxLabel(panelGo.transform, font, "", 25, new Vector2(0f, 58f), new Vector2(560f, 210f));
+            _rewardBodyText.alignment = TextAnchor.MiddleCenter;
+            _rewardBodyText.color = new Color(0.9f, 0.95f, 1f, 1f);
+
+            _rewardPrimaryButton = CreatePanelButton(
+                panelGo.transform,
+                font,
+                "Tiếp tục",
+                new Vector2(0f, -92f),
+                new Vector2(360f, 72f),
+                PrepStartButtonColor,
+                HudUiSprites.CombatContinue);
+            _rewardPrimaryButton.onClick.AddListener(OnRewardPrimaryClicked);
+
+            _rewardSecondaryButton = CreatePanelButton(
+                panelGo.transform,
+                font,
+                "Home",
+                new Vector2(0f, -178f),
+                new Vector2(300f, 60f),
+                MetaHudTheme.ButtonBack,
+                HudUiSprites.CombatHomeInBattle);
+            _rewardSecondaryButton.onClick.AddListener(OnRewardSecondaryClicked);
+
+            _rewardOverlayRoot.SetActive(false);
+        }
+
+        void ShowRewardOverlay(
+            string title,
+            string body,
+            string primaryLabel,
+            bool primaryGoesHome,
+            string secondaryLabel,
+            bool secondaryGoesHome)
+        {
+            if (_rewardOverlayRoot == null)
+                return;
+
+            if (_rewardTitleText != null)
+                _rewardTitleText.text = title;
+            if (_rewardBodyText != null)
+                _rewardBodyText.text = body;
+
+            _rewardPrimaryAction = primaryGoesHome
+                ? RewardPrimaryAction.Home
+                : BattleEnded
+                    ? RewardPrimaryAction.Restart
+                    : RewardPrimaryAction.Close;
+            _rewardSecondaryAction = secondaryGoesHome
+                ? RewardPrimaryAction.Home
+                : BattleEnded
+                    ? RewardPrimaryAction.Restart
+                    : RewardPrimaryAction.Close;
+
+            SetButtonLabel(_rewardPrimaryButton, primaryLabel);
+            SetButtonLabel(_rewardSecondaryButton, secondaryLabel);
+
+            if (_rewardPrimaryButton != null)
+                _rewardPrimaryButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(primaryLabel));
+            if (_rewardSecondaryButton != null)
+                _rewardSecondaryButton.gameObject.SetActive(!string.IsNullOrWhiteSpace(secondaryLabel));
+
+            _rewardOverlayRoot.SetActive(true);
+            _rewardOverlayRoot.transform.SetAsLastSibling();
+        }
+
+        void CloseRewardOverlay()
+        {
+            if (_rewardOverlayRoot != null)
+                _rewardOverlayRoot.SetActive(false);
+        }
+
+        static void SetButtonLabel(Button button, string label)
+        {
+            if (button == null)
+                return;
+            var text = button.GetComponentInChildren<Text>(true);
+            if (text != null)
+                text.text = label ?? string.Empty;
+        }
+
+        void OnRewardPrimaryClicked()
+        {
+            if (_rewardPrimaryAction == RewardPrimaryAction.Home)
+            {
+                OnHomeButtonClicked();
+                return;
+            }
+
+            if (_rewardPrimaryAction == RewardPrimaryAction.Restart)
+            {
+                if (_rewardOverlayRoot != null)
+                    _rewardOverlayRoot.SetActive(false);
+                RestartDuel();
+                return;
+            }
+
+            if (_rewardOverlayRoot != null)
+                _rewardOverlayRoot.SetActive(false);
+            RefreshPrepPrimaryUi();
+        }
+
+        void OnRewardSecondaryClicked()
+        {
+            if (_rewardSecondaryAction == RewardPrimaryAction.Home)
+            {
+                OnHomeButtonClicked();
+                return;
+            }
+
+            if (_rewardSecondaryAction == RewardPrimaryAction.Restart)
+            {
+                CloseRewardOverlay();
+                RestartDuel();
+                return;
+            }
+
+            CloseRewardOverlay();
+        }
+
         void OnPauseRestartClicked()
         {
             ClosePauseAndRestoreTimeScale();
@@ -3069,6 +3261,7 @@ namespace SpinSquad.Core
         {
             ClosePauseAndRestoreTimeScale();
             CloseSettingsStubPanel();
+            CloseRewardOverlay();
             if (!Application.CanStreamedLevelBeLoaded(homepageSceneName))
             {
                 Debug.LogWarning("[DuelDirector] Không load được scene Homepage: " + homepageSceneName);
