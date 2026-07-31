@@ -5011,7 +5011,8 @@ namespace SpinSquad.Core
             if (go == null)
                 return false;
 
-            var sprite = AnimalKitEnemySprites.Pick(def, wave, spawnIndex);
+            var profile = AnimalKitEnemySprites.PickProfile(def, wave, spawnIndex);
+            var sprite = profile?.Idle;
             if (sprite == null)
                 return false;
 
@@ -5044,8 +5045,10 @@ namespace SpinSquad.Core
             if (collider != null)
                 collider.size = new Vector2(0.42f / Mathf.Max(scale, 0.01f), 0.42f / Mathf.Max(scale, 0.01f));
 
-            if (go.GetComponent<AnimalKitEnemyBattleAnimator>() == null)
-                go.AddComponent<AnimalKitEnemyBattleAnimator>();
+            var frameAnimator = go.GetComponent<AnimalKitEnemyBattleAnimator>();
+            if (frameAnimator == null)
+                frameAnimator = go.AddComponent<AnimalKitEnemyBattleAnimator>();
+            frameAnimator.ConfigureProfile(profile);
 
             return true;
         }

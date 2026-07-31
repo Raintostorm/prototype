@@ -8,11 +8,13 @@ namespace SpinSquad.Editor
     {
         const string LocalAnimalKitUiPath = "Assets/SpinSquad/Resources/UI/AnimalKitLocal/";
         const string LocalAnimalKitBattlePath = "Assets/SpinSquad/Resources/Battle/AnimalKitLocal/";
+        const string LocalAnimalKitFramesPath = "Assets/SpinSquad/Resources/Battle/AnimalKitFrames/";
 
         void OnPreprocessTexture()
         {
             if (!assetPath.StartsWith(LocalAnimalKitUiPath, System.StringComparison.Ordinal) &&
-                !assetPath.StartsWith(LocalAnimalKitBattlePath, System.StringComparison.Ordinal))
+                !assetPath.StartsWith(LocalAnimalKitBattlePath, System.StringComparison.Ordinal) &&
+                !assetPath.StartsWith(LocalAnimalKitFramesPath, System.StringComparison.Ordinal))
                 return;
 
             var importer = (TextureImporter)assetImporter;

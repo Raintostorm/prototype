@@ -30,6 +30,8 @@ namespace SpinSquad.Core
         Coroutine _attackRoutine;
         Action _onHit;
         Action _onComplete;
+        AnimalKitEnemySprites.Profile _profile;
+        Sprite _lastAppliedSprite;
 
         void Awake()
         {
@@ -71,6 +73,7 @@ namespace SpinSquad.Core
             _nextAttackTime = Time.time + Mathf.Max(0.01f, attackMinInterval);
             _onHit = onHit;
             _onComplete = onComplete;
+            ApplySprite(_profile?.Attack);
 
             if (_attackRoutine != null)
                 StopCoroutine(_attackRoutine);
@@ -82,6 +85,8 @@ namespace SpinSquad.Core
             if (_dead)
                 return;
             _moving = isMoving;
+            if (_attackRoutine == null)
+                ApplySprite(_moving ? _profile?.Walk : _profile?.Idle);
         }
 
         public void ForceIdleLoop()
@@ -90,7 +95,10 @@ namespace SpinSquad.Core
                 return;
             _moving = false;
             if (_attackRoutine == null)
+            {
+                ApplySprite(_profile?.Idle);
                 ResetPose();
+            }
         }
 
         public void UpdateFacing(float dirX)
@@ -168,6 +176,7 @@ namespace SpinSquad.Core
 
             _dead = true;
             ClearAttack();
+            ApplySprite(_profile?.Die);
             _visualRoot.localPosition = _baseLocalPosition + new Vector3(_facingSign * -0.06f, -0.09f, 0f);
             _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 34f : -34f);
             _visualRoot.localScale = new Vector3(_baseLocalScale.x * 1.14f, _baseLocalScale.y * 0.58f, _baseLocalScale.z);
@@ -175,9 +184,17 @@ namespace SpinSquad.Core
 
         void ResetPose()
         {
+            if (!_dead && !_moving)
+                ApplySprite(_profile?.Idle);
             _visualRoot.localPosition = _baseLocalPosition;
             _visualRoot.localRotation = Quaternion.identity;
             _visualRoot.localScale = _baseLocalScale;
+        }
+
+        public void ConfigureProfile(AnimalKitEnemySprites.Profile profile)
+        {
+            _profile = profile;
+            ApplySprite(_profile?.Idle);
         }
 
         void ClearAttack()
@@ -192,6 +209,14 @@ namespace SpinSquad.Core
             if (child != null && child.TryGetComponent<SpriteRenderer>(out var childSr))
                 return childSr;
             return GetComponent<SpriteRenderer>();
+        }
+
+        void ApplySprite(Sprite sprite)
+        {
+            if (spriteRenderer == null || sprite == null || _lastAppliedSprite == sprite)
+                return;
+            spriteRenderer.sprite = sprite;
+            _lastAppliedSprite = sprite;
         }
     }
 }

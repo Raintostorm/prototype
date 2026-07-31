@@ -10,6 +10,14 @@ namespace SpinSquad.Core
     public static class AnimalKitEnemySprites
     {
         const string Folder = "Battle/AnimalKitLocal";
+        const string FramesFolder = "Battle/AnimalKitFrames";
+
+        static readonly string[] FrameProfilePool =
+        {
+            "Crocodile",
+            "Rabbit",
+            "Tiger"
+        };
 
         static readonly string[] MeleePool =
         {
@@ -23,6 +31,35 @@ namespace SpinSquad.Core
             "enemy_shark",
             "enemy_spirit"
         };
+
+        public sealed class Profile
+        {
+            public readonly string Name;
+            public readonly Sprite Idle;
+            public readonly Sprite Walk;
+            public readonly Sprite Attack;
+            public readonly Sprite Die;
+
+            public Profile(string name, Sprite idle, Sprite walk, Sprite attack, Sprite die)
+            {
+                Name = name;
+                Idle = idle;
+                Walk = walk != null ? walk : idle;
+                Attack = attack != null ? attack : idle;
+                Die = die != null ? die : idle;
+            }
+        }
+
+        public static Profile PickProfile(UnitDefinition def, int wave, int spawnIndex)
+        {
+            var profileName = FrameProfilePool[Mathf.Abs((wave - 1) + spawnIndex) % FrameProfilePool.Length];
+            var profile = LoadProfile(profileName);
+            if (profile != null && profile.Idle != null)
+                return profile;
+
+            var fallback = Pick(def, wave, spawnIndex);
+            return fallback != null ? new Profile("Fallback", fallback, fallback, fallback, fallback) : null;
+        }
 
         public static Sprite Pick(UnitDefinition def, int wave, int spawnIndex)
         {
@@ -45,6 +82,20 @@ namespace SpinSquad.Core
         static Sprite Load(string assetName)
         {
             return Resources.Load<Sprite>(Folder + "/" + assetName);
+        }
+
+        static Profile LoadProfile(string profileName)
+        {
+            if (string.IsNullOrWhiteSpace(profileName))
+                return null;
+
+            var basePath = FramesFolder + "/" + profileName + "/";
+            return new Profile(
+                profileName,
+                Resources.Load<Sprite>(basePath + "idle_0"),
+                Resources.Load<Sprite>(basePath + "walk_0"),
+                Resources.Load<Sprite>(basePath + "attack_0"),
+                Resources.Load<Sprite>(basePath + "die_0"));
         }
     }
 }
