@@ -9,14 +9,14 @@ namespace SpinSquad.Core
     public sealed class AnimalKitEnemyBattleAnimator : MonoBehaviour, IBattleVisualDriver
     {
         [SerializeField] SpriteRenderer spriteRenderer;
-        [SerializeField] float idleBobWorld = 0.018f;
-        [SerializeField] float idleCycleSeconds = 1.35f;
-        [SerializeField] float walkBobWorld = 0.04f;
-        [SerializeField] float walkCycleSeconds = 0.42f;
-        [SerializeField] float attackDurationSeconds = 0.22f;
-        [SerializeField] float attackLungeWorld = 0.16f;
-        [SerializeField] float attackHitNormalizedTime = 0.48f;
-        [SerializeField] float attackMinInterval = 0.18f;
+        [SerializeField] float idleBobWorld = 0.026f;
+        [SerializeField] float idleCycleSeconds = 1.15f;
+        [SerializeField] float walkBobWorld = 0.075f;
+        [SerializeField] float walkCycleSeconds = 0.34f;
+        [SerializeField] float attackDurationSeconds = 0.34f;
+        [SerializeField] float attackLungeWorld = 0.32f;
+        [SerializeField] float attackHitNormalizedTime = 0.42f;
+        [SerializeField] float attackMinInterval = 0.04f;
 
         CombatHealth _health;
         Vector3 _baseLocalPosition;
@@ -56,8 +56,15 @@ namespace SpinSquad.Core
 
         public void PlayAttack(Action onHit, Action onComplete = null)
         {
-            if (_dead || Time.time < _nextAttackTime)
+            if (_dead)
                 return;
+
+            if (Time.time < _nextAttackTime)
+            {
+                onHit?.Invoke();
+                onComplete?.Invoke();
+                return;
+            }
 
             _nextAttackTime = Time.time + Mathf.Max(0.01f, attackMinInterval);
             _onHit = onHit;
@@ -111,8 +118,9 @@ namespace SpinSquad.Core
             var phase = _moving ? phaseByDistance : phaseByTime;
             var bob = _moving ? Mathf.Abs(phase) * walkBobWorld : phase * idleBobWorld;
             transform.localPosition = _baseLocalPosition + new Vector3(0f, bob, 0f);
-            transform.localRotation = Quaternion.identity;
-            transform.localScale = _baseLocalScale;
+            transform.localRotation = Quaternion.Euler(0f, 0f, _moving ? phase * 5.5f : phase * 1.8f);
+            var squash = _moving ? 1f + Mathf.Abs(phase) * 0.08f : 1f;
+            transform.localScale = new Vector3(_baseLocalScale.x, _baseLocalScale.y * squash, _baseLocalScale.z);
         }
 
         IEnumerator AttackRoutine()
@@ -126,10 +134,13 @@ namespace SpinSquad.Core
             {
                 t += Time.deltaTime;
                 var k = Mathf.Clamp01(t / dur);
-                var lunge = Mathf.Sin(k * Mathf.PI) * attackLungeWorld * _facingSign;
-                var squash = 1f + Mathf.Sin(k * Mathf.PI) * 0.06f;
-                transform.localPosition = _baseLocalPosition + new Vector3(lunge, 0f, 0f);
-                transform.localScale = new Vector3(_baseLocalScale.x * (1f + (squash - 1f) * 0.4f), _baseLocalScale.y * squash, _baseLocalScale.z);
+                var strikeCurve = Mathf.Sin(k * Mathf.PI);
+                var anticipation = k < 0.28f ? -0.12f * (k / 0.28f) : 0f;
+                var lunge = (anticipation + strikeCurve * attackLungeWorld) * _facingSign;
+                var squash = 1f + strikeCurve * 0.16f;
+                transform.localPosition = _baseLocalPosition + new Vector3(lunge, strikeCurve * 0.035f, 0f);
+                transform.localRotation = Quaternion.Euler(0f, 0f, -_facingSign * strikeCurve * 9f);
+                transform.localScale = new Vector3(_baseLocalScale.x * (1f + strikeCurve * 0.08f), _baseLocalScale.y * squash, _baseLocalScale.z);
 
                 if (!hitFired && t >= hitTime)
                 {
@@ -155,9 +166,9 @@ namespace SpinSquad.Core
 
             _dead = true;
             ClearAttack();
-            transform.localPosition = _baseLocalPosition + new Vector3(0f, -0.04f, 0f);
-            transform.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 12f : -12f);
-            transform.localScale = new Vector3(_baseLocalScale.x * 1.05f, _baseLocalScale.y * 0.82f, _baseLocalScale.z);
+            transform.localPosition = _baseLocalPosition + new Vector3(_facingSign * -0.06f, -0.09f, 0f);
+            transform.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 34f : -34f);
+            transform.localScale = new Vector3(_baseLocalScale.x * 1.14f, _baseLocalScale.y * 0.58f, _baseLocalScale.z);
         }
 
         void ResetPose()
