@@ -5028,13 +5028,16 @@ namespace SpinSquad.Core
 
             var bounds = sprite.bounds.size;
             var maxAxis = Mathf.Max(bounds.x, bounds.y, 0.01f);
-            var targetWorldHeight = wave >= 5 && spawnIndex == 0 ? 0.92f : 0.72f;
+            var targetWorldHeight = wave >= 5 && spawnIndex == 0 ? 0.68f : 0.52f;
             var scale = targetWorldHeight / maxAxis;
             go.transform.localScale = new Vector3(scale, scale, 1f);
 
             var collider = go.GetComponent<BoxCollider2D>();
             if (collider != null)
-                collider.size = new Vector2(0.64f / Mathf.Max(scale, 0.01f), 0.64f / Mathf.Max(scale, 0.01f));
+                collider.size = new Vector2(0.48f / Mathf.Max(scale, 0.01f), 0.48f / Mathf.Max(scale, 0.01f));
+
+            if (go.GetComponent<AnimalKitEnemyBattleAnimator>() == null)
+                go.AddComponent<AnimalKitEnemyBattleAnimator>();
 
             return true;
         }
@@ -5048,6 +5051,13 @@ namespace SpinSquad.Core
             {
                 if (go.GetComponent<SpineBattleAnimator>() == null)
                     go.AddComponent<SpineBattleAnimator>();
+                return;
+            }
+
+            if (go.GetComponent<AnimalKitEnemyVisualMarker>() != null)
+            {
+                if (go.GetComponent<AnimalKitEnemyBattleAnimator>() == null)
+                    go.AddComponent<AnimalKitEnemyBattleAnimator>();
                 return;
             }
 
