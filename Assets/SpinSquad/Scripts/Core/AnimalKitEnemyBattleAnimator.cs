@@ -9,8 +9,6 @@ namespace SpinSquad.Core
     public sealed class AnimalKitEnemyBattleAnimator : MonoBehaviour, IBattleVisualDriver
     {
         [SerializeField] SpriteRenderer spriteRenderer;
-        [SerializeField] float idleBobWorld = 0.026f;
-        [SerializeField] float idleCycleSeconds = 1.15f;
         [SerializeField] float attackDurationSeconds = 0.46f;
         [SerializeField] float attackLungeWorld = 0.42f;
         [SerializeField] float attackHitNormalizedTime = 0.42f;
@@ -123,10 +121,10 @@ namespace SpinSquad.Core
                 return;
             }
 
-            var phase = Mathf.Sin((Time.time / Mathf.Max(0.01f, idleCycleSeconds)) * Mathf.PI * 2f);
-            _visualRoot.localPosition = _baseLocalPosition + new Vector3(0f, phase * idleBobWorld, 0f);
-            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, phase * 1.8f);
-            _visualRoot.localScale = _baseLocalScale;
+            // Enemies waiting for battle use the authored idle pose without the
+            // old placeholder bob, tilt, or squash animation.
+            ApplySprite(_profile?.Idle);
+            ResetPose();
         }
 
         IEnumerator AttackRoutine()
