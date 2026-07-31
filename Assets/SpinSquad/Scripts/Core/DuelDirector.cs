@@ -747,6 +747,7 @@ namespace SpinSquad.Core
             _combatEngageRoutine = StartCoroutine(EngageCombatAfterDelayRoutine());
             ClosePrepUnitStatInspect();
             RefreshBattleGridPrepVisuals();
+            ApplyCombatTimeScale();
             RefreshSpeed2xButton();
             if (_startCombatButton != null)
                 _startCombatButton.gameObject.SetActive(false);
@@ -2664,7 +2665,7 @@ namespace SpinSquad.Core
 
         void OnSpeed2xClicked()
         {
-            if (!CombatStarted || BattleEnded)
+            if (BattleEnded)
                 return;
             _combatSpeedMode = (_combatSpeedMode + 1) % 3;
             ApplyCombatTimeScale();
@@ -2675,24 +2676,22 @@ namespace SpinSquad.Core
         {
             if (_speed2xStubButton == null)
                 return;
-            var inCombat = CombatStarted && !BattleEnded;
-            _speed2xStubButton.interactable = inCombat;
+            var canChooseSpeed = !BattleEnded;
+            _speed2xStubButton.interactable = canChooseSpeed;
             var image = _speed2xStubButton.GetComponent<Image>();
-            var sprite = _combatSpeedMode == 2 && inCombat ? HudUiSprites.CombatSpeed2On : HudUiSprites.CombatSpeed2Off;
-            HudUiSprites.ApplyIcon(image, sprite, inCombat ? MetaHudTheme.ButtonIconBar : MetaHudTheme.ButtonStubDisabled);
+            var sprite = _combatSpeedMode == 2 && canChooseSpeed ? HudUiSprites.CombatSpeed2On : HudUiSprites.CombatSpeed2Off;
+            HudUiSprites.ApplyIcon(image, sprite, canChooseSpeed ? MetaHudTheme.ButtonIconBar : MetaHudTheme.ButtonStubDisabled);
             var label = _speed2xStubButton.GetComponentInChildren<Text>(true);
             if (label != null)
             {
                 label.gameObject.SetActive(true);
                 label.fontSize = 20;
-                label.text = !inCombat
-                    ? "1x"
-                    : _combatSpeedMode switch
-                    {
-                        1 => "0.25x",
-                        2 => "2x",
-                        _ => "1x"
-                    };
+                label.text = _combatSpeedMode switch
+                {
+                    1 => "0.25x",
+                    2 => "2x",
+                    _ => "1x"
+                };
             }
         }
 

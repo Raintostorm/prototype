@@ -11,8 +11,6 @@ namespace SpinSquad.Core
         [SerializeField] SpriteRenderer spriteRenderer;
         [SerializeField] float idleBobWorld = 0.026f;
         [SerializeField] float idleCycleSeconds = 1.15f;
-        [SerializeField] float walkBobWorld = 0.075f;
-        [SerializeField] float walkCycleSeconds = 0.34f;
         [SerializeField] float attackDurationSeconds = 0.46f;
         [SerializeField] float attackLungeWorld = 0.42f;
         [SerializeField] float attackHitNormalizedTime = 0.42f;
@@ -115,17 +113,20 @@ namespace SpinSquad.Core
             if (_dead || _attackRoutine != null)
                 return;
 
-            var cycle = Mathf.Max(0.01f, _moving ? walkCycleSeconds : idleCycleSeconds);
-            var phaseByTime = Mathf.Sin((Time.time / cycle) * Mathf.PI * 2f);
-            var phaseByDistance = Mathf.Sin((_moveDistance / 0.18f) * Mathf.PI * 2f);
-            var phase = _moving ? phaseByDistance : phaseByTime;
             if (_moving)
-                ApplySprite(phaseByDistance >= 0f ? _profile?.Walk : _profile?.Idle);
-            var bob = _moving ? Mathf.Abs(phase) * walkBobWorld : phase * idleBobWorld;
-            _visualRoot.localPosition = _baseLocalPosition + new Vector3(0f, bob, 0f);
-            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _moving ? phase * 5.5f : phase * 1.8f);
-            var squash = _moving ? 1f + Mathf.Abs(phase) * 0.08f : 1f;
-            _visualRoot.localScale = new Vector3(_baseLocalScale.x, _baseLocalScale.y * squash, _baseLocalScale.z);
+            {
+                // The extracted kit already supplies a distinct run pose. Alternate it
+                // by distance travelled, but do not add the old procedural wobble.
+                var useRunPose = Mathf.FloorToInt(_moveDistance / 0.07f) % 2 == 0;
+                ApplySprite(useRunPose ? _profile?.Walk : _profile?.Idle);
+                ResetPose();
+                return;
+            }
+
+            var phase = Mathf.Sin((Time.time / Mathf.Max(0.01f, idleCycleSeconds)) * Mathf.PI * 2f);
+            _visualRoot.localPosition = _baseLocalPosition + new Vector3(0f, phase * idleBobWorld, 0f);
+            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, phase * 1.8f);
+            _visualRoot.localScale = _baseLocalScale;
         }
 
         IEnumerator AttackRoutine()
