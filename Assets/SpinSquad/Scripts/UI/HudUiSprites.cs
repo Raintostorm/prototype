@@ -14,11 +14,11 @@ namespace SpinSquad.UI
         static Dictionary<string, Sprite> _index;
         static bool _indexBuilt;
 
-        public static Sprite MetaSetting => Get("Setting");
-        public static Sprite MetaMail => Get("Mail_button");
+        public static Sprite MetaSetting => AnimalKitUiSprites.Settings ?? Get("Setting");
+        public static Sprite MetaMail => AnimalKitUiSprites.Mail ?? Get("Mail_button");
         public static Sprite MetaBattleButton => Get("Battle_button");
         public static Sprite MetaGreenButton => Get("Green_button");
-        public static Sprite MetaChest => Get("Chest");
+        public static Sprite MetaChest => AnimalKitUiSprites.Treasure ?? Get("Chest");
         public static Sprite MetaRewardButton => Get("Reward_button");
         public static Sprite MetaLock => Get("Lock");
         public static Sprite MetaPrev => Get("Prev");
@@ -44,14 +44,14 @@ namespace SpinSquad.UI
         public static Sprite CombatStopOff => Get("Stop_off");
         public static Sprite CombatSpeed2Off => Get("Speed_x2_off");
         public static Sprite CombatSpeed2On => Get("Speed_x2_on");
-        public static Sprite CombatShop => Get("Shop_icon");
+        public static Sprite CombatShop => AnimalKitUiSprites.Shop ?? Get("Shop_icon");
         public static Sprite CombatMerge => Get("Merge");
         public static Sprite CombatSell => Get("Sell");
         public static Sprite CombatBack => Get("Back");
         public static Sprite CombatContinue => Get("continue");
         public static Sprite CombatPause => Get("pause");
         public static Sprite CombatRestart => Get("Restart");
-        public static Sprite CombatHomeInBattle => Get("Home_in_battle");
+        public static Sprite CombatHomeInBattle => AnimalKitUiSprites.Home ?? Get("Home_in_battle");
         public static Sprite CombatSceneBackground => Get("Background_combat");
         public static Sprite MetaSceneBackground => Get("Background");
         public static Sprite CombatBlueButton => Get("Blue_button");

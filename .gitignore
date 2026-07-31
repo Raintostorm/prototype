@@ -61,3 +61,8 @@ crashlytics-build.properties
 
 # Unity / tooling generated (local only)
 GeneratedAssets/
+
+# Local-only prototype art extracted/studied from external kits.
+# Keep this usable on this machine, but do not publish it with the repo.
+Assets/SpinSquad/Resources/UI/AnimalKitLocal/
+Assets/SpinSquad/Resources/UI/AnimalKitLocal.meta

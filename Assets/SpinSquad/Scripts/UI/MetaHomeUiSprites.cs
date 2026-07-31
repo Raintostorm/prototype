@@ -41,13 +41,13 @@ namespace SpinSquad.UI
         public static Sprite CampaignPanel => RoundedPanel("campaign-panel", PanelWidth, PanelHeight,
             new Color32(5, 18, 34, 214), new Color32(41, 127, 205, 110), new Color32(255, 214, 105, 190), 24);
 
-        public static Sprite HomeIcon => Icon("home", DrawHome);
-        public static Sprite UpgradeIcon => Icon("upgrade", DrawUpgrade);
-        public static Sprite TreasureIcon => Icon("treasure", DrawTreasure);
-        public static Sprite SettingsIcon => Icon("settings", DrawSettings);
+        public static Sprite HomeIcon => AnimalKitUiSprites.Home ?? Icon("home", DrawHome);
+        public static Sprite UpgradeIcon => AnimalKitUiSprites.Upgrade ?? Icon("upgrade", DrawUpgrade);
+        public static Sprite TreasureIcon => AnimalKitUiSprites.Treasure ?? Icon("treasure", DrawTreasure);
+        public static Sprite SettingsIcon => AnimalKitUiSprites.Settings ?? Icon("settings", DrawSettings);
         public static Sprite SwordIcon => Icon("sword", DrawSword);
-        public static Sprite MailIcon => Icon("mail", DrawMail);
-        public static Sprite ShopIcon => Icon("shop", DrawShop);
+        public static Sprite MailIcon => AnimalKitUiSprites.Mail ?? Icon("mail", DrawMail);
+        public static Sprite ShopIcon => AnimalKitUiSprites.Shop ?? Icon("shop", DrawShop);
         public static Sprite CoinIcon => Icon("coin", DrawCoin);
         public static Sprite KeyIcon => Icon("key", DrawKey);
         public static Sprite EnergyIcon => Icon("energy", DrawEnergy);
