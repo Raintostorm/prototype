@@ -95,12 +95,6 @@ namespace SpinSquad.Core
             var attack = Resources.Load<Sprite>(basePath + "attack_0");
             var die = Resources.Load<Sprite>(basePath + "die_0");
 
-            // The extracted Crocodile kit only contains two verified character poses:
-            // 3158 = mouth closed, 3543 = mouth open. The previous mapping reused
-            // the open-mouth pose for Walk, making the Attack transition invisible.
-            if (profileName == "Crocodile")
-                walk = idle;
-
             return new Profile(profileName, idle, walk, attack, die);
         }
     }
