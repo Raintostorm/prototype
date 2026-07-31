@@ -19,6 +19,7 @@ namespace SpinSquad.Core
         [SerializeField] float attackMinInterval = 0.04f;
 
         CombatHealth _health;
+        Transform _visualRoot;
         Vector3 _baseLocalPosition;
         Vector3 _baseLocalScale;
         bool _moving;
@@ -33,10 +34,11 @@ namespace SpinSquad.Core
         void Awake()
         {
             if (spriteRenderer == null)
-                spriteRenderer = GetComponent<SpriteRenderer>();
+                spriteRenderer = FindAnimalSpriteRenderer();
+            _visualRoot = spriteRenderer != null ? spriteRenderer.transform : transform;
             _health = GetComponent<CombatHealth>();
-            _baseLocalPosition = transform.localPosition;
-            _baseLocalScale = transform.localScale;
+            _baseLocalPosition = _visualRoot.localPosition;
+            _baseLocalScale = _visualRoot.localScale;
         }
 
         void OnEnable()
@@ -117,10 +119,10 @@ namespace SpinSquad.Core
             var phaseByDistance = Mathf.Sin((_moveDistance / 0.18f) * Mathf.PI * 2f);
             var phase = _moving ? phaseByDistance : phaseByTime;
             var bob = _moving ? Mathf.Abs(phase) * walkBobWorld : phase * idleBobWorld;
-            transform.localPosition = _baseLocalPosition + new Vector3(0f, bob, 0f);
-            transform.localRotation = Quaternion.Euler(0f, 0f, _moving ? phase * 5.5f : phase * 1.8f);
+            _visualRoot.localPosition = _baseLocalPosition + new Vector3(0f, bob, 0f);
+            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _moving ? phase * 5.5f : phase * 1.8f);
             var squash = _moving ? 1f + Mathf.Abs(phase) * 0.08f : 1f;
-            transform.localScale = new Vector3(_baseLocalScale.x, _baseLocalScale.y * squash, _baseLocalScale.z);
+            _visualRoot.localScale = new Vector3(_baseLocalScale.x, _baseLocalScale.y * squash, _baseLocalScale.z);
         }
 
         IEnumerator AttackRoutine()
@@ -138,9 +140,9 @@ namespace SpinSquad.Core
                 var anticipation = k < 0.28f ? -0.12f * (k / 0.28f) : 0f;
                 var lunge = (anticipation + strikeCurve * attackLungeWorld) * _facingSign;
                 var squash = 1f + strikeCurve * 0.16f;
-                transform.localPosition = _baseLocalPosition + new Vector3(lunge, strikeCurve * 0.035f, 0f);
-                transform.localRotation = Quaternion.Euler(0f, 0f, -_facingSign * strikeCurve * 9f);
-                transform.localScale = new Vector3(_baseLocalScale.x * (1f + strikeCurve * 0.08f), _baseLocalScale.y * squash, _baseLocalScale.z);
+                _visualRoot.localPosition = _baseLocalPosition + new Vector3(lunge, strikeCurve * 0.035f, 0f);
+                _visualRoot.localRotation = Quaternion.Euler(0f, 0f, -_facingSign * strikeCurve * 9f);
+                _visualRoot.localScale = new Vector3(_baseLocalScale.x * (1f + strikeCurve * 0.08f), _baseLocalScale.y * squash, _baseLocalScale.z);
 
                 if (!hitFired && t >= hitTime)
                 {
@@ -166,22 +168,30 @@ namespace SpinSquad.Core
 
             _dead = true;
             ClearAttack();
-            transform.localPosition = _baseLocalPosition + new Vector3(_facingSign * -0.06f, -0.09f, 0f);
-            transform.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 34f : -34f);
-            transform.localScale = new Vector3(_baseLocalScale.x * 1.14f, _baseLocalScale.y * 0.58f, _baseLocalScale.z);
+            _visualRoot.localPosition = _baseLocalPosition + new Vector3(_facingSign * -0.06f, -0.09f, 0f);
+            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 34f : -34f);
+            _visualRoot.localScale = new Vector3(_baseLocalScale.x * 1.14f, _baseLocalScale.y * 0.58f, _baseLocalScale.z);
         }
 
         void ResetPose()
         {
-            transform.localPosition = _baseLocalPosition;
-            transform.localRotation = Quaternion.identity;
-            transform.localScale = _baseLocalScale;
+            _visualRoot.localPosition = _baseLocalPosition;
+            _visualRoot.localRotation = Quaternion.identity;
+            _visualRoot.localScale = _baseLocalScale;
         }
 
         void ClearAttack()
         {
             _onHit = null;
             _onComplete = null;
+        }
+
+        SpriteRenderer FindAnimalSpriteRenderer()
+        {
+            var child = transform.Find("AnimalKitSprite");
+            if (child != null && child.TryGetComponent<SpriteRenderer>(out var childSr))
+                return childSr;
+            return GetComponent<SpriteRenderer>();
         }
     }
 }

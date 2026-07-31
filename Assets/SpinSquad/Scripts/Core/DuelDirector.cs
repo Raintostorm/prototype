@@ -5015,9 +5015,17 @@ namespace SpinSquad.Core
             if (sprite == null)
                 return false;
 
-            var sr = go.GetComponent<SpriteRenderer>();
-            if (sr == null)
-                sr = go.AddComponent<SpriteRenderer>();
+            var rootSr = go.GetComponent<SpriteRenderer>();
+            if (rootSr != null)
+                rootSr.sprite = null;
+
+            var visualGo = new GameObject("AnimalKitSprite");
+            visualGo.transform.SetParent(go.transform, false);
+            visualGo.transform.localPosition = Vector3.zero;
+            visualGo.transform.localRotation = Quaternion.identity;
+            visualGo.transform.localScale = Vector3.one;
+
+            var sr = visualGo.AddComponent<SpriteRenderer>();
 
             if (go.GetComponent<AnimalKitEnemyVisualMarker>() == null)
                 go.AddComponent<AnimalKitEnemyVisualMarker>();
