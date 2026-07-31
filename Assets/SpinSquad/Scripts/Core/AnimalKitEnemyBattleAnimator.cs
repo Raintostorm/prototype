@@ -17,6 +17,7 @@ namespace SpinSquad.Core
         [SerializeField] float attackLungeWorld = 0.42f;
         [SerializeField] float attackHitNormalizedTime = 0.42f;
         [SerializeField] float attackMinInterval = 0f;
+        [SerializeField] float deathFallSeconds = 0.42f;
 
         CombatHealth _health;
         Transform _visualRoot;
@@ -28,6 +29,7 @@ namespace SpinSquad.Core
         float _moveDistance;
         float _facingSign = -1f;
         Coroutine _attackRoutine;
+        Coroutine _deathRoutine;
         Action _onHit;
         Action _onComplete;
         AnimalKitEnemySprites.Profile _profile;
@@ -128,7 +130,12 @@ namespace SpinSquad.Core
 
         IEnumerator AttackRoutine()
         {
-            var dur = Mathf.Max(0.05f, attackDurationSeconds);
+            // Crocodile's defining pose is the open jaw, so keep it readable even
+            // at normal combat speed instead of flashing for less than half a second.
+            var profileDuration = _profile != null && _profile.Name == "Crocodile"
+                ? Mathf.Max(0.68f, attackDurationSeconds)
+                : attackDurationSeconds;
+            var dur = Mathf.Max(0.05f, profileDuration);
             var hitTime = dur * Mathf.Clamp01(attackHitNormalizedTime);
             var hitFired = false;
             var t = 0f;
@@ -168,11 +175,44 @@ namespace SpinSquad.Core
                 return;
 
             _dead = true;
+            if (_attackRoutine != null)
+            {
+                StopCoroutine(_attackRoutine);
+                _attackRoutine = null;
+            }
             ClearAttack();
             ApplySprite(_profile?.Die);
-            _visualRoot.localPosition = _baseLocalPosition + new Vector3(_facingSign * -0.06f, -0.09f, 0f);
-            _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _facingSign < 0f ? 34f : -34f);
-            _visualRoot.localScale = new Vector3(_baseLocalScale.x * 1.14f, _baseLocalScale.y * 0.58f, _baseLocalScale.z);
+            if (_deathRoutine != null)
+                StopCoroutine(_deathRoutine);
+            _deathRoutine = StartCoroutine(DeathRoutine());
+        }
+
+        IEnumerator DeathRoutine()
+        {
+            var dur = Mathf.Max(0.08f, deathFallSeconds);
+            var t = 0f;
+            while (t < dur)
+            {
+                t += Time.deltaTime;
+                var k = Mathf.Clamp01(t / dur);
+                var eased = 1f - Mathf.Pow(1f - k, 3f);
+                var stagger = Mathf.Sin(k * Mathf.PI) * 0.07f;
+                _visualRoot.localPosition = _baseLocalPosition + new Vector3(
+                    _facingSign * (-0.12f * eased),
+                    stagger - 0.11f * eased,
+                    0f);
+                _visualRoot.localRotation = Quaternion.Euler(
+                    0f,
+                    0f,
+                    (_facingSign < 0f ? 72f : -72f) * eased);
+                _visualRoot.localScale = new Vector3(
+                    _baseLocalScale.x * Mathf.Lerp(1f, 1.2f, eased),
+                    _baseLocalScale.y * Mathf.Lerp(1f, 0.52f, eased),
+                    _baseLocalScale.z);
+                yield return null;
+            }
+
+            _deathRoutine = null;
         }
 
         void ResetPose()
