@@ -66,3 +66,5 @@ GeneratedAssets/
 # Keep this usable on this machine, but do not publish it with the repo.
 Assets/SpinSquad/Resources/UI/AnimalKitLocal/
 Assets/SpinSquad/Resources/UI/AnimalKitLocal.meta
+Assets/SpinSquad/Resources/Battle/AnimalKitLocal/
+Assets/SpinSquad/Resources/Battle/AnimalKitLocal.meta

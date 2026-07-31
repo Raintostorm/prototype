@@ -447,7 +447,16 @@ namespace SpinSquad.Core
             var shape = def != null ? def.BodyShape : UnitBodyShape.Square;
             var idx = CountLivingEnemies() + 1;
             var disp = def != null ? def.DisplayName : "Enemy";
-            var enemyGo = CreateCombatUnitVisual($"{disp} (+{idx})", pos, tint, def, shape, false, out var enemyUsedFallbackSprite);
+            var enemyGo = CreateCombatUnitVisual(
+                $"{disp} (+{idx})",
+                pos,
+                tint,
+                def,
+                shape,
+                false,
+                out var enemyUsedFallbackSprite,
+                currentWave,
+                idx - 1);
             if (enemyUsedFallbackSprite)
                 ApplyEnemyDefinitionVisualScale(enemyGo.transform, def, shape);
             EnsureBattleVisualDriver(enemyGo);
@@ -456,7 +465,7 @@ namespace SpinSquad.Core
             es.InitFromDefinition(def, tier, hp, atk);
             ConfigureEnemy(enemyGo, def);
             var rootSr = enemyGo.GetComponent<SpriteRenderer>();
-            if (rootSr != null)
+            if (rootSr != null && enemyGo.GetComponent<AnimalKitEnemyVisualMarker>() == null)
                 rootSr.color = tint;
             ApplyFootGroundDecorIfEnabled(enemyGo.transform, tier);
 
@@ -4973,7 +4982,9 @@ namespace SpinSquad.Core
             UnitDefinition def,
             UnitBodyShape fallbackShape,
             bool attachAllySpec,
-            out bool usedFallbackSprite)
+            out bool usedFallbackSprite,
+            int waveForEnemySprite = 1,
+            int spawnIndexForEnemySprite = 0)
         {
             var prefabSource = TryResolveBattlePrefabSource(def, attachAllySpec ? "ally" : "enemy");
             GameObject go = null;
@@ -4981,7 +4992,11 @@ namespace SpinSquad.Core
                 go = CreateRigFighter(displayName, pos, tint, prefabSource, attachAllySpec);
             usedFallbackSprite = go == null;
             if (usedFallbackSprite)
+            {
                 go = CreateFighter(displayName, pos, tint, fallbackShape, attachAllySpec);
+                if (!attachAllySpec)
+                    usedFallbackSprite = !ApplyAnimalKitEnemySprite(go, def, waveForEnemySprite, spawnIndexForEnemySprite);
+            }
 
             if (attachAllySpec)
             {
@@ -4989,6 +5004,39 @@ namespace SpinSquad.Core
             }
 
             return go;
+        }
+
+        static bool ApplyAnimalKitEnemySprite(GameObject go, UnitDefinition def, int wave, int spawnIndex)
+        {
+            if (go == null)
+                return false;
+
+            var sprite = AnimalKitEnemySprites.Pick(def, wave, spawnIndex);
+            if (sprite == null)
+                return false;
+
+            var sr = go.GetComponent<SpriteRenderer>();
+            if (sr == null)
+                sr = go.AddComponent<SpriteRenderer>();
+
+            if (go.GetComponent<AnimalKitEnemyVisualMarker>() == null)
+                go.AddComponent<AnimalKitEnemyVisualMarker>();
+
+            sr.sprite = sprite;
+            sr.color = Color.white;
+            sr.sortingOrder = Mathf.Max(sr.sortingOrder, 7);
+
+            var bounds = sprite.bounds.size;
+            var maxAxis = Mathf.Max(bounds.x, bounds.y, 0.01f);
+            var targetWorldHeight = wave >= 5 && spawnIndex == 0 ? 0.92f : 0.72f;
+            var scale = targetWorldHeight / maxAxis;
+            go.transform.localScale = new Vector3(scale, scale, 1f);
+
+            var collider = go.GetComponent<BoxCollider2D>();
+            if (collider != null)
+                collider.size = new Vector2(0.64f / Mathf.Max(scale, 0.01f), 0.64f / Mathf.Max(scale, 0.01f));
+
+            return true;
         }
 
         void EnsureBattleVisualDriver(GameObject go)

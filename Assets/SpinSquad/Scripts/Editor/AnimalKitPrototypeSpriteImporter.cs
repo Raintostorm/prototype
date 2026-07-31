@@ -7,10 +7,12 @@ namespace SpinSquad.Editor
     public sealed class AnimalKitPrototypeSpriteImporter : AssetPostprocessor
     {
         const string LocalAnimalKitUiPath = "Assets/SpinSquad/Resources/UI/AnimalKitLocal/";
+        const string LocalAnimalKitBattlePath = "Assets/SpinSquad/Resources/Battle/AnimalKitLocal/";
 
         void OnPreprocessTexture()
         {
-            if (!assetPath.StartsWith(LocalAnimalKitUiPath, System.StringComparison.Ordinal))
+            if (!assetPath.StartsWith(LocalAnimalKitUiPath, System.StringComparison.Ordinal) &&
+                !assetPath.StartsWith(LocalAnimalKitBattlePath, System.StringComparison.Ordinal))
                 return;
 
             var importer = (TextureImporter)assetImporter;
