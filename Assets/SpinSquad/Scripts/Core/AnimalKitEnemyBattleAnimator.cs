@@ -17,7 +17,6 @@ namespace SpinSquad.Core
         [SerializeField] float attackLungeWorld = 0.42f;
         [SerializeField] float attackHitNormalizedTime = 0.42f;
         [SerializeField] float attackMinInterval = 0f;
-        [SerializeField] float deathFallSeconds = 0.42f;
 
         CombatHealth _health;
         Transform _visualRoot;
@@ -29,7 +28,6 @@ namespace SpinSquad.Core
         float _moveDistance;
         float _facingSign = -1f;
         Coroutine _attackRoutine;
-        Coroutine _deathRoutine;
         Action _onHit;
         Action _onComplete;
         AnimalKitEnemySprites.Profile _profile;
@@ -121,6 +119,8 @@ namespace SpinSquad.Core
             var phaseByTime = Mathf.Sin((Time.time / cycle) * Mathf.PI * 2f);
             var phaseByDistance = Mathf.Sin((_moveDistance / 0.18f) * Mathf.PI * 2f);
             var phase = _moving ? phaseByDistance : phaseByTime;
+            if (_moving)
+                ApplySprite(phaseByDistance >= 0f ? _profile?.Walk : _profile?.Idle);
             var bob = _moving ? Mathf.Abs(phase) * walkBobWorld : phase * idleBobWorld;
             _visualRoot.localPosition = _baseLocalPosition + new Vector3(0f, bob, 0f);
             _visualRoot.localRotation = Quaternion.Euler(0f, 0f, _moving ? phase * 5.5f : phase * 1.8f);
@@ -182,37 +182,11 @@ namespace SpinSquad.Core
             }
             ClearAttack();
             ApplySprite(_profile?.Die);
-            if (_deathRoutine != null)
-                StopCoroutine(_deathRoutine);
-            _deathRoutine = StartCoroutine(DeathRoutine());
-        }
-
-        IEnumerator DeathRoutine()
-        {
-            var dur = Mathf.Max(0.08f, deathFallSeconds);
-            var t = 0f;
-            while (t < dur)
-            {
-                t += Time.deltaTime;
-                var k = Mathf.Clamp01(t / dur);
-                var eased = 1f - Mathf.Pow(1f - k, 3f);
-                var stagger = Mathf.Sin(k * Mathf.PI) * 0.07f;
-                _visualRoot.localPosition = _baseLocalPosition + new Vector3(
-                    _facingSign * (-0.12f * eased),
-                    stagger - 0.11f * eased,
-                    0f);
-                _visualRoot.localRotation = Quaternion.Euler(
-                    0f,
-                    0f,
-                    (_facingSign < 0f ? 72f : -72f) * eased);
-                _visualRoot.localScale = new Vector3(
-                    _baseLocalScale.x * Mathf.Lerp(1f, 1.2f, eased),
-                    _baseLocalScale.y * Mathf.Lerp(1f, 0.52f, eased),
-                    _baseLocalScale.z);
-                yield return null;
-            }
-
-            _deathRoutine = null;
+            // The extracted "down" sprite already contains the complete death pose.
+            // Preserve its authored silhouette instead of rotating or squashing it.
+            _visualRoot.localPosition = _baseLocalPosition;
+            _visualRoot.localRotation = Quaternion.identity;
+            _visualRoot.localScale = _baseLocalScale;
         }
 
         void ResetPose()
