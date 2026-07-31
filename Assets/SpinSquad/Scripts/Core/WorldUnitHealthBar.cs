@@ -19,6 +19,12 @@ namespace SpinSquad.Core
         EnemyInstanceSpec _enemySpec;
         GameObject _root;
         SpriteRenderer _fillSr;
+        SpriteRenderer _damageTrailSr;
+        float _displayedTrail = 1f;
+        float _trailDelayUntil;
+
+        const float TrailHoldSeconds = 0.16f;
+        const float TrailCatchupSpeed = 1.8f;
 
         static Sprite _squareSprite;
 
@@ -28,6 +34,18 @@ namespace SpinSquad.Core
             _allySpec = GetComponent<AllyInstanceSpec>();
             _enemySpec = GetComponent<EnemyInstanceSpec>();
             BuildVisuals();
+        }
+
+        void OnEnable()
+        {
+            if (_hp != null)
+                _hp.Damaged += OnDamaged;
+        }
+
+        void OnDisable()
+        {
+            if (_hp != null)
+                _hp.Damaged -= OnDamaged;
         }
 
         void OnDestroy()
@@ -50,10 +68,13 @@ namespace SpinSquad.Core
 
             var t = _hp.Max > 0.0001f ? Mathf.Clamp01(_hp.Current / _hp.Max) : 0f;
             _fillSr.color = FillTintForFaction();
+            SetBarAmount(_fillSr, t, -0.003f);
 
-            _fillSr.transform.localScale = new Vector3(barWidth * t, barHeight, 1f);
-            // Pivot sprite 0.5,0.5 — co đối xứng quanh tâm khung (không neo mép trái).
-            _fillSr.transform.localPosition = new Vector3(0f, 0f, -0.002f);
+            if (Time.unscaledTime >= _trailDelayUntil)
+                _displayedTrail = Mathf.MoveTowards(_displayedTrail, t, TrailCatchupSpeed * Time.unscaledDeltaTime);
+            else
+                _displayedTrail = Mathf.Max(_displayedTrail, t);
+            SetBarAmount(_damageTrailSr, Mathf.Max(t, _displayedTrail), -0.002f);
         }
 
         void BuildVisuals()
@@ -68,7 +89,7 @@ namespace SpinSquad.Core
             var bg = bgGo.AddComponent<SpriteRenderer>();
             bg.sprite = SquareSprite();
             bg.color = new Color(0.04f, 0.04f, 0.07f, 0.95f);
-            bg.sortingOrder = 35;
+            bg.sortingOrder = 36;
             bg.transform.localScale = new Vector3(barWidth, barHeight, 1f);
 
             var frameGo = new GameObject("Frame");
@@ -76,7 +97,7 @@ namespace SpinSquad.Core
             var frame = frameGo.AddComponent<SpriteRenderer>();
             frame.sprite = SquareSprite();
             frame.color = new Color(0.95f, 0.95f, 1f, 0.8f);
-            frame.sortingOrder = 36;
+            frame.sortingOrder = 35;
             frame.transform.localScale = new Vector3(barWidth + 0.03f, barHeight + 0.03f, 1f);
             frame.transform.localPosition = new Vector3(0f, 0f, 0.002f);
 
@@ -84,7 +105,33 @@ namespace SpinSquad.Core
             fillGo.transform.SetParent(_root.transform, false);
             _fillSr = fillGo.AddComponent<SpriteRenderer>();
             _fillSr.sprite = SquareSprite();
-            _fillSr.sortingOrder = 37;
+            _fillSr.sortingOrder = 38;
+
+            var trailGo = new GameObject("DamageTrail");
+            trailGo.transform.SetParent(_root.transform, false);
+            _damageTrailSr = trailGo.AddComponent<SpriteRenderer>();
+            _damageTrailSr.sprite = SquareSprite();
+            _damageTrailSr.color = new Color(1f, 0.78f, 0.18f, 0.95f);
+            _damageTrailSr.sortingOrder = 37;
+        }
+
+        void OnDamaged(CombatHealth target, float amount)
+        {
+            if (target != _hp || amount <= 0f)
+                return;
+            var current = _hp.Max > 0.0001f ? Mathf.Clamp01(_hp.Current / _hp.Max) : 0f;
+            _displayedTrail = Mathf.Max(_displayedTrail, current);
+            _trailDelayUntil = Time.unscaledTime + TrailHoldSeconds;
+        }
+
+        void SetBarAmount(SpriteRenderer renderer, float amount, float z)
+        {
+            if (renderer == null)
+                return;
+            amount = Mathf.Clamp01(amount);
+            var width = barWidth * amount;
+            renderer.transform.localScale = new Vector3(width, barHeight, 1f);
+            renderer.transform.localPosition = new Vector3((width - barWidth) * 0.5f, 0f, z);
         }
 
         Color FillTintForFaction()

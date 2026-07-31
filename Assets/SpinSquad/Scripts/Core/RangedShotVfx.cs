@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SpinSquad.Data;
 using UnityEngine;
@@ -28,7 +29,12 @@ namespace SpinSquad.Core
             return sp;
         }
 
-        public static void Spawn(Vector3 fromWorld, Vector3 toWorld, CombatFaction shooterFaction, Sprite boltSpriteOverride = null)
+        public static void Spawn(
+            Vector3 fromWorld,
+            Vector3 toWorld,
+            CombatFaction shooterFaction,
+            Sprite boltSpriteOverride = null,
+            Action onImpact = null)
         {
             var dir = (Vector2)(toWorld - fromWorld);
             if (dir.sqrMagnitude < 0.0001f)
@@ -42,7 +48,7 @@ namespace SpinSquad.Core
             var go = new GameObject("RangedShotBolt");
             var bolt = go.AddComponent<RangedShotBolt>();
             var tint = shooterFaction == CombatFaction.Ally ? AllyBoltColor : EnemyBoltColor;
-            bolt.Init(a, b, tint, boltSpriteOverride);
+            bolt.Init(a, b, tint, boltSpriteOverride, onImpact);
         }
     }
 
@@ -54,11 +60,14 @@ namespace SpinSquad.Core
         float _age;
         const float Duration = 0.32f;
         SpriteRenderer _sr;
+        Action _onImpact;
+        bool _impactFired;
 
-        public void Init(Vector3 from, Vector3 to, Color factionTint, Sprite spriteOverride)
+        public void Init(Vector3 from, Vector3 to, Color factionTint, Sprite spriteOverride, Action onImpact)
         {
             _from = from;
             _to = to;
+            _onImpact = onImpact;
 
             _sr = gameObject.AddComponent<SpriteRenderer>();
             if (spriteOverride != null)
@@ -92,7 +101,20 @@ namespace SpinSquad.Core
             c.a = _baseColor.a * (1f - u * u);
             _sr.color = c;
             if (_age >= Duration)
+            {
+                if (!_impactFired)
+                {
+                    _impactFired = true;
+                    _onImpact?.Invoke();
+                    _onImpact = null;
+                }
                 Destroy(gameObject);
+            }
+        }
+
+        void OnDestroy()
+        {
+            _onImpact = null;
         }
     }
 }

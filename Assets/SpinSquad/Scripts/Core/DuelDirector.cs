@@ -1438,18 +1438,26 @@ namespace SpinSquad.Core
             var mid = (allyWorldPos + enemyWorldPos) * 0.5f;
             mid.z = 0f;
 
-            var allyPop = Vector3.Lerp(mid, allyWorldPos, 0.4f) + Vector3.up * 0.12f;
-            var enemyPop = Vector3.Lerp(mid, enemyWorldPos, 0.4f) + Vector3.up * 0.12f;
+            var allyWasHit = damageAllyReceived > 0.0001f;
+            var enemyWasHit = damageEnemyReceived > 0.0001f;
+            var impactPos = allyWasHit && !enemyWasHit
+                ? allyWorldPos
+                : enemyWasHit && !allyWasHit
+                    ? enemyWorldPos
+                    : mid;
+            impactPos.z = 0f;
+            var allyPop = allyWorldPos + Vector3.up * 0.18f;
+            var enemyPop = enemyWorldPos + Vector3.up * 0.18f;
             var totalDamage = Mathf.Max(damageAllyReceived, damageEnemyReceived);
             var strong = totalDamage >= 18f;
             var impactScale = strong ? 0.54f : 0.38f;
-            CombatImpactVfx.SpawnSlash(mid + Vector3.up * 0.06f, new Color(1f, 0.86f, 0.34f, 0.95f), impactScale);
-            CombatImpactVfx.SpawnSpark(mid + Vector3.up * 0.08f, Color.white, impactScale * 0.72f);
+            CombatImpactVfx.SpawnSlash(impactPos + Vector3.up * 0.06f, new Color(1f, 0.86f, 0.34f, 0.95f), impactScale);
+            CombatImpactVfx.SpawnSpark(impactPos + Vector3.up * 0.08f, Color.white, impactScale * 0.72f);
             PlayCombatImpactFeedback(totalDamage, strong);
 
-            if (damageAllyReceived > 0.0001f)
+            if (allyWasHit)
                 FloatingDamagePopup.SpawnAt(allyPop, damageAllyReceived, new Color(0.55f, 0.88f, 1f, 1f), strong);
-            if (damageEnemyReceived > 0.0001f)
+            if (enemyWasHit)
                 FloatingDamagePopup.SpawnAt(enemyPop, damageEnemyReceived, new Color(1f, 0.4f, 0.32f, 1f), strong);
         }
 

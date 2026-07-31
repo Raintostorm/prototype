@@ -116,7 +116,13 @@ namespace SpinSquad.Core
 
         public void QueueAttackHit(Action onHit, Action onComplete = null)
         {
-            TryPlayLine1AttackAnimation(onHit, onComplete);
+            // Combat must remain functional even when a unit is temporarily missing
+            // its presentation driver. The animation is optional; the hit is not.
+            if (!TryPlayLine1AttackAnimation(onHit, onComplete))
+            {
+                onHit?.Invoke();
+                onComplete?.Invoke();
+            }
         }
 
         void UpdateLine1Facing(float dirX)
@@ -553,29 +559,33 @@ namespace SpinSquad.Core
 
             var outgoing = _health.Faction == CombatFaction.Ally ? AllyOutgoingTo(targetHealth) : attackDamage;
             var fromW = _health.transform.position;
-            var toW = targetHealth.transform.position;
             QueueAttackHit(() =>
             {
                 if (_director == null || _director.BattleEnded || targetHealth == null || targetHealth.IsDead)
                     return;
-                targetHealth.TakeDamage(outgoing);
-                if (targetHealth.IsDead || _director.BattleEnded)
+
+                var boltSprite = RangedShotVfx.GetOrCreateBoltSprite(_rangedBoltTextureResourcesPath);
+                RangedShotVfx.Spawn(fromW, targetHealth.transform.position, _health.Faction, boltSprite, () =>
                 {
-                    if (targetHealth.IsDead)
-                        _director.ReportKillingHit(targetHealth, outgoing);
-                    return;
-                }
+                    if (_director == null || _director.BattleEnded || targetHealth == null || targetHealth.IsDead)
+                        return;
+                    targetHealth.TakeDamage(outgoing);
+                    if (targetHealth.IsDead || _director.BattleEnded)
+                    {
+                        if (targetHealth.IsDead)
+                            _director.ReportKillingHit(targetHealth, outgoing);
+                        return;
+                    }
 
-                var allyPos = _health.Faction == CombatFaction.Ally ? _health.transform.position : targetHealth.transform.position;
-                var enemyPos = _health.Faction == CombatFaction.Ally ? targetHealth.transform.position : _health.transform.position;
+                    var allyPos = _health.Faction == CombatFaction.Ally ? _health.transform.position : targetHealth.transform.position;
+                    var enemyPos = _health.Faction == CombatFaction.Ally ? targetHealth.transform.position : _health.transform.position;
 
-                if (_health.Faction == CombatFaction.Ally)
-                    _director.ReportHitExchange(0f, outgoing, allyPos, enemyPos);
-                else
-                    _director.ReportHitExchange(outgoing, 0f, allyPos, enemyPos);
+                    if (_health.Faction == CombatFaction.Ally)
+                        _director.ReportHitExchange(0f, outgoing, allyPos, enemyPos);
+                    else
+                        _director.ReportHitExchange(outgoing, 0f, allyPos, enemyPos);
+                });
             });
-            var boltSprite = RangedShotVfx.GetOrCreateBoltSprite(_rangedBoltTextureResourcesPath);
-            RangedShotVfx.Spawn(fromW, toW, _health.Faction, boltSprite);
         }
 
         static void ClampToArena(Transform t)
