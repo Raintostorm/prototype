@@ -13,10 +13,10 @@ namespace SpinSquad.Core
         [SerializeField] float idleCycleSeconds = 1.15f;
         [SerializeField] float walkBobWorld = 0.075f;
         [SerializeField] float walkCycleSeconds = 0.34f;
-        [SerializeField] float attackDurationSeconds = 0.34f;
-        [SerializeField] float attackLungeWorld = 0.32f;
+        [SerializeField] float attackDurationSeconds = 0.46f;
+        [SerializeField] float attackLungeWorld = 0.42f;
         [SerializeField] float attackHitNormalizedTime = 0.42f;
-        [SerializeField] float attackMinInterval = 0.04f;
+        [SerializeField] float attackMinInterval = 0f;
 
         CombatHealth _health;
         Transform _visualRoot;
@@ -62,13 +62,6 @@ namespace SpinSquad.Core
         {
             if (_dead)
                 return;
-
-            if (Time.time < _nextAttackTime)
-            {
-                onHit?.Invoke();
-                onComplete?.Invoke();
-                return;
-            }
 
             _nextAttackTime = Time.time + Mathf.Max(0.01f, attackMinInterval);
             _onHit = onHit;

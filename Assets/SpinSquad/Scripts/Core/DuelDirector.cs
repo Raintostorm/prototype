@@ -97,7 +97,7 @@ namespace SpinSquad.Core
         [SerializeField] private UnitCatalog unitCatalog;
         [SerializeField] private string allyUnitId = "common_melee";
 
-        [Tooltip("Level 1 wave 1: spawn đủ 5 ally starter (Mộc/Hỏa/Kim/Thủy + Knight) mỗi con một ô — không phụ thuộc allyUnitId. Tắt khi không cần test.")]
+        [Tooltip("Level 1 wave 1: spawn một nhóm ally starter nhỏ để test đọc animation/enemy rõ hơn.")]
         [SerializeField] private bool spawnFiveStarterElementAlliesOnWave1 = true;
 
         [SerializeField] private string enemyUnitId = "unit_moss_oracle";
@@ -572,7 +572,7 @@ namespace SpinSquad.Core
         Button _pauseTopButton;
         Button _settingsTopButton;
         Button _speed2xStubButton;
-        bool _speed2xActive;
+        int _combatSpeedMode; // 0=1x, 1=0.25x debug slow, 2=2x
         GameObject _pauseOverlayRoot;
         Button _pauseResumeButton;
         GameObject _rewardOverlayRoot;
@@ -969,7 +969,7 @@ namespace SpinSquad.Core
             }
         }
 
-        /// <summary>Spawn 5 ally catalog (một ô mỗi loại) + enemy wave 1 — trả false nếu thiếu id trong catalog.</summary>
+        /// <summary>Spawn một nhóm starter nhỏ + enemy wave 1 — trả false nếu thiếu id trong catalog.</summary>
         bool TrySpawnFiveStarterElementAllies(UnitDefinition waveEnemyDef, float wave1TestHpMultiplier, int enemySpawnCount)
         {
             if (unitCatalog == null || waveEnemyDef == null)
@@ -980,8 +980,6 @@ namespace SpinSquad.Core
                 (AllyLineCatalog.Line0Id, 0, 0, 0),
                 (AllyLineCatalog.Line1Id, 1, 1, 0),
                 (AllyLineCatalog.Line2Id, 2, 2, 0),
-                (AllyLineCatalog.Line3Id, 3, 3, 0),
-                (AllyLineCatalog.Line4Id, 4, 0, 1),
             };
 
             var defs = new UnitDefinition[placements.Length];
@@ -1547,7 +1545,7 @@ namespace SpinSquad.Core
                 _rewardSecondaryButton.onClick.RemoveListener(OnRewardSecondaryClicked);
             if (_speed2xStubButton != null)
                 _speed2xStubButton.onClick.RemoveListener(OnSpeed2xClicked);
-            _speed2xActive = false;
+            _combatSpeedMode = 0;
             Time.timeScale = 1f;
             ClosePauseAndRestoreTimeScale();
             CloseSettingsStubPanel();
@@ -2647,12 +2645,19 @@ namespace SpinSquad.Core
                 return;
             }
 
-            Time.timeScale = _speed2xActive && CombatStarted && !BattleEnded ? 2f : 1f;
+            Time.timeScale = CombatStarted && !BattleEnded
+                ? _combatSpeedMode switch
+                {
+                    1 => 0.25f,
+                    2 => 2f,
+                    _ => 1f
+                }
+                : 1f;
         }
 
         void ResetSpeed2x()
         {
-            _speed2xActive = false;
+            _combatSpeedMode = 0;
             RefreshSpeed2xButton();
             ApplyCombatTimeScale();
         }
@@ -2661,7 +2666,7 @@ namespace SpinSquad.Core
         {
             if (!CombatStarted || BattleEnded)
                 return;
-            _speed2xActive = !_speed2xActive;
+            _combatSpeedMode = (_combatSpeedMode + 1) % 3;
             ApplyCombatTimeScale();
             RefreshSpeed2xButton();
         }
@@ -2673,8 +2678,22 @@ namespace SpinSquad.Core
             var inCombat = CombatStarted && !BattleEnded;
             _speed2xStubButton.interactable = inCombat;
             var image = _speed2xStubButton.GetComponent<Image>();
-            var sprite = _speed2xActive && inCombat ? HudUiSprites.CombatSpeed2On : HudUiSprites.CombatSpeed2Off;
+            var sprite = _combatSpeedMode == 2 && inCombat ? HudUiSprites.CombatSpeed2On : HudUiSprites.CombatSpeed2Off;
             HudUiSprites.ApplyIcon(image, sprite, inCombat ? MetaHudTheme.ButtonIconBar : MetaHudTheme.ButtonStubDisabled);
+            var label = _speed2xStubButton.GetComponentInChildren<Text>(true);
+            if (label != null)
+            {
+                label.gameObject.SetActive(true);
+                label.fontSize = 20;
+                label.text = !inCombat
+                    ? "1x"
+                    : _combatSpeedMode switch
+                    {
+                        1 => "0.25x",
+                        2 => "2x",
+                        _ => "1x"
+                    };
+            }
         }
 
         void CloseSettingsStubPanel()
