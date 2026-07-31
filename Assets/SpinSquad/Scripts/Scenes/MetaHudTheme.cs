@@ -69,8 +69,8 @@ namespace SpinSquad.Scenes
         public const float ActionRowGap = 24f;
 
         public const float BottomNavHeight = 132f;
-        public const float BottomActionBarHeight = 128f;
-        public const float InfoStripHeight = 88f;
+        public const float BottomActionBarHeight = 148f;
+        public const float InfoStripHeight = 112f;
 
         /// <summary>Khoảng tâm–tâm CTA dọc (mép–mép ≥ ActionRowGap).</summary>
         public static float CtaSpacing => CtaSize.y + ActionRowGap;

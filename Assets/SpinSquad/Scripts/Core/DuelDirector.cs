@@ -1877,10 +1877,10 @@ namespace SpinSquad.Core
             _duelInfoStripRoot = infoLane.gameObject;
             infoLane.anchoredPosition = new Vector2(0f, barH);
 
-            _prepCoinText = CreateBottomInfoText(infoLane.transform, font, 58f, 26f);
+            _prepCoinText = CreateBottomInfoText(infoLane.transform, font, 80f, 26f);
             _prepCoinText.fontSize = 20;
 
-            _objectiveText = CreateBottomInfoText(infoLane.transform, font, 33f, 26f);
+            _objectiveText = CreateBottomInfoText(infoLane.transform, font, 47f, 28f);
             _objectiveText.fontSize = 18;
             _objectiveText.color = new Color(0.76f, 0.88f, 1f, 1f);
 
@@ -1889,8 +1889,8 @@ namespace SpinSquad.Core
             bannerRt.anchorMin = new Vector2(0.5f, 0f);
             bannerRt.anchorMax = new Vector2(0.5f, 0f);
             bannerRt.pivot = new Vector2(0.5f, 0f);
-            bannerRt.anchoredPosition = new Vector2(0f, 4f);
-            bannerRt.sizeDelta = new Vector2(900f, 28f);
+            bannerRt.anchoredPosition = new Vector2(0f, 7f);
+            bannerRt.sizeDelta = new Vector2(960f, 32f);
             _banner.fontSize = 20;
 
             var barLane = MetaHudTheme.CreateBottomLanePanel(
@@ -1900,17 +1900,17 @@ namespace SpinSquad.Core
 
             _addAllyButton = CreateBottomTextButton(
                 row, font, "Thêm ally", 0f,
-                new Color(0.16f, 0.52f, 0.38f, 0.96f), HudUiSprites.CombatBlueButton);
+                new Color(0.16f, 0.52f, 0.38f, 0.96f));
             _addAllyButton.onClick.AddListener(AddAllyFromButton);
 
             _startCombatButton = CreateBottomTextButton(
-                row, font, "Bắt đầu", 0f, PrepStartButtonColor, HudUiSprites.CombatOrangeButton);
+                row, font, "Bắt đầu", 0f, PrepStartButtonColor);
             _startCombatButton.onClick.AddListener(OnPrepPrimaryClicked);
             _startCombatButtonLabel = _startCombatButton.GetComponentInChildren<Text>();
 
             _alliesBagToggleButton = CreateBottomTextButton(
                 row, font, "Túi 0/16 ▼", 0f,
-                new Color(0.22f, 0.38f, 0.55f, 0.98f), HudUiSprites.CombatBlueButton);
+                new Color(0.22f, 0.38f, 0.55f, 0.98f));
             _alliesBagToggleButton.onClick.AddListener(OnToggleAlliesBagClicked);
 
             var children = new List<RectTransform>
@@ -1919,8 +1919,8 @@ namespace SpinSquad.Core
                 _startCombatButton.GetComponent<RectTransform>(),
                 _alliesBagToggleButton.GetComponent<RectTransform>()
             };
-            var fracs = new List<float> { 0.34f, 0.42f, 0.24f };
-            MetaHudTheme.LayoutHorizontalRow(row, MetaHudTheme.ActionRowGap, children, fracs);
+            var fracs = new List<float> { 0.3f, 0.4f, 0.3f };
+            MetaHudTheme.LayoutHorizontalRow(row, 16f, children, fracs);
         }
 
         void BuildAllyCellContextMenu(Transform canvasParent, Font font)
@@ -1938,10 +1938,10 @@ namespace SpinSquad.Core
             float y = 68f;
             _allyCtxTitleText = CreateCtxLabel(_allyCellMenuRoot.transform, font, "Ô ally", 22, new Vector2(0f, y), new Vector2(300f, 36f));
             y -= 48f;
-            _allyCtxSellButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "", y, new Color(0.38f, 0.28f, 0.18f, 0.98f), HudUiSprites.CombatSell, new Vector2(280f, 52f));
+            _allyCtxSellButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Bán ally", y, new Color(0.38f, 0.28f, 0.18f, 0.98f), null, new Vector2(280f, 58f));
             _allyCtxSellButton.onClick.AddListener(OnAllyCtxSellClicked);
             y -= 56f;
-            _allyCtxMergeButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "", y, new Color(0.22f, 0.42f, 0.28f, 0.98f), HudUiSprites.CombatMerge, new Vector2(280f, 52f));
+            _allyCtxMergeButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Ghép ally", y, new Color(0.22f, 0.42f, 0.28f, 0.98f), null, new Vector2(280f, 58f));
             _allyCtxMergeButton.onClick.AddListener(OnAllyCtxMergeClicked);
             y -= 52f;
             _allyCtxCloseButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Đóng", y, new Color(0.25f, 0.25f, 0.3f, 0.98f));
@@ -2290,14 +2290,16 @@ namespace SpinSquad.Core
             var btnGo = new GameObject(string.IsNullOrEmpty(label) ? "CtxBtn" : label + "Btn");
             btnGo.transform.SetParent(parent, false);
             var img = btnGo.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(img, iconSprite, bg);
+            ApplyGeneratedButtonBackground(img, bg);
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
             var colors = btn.colors;
-            colors.highlightedColor = bg * 1.12f;
-            colors.pressedColor = bg * 0.82f;
+            colors.highlightedColor = new Color(1f, 0.96f, 0.82f, 1f);
+            colors.pressedColor = new Color(0.72f, 0.76f, 0.86f, 1f);
             btn.colors = colors;
+
+            AddButtonIcon(btnGo.transform, iconSprite, string.IsNullOrEmpty(label), 42f);
 
             var labelGo = new GameObject("Txt");
             labelGo.transform.SetParent(btnGo.transform, false);
@@ -2308,11 +2310,12 @@ namespace SpinSquad.Core
             tx.alignment = TextAnchor.MiddleCenter;
             tx.color = Color.white;
             tx.raycastTarget = false;
-            labelGo.SetActive(iconSprite == null || !string.IsNullOrEmpty(label));
+            AddTextShadow(labelGo);
+            labelGo.SetActive(!string.IsNullOrEmpty(label));
             var lrt = tx.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMin = iconSprite != null ? new Vector2(52f, 0f) : Vector2.zero;
             lrt.offsetMax = Vector2.zero;
 
             var rt = btnGo.GetComponent<RectTransform>();
@@ -2335,14 +2338,16 @@ namespace SpinSquad.Core
             var btnGo = new GameObject(label + "PanelBtn");
             btnGo.transform.SetParent(parent, false);
             var img = btnGo.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(img, iconSprite, bg);
+            ApplyGeneratedButtonBackground(img, bg);
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
             var colors = btn.colors;
-            colors.highlightedColor = bg * 1.12f;
-            colors.pressedColor = bg * 0.82f;
+            colors.highlightedColor = new Color(1f, 0.96f, 0.82f, 1f);
+            colors.pressedColor = new Color(0.72f, 0.76f, 0.86f, 1f);
             btn.colors = colors;
+
+            AddButtonIcon(btnGo.transform, iconSprite, string.IsNullOrEmpty(label), Mathf.Min(54f, size.y * 0.64f));
 
             var labelGo = new GameObject("Txt");
             labelGo.transform.SetParent(btnGo.transform, false);
@@ -2353,11 +2358,12 @@ namespace SpinSquad.Core
             tx.alignment = TextAnchor.MiddleCenter;
             tx.color = Color.white;
             tx.raycastTarget = false;
-            labelGo.SetActive(iconSprite == null || !string.IsNullOrEmpty(label));
+            AddTextShadow(labelGo);
+            labelGo.SetActive(!string.IsNullOrEmpty(label));
             var lrt = tx.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = Vector2.zero;
+            lrt.offsetMin = iconSprite != null ? new Vector2(64f, 0f) : Vector2.zero;
             lrt.offsetMax = Vector2.zero;
 
             var rt = btnGo.GetComponent<RectTransform>();
@@ -2823,11 +2829,10 @@ namespace SpinSquad.Core
             _pauseResumeButton = CreatePanelButton(
                 panelGo.transform,
                 font,
-                "",
+                "Tiếp tục",
                 new Vector2(0f, 96f),
-                new Vector2(280f, 64f),
-                PrepStartButtonColor,
-                HudUiSprites.CombatContinue);
+                new Vector2(360f, 72f),
+                PrepStartButtonColor);
             _pauseResumeButton.onClick.AddListener(OnPauseResumeClicked);
 
             _pauseRestartButton = CreatePanelButton(
@@ -2890,8 +2895,7 @@ namespace SpinSquad.Core
                 "Tiếp tục",
                 new Vector2(0f, -92f),
                 new Vector2(360f, 72f),
-                PrepStartButtonColor,
-                HudUiSprites.CombatContinue);
+                PrepStartButtonColor);
             _rewardPrimaryButton.onClick.AddListener(OnRewardPrimaryClicked);
 
             _rewardSecondaryButton = CreatePanelButton(
@@ -3636,32 +3640,36 @@ namespace SpinSquad.Core
             btnGo.transform.SetParent(canvasParent, false);
 
             var image = btnGo.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(image, iconSprite, bg);
+            ApplyGeneratedButtonBackground(image, bg);
             image.raycastTarget = true;
 
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = image;
             var colors = btn.colors;
-            colors.highlightedColor = bg * 1.15f;
-            colors.pressedColor = bg * 0.75f;
+            colors.highlightedColor = new Color(1f, 0.96f, 0.82f, 1f);
+            colors.pressedColor = new Color(0.72f, 0.76f, 0.86f, 1f);
             btn.colors = colors;
+
+            AddButtonIcon(btnGo.transform, iconSprite, string.IsNullOrEmpty(label), 52f);
 
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(btnGo.transform, false);
             var text = labelGo.AddComponent<Text>();
             text.font = font;
             text.text = label;
-            text.fontSize = 34;
+            text.fontSize = 30;
+            text.fontStyle = FontStyle.Bold;
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
             text.raycastTarget = false;
-            labelGo.SetActive(iconSprite == null || !string.IsNullOrEmpty(label));
+            AddTextShadow(labelGo);
+            labelGo.SetActive(!string.IsNullOrEmpty(label));
 
             var labelRt = text.rectTransform;
             labelRt.anchorMin = Vector2.zero;
             labelRt.anchorMax = Vector2.one;
-            labelRt.offsetMin = Vector2.zero;
-            labelRt.offsetMax = Vector2.zero;
+            labelRt.offsetMin = iconSprite != null ? new Vector2(64f, 0f) : new Vector2(14f, 4f);
+            labelRt.offsetMax = new Vector2(-14f, -4f);
 
             var btnRt = btnGo.GetComponent<RectTransform>();
             btnRt.anchorMin = new Vector2(0.5f, 0f);
@@ -3671,6 +3679,53 @@ namespace SpinSquad.Core
             btnRt.sizeDelta = iconSprite != null ? new Vector2(480f, 96f) : new Vector2(420f, 88f);
 
             return btn;
+        }
+
+        static void ApplyGeneratedButtonBackground(Image image, Color fallbackColor)
+        {
+            if (image == null)
+                return;
+            var generated = GeneratedUiSprites.PrimaryButton;
+            if (generated == null)
+            {
+                image.sprite = CreateWhiteSprite();
+                image.color = fallbackColor;
+                image.type = Image.Type.Simple;
+                return;
+            }
+
+            image.sprite = generated;
+            image.color = Color.white;
+            image.type = Image.Type.Sliced;
+            image.preserveAspect = false;
+        }
+
+        static void AddButtonIcon(Transform parent, Sprite iconSprite, bool centered, float size)
+        {
+            if (parent == null || iconSprite == null)
+                return;
+            var iconGo = new GameObject("Icon");
+            iconGo.transform.SetParent(parent, false);
+            var icon = iconGo.AddComponent<Image>();
+            icon.sprite = iconSprite;
+            icon.color = Color.white;
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            var rt = icon.rectTransform;
+            rt.anchorMin = rt.anchorMax = new Vector2(centered ? 0.5f : 0f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = centered ? Vector2.zero : new Vector2(size * 0.78f, 0f);
+            rt.sizeDelta = new Vector2(size, size);
+        }
+
+        static void AddTextShadow(GameObject textObject)
+        {
+            if (textObject == null)
+                return;
+            var shadow = textObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.78f);
+            shadow.effectDistance = new Vector2(2f, -2f);
+            shadow.useGraphicAlpha = true;
         }
 
         void RefreshPauseTopIcon(bool paused)

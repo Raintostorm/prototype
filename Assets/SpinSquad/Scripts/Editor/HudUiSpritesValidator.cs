@@ -23,7 +23,8 @@ namespace SpinSquad.EditorTools
             Check("Combat Shop", HudUiSprites.CombatShop, ref ok, ref fail);
             Check("Combat Merge", HudUiSprites.CombatMerge, ref ok, ref fail);
             Check("Combat Sell", HudUiSprites.CombatSell, ref ok, ref fail);
-            Debug.Log($"[HudUiSprites] Validate (7 wired): {ok} OK, {fail} missing.");
+            Check("Generated primary button", GeneratedUiSprites.PrimaryButton, ref ok, ref fail);
+            Debug.Log($"[HudUiSprites] Validate wired assets: {ok} OK, {fail} missing.");
         }
 
         [MenuItem("SpinSquad/UI/Validate All HUD Sprites (68)", false, 3)]
