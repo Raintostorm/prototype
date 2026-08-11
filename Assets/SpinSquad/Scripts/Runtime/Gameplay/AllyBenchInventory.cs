@@ -63,6 +63,26 @@ namespace SpinSquad.Core
 
         public bool HasFreeSlot => FindFreeSlotIndex() >= 0;
 
+        public int CountMatching(int lineIndex, Rarity rarity)
+        {
+            var count = 0;
+            for (var i = 0; i < SlotCount; i++)
+                if (_slots[i].HasValue && _slots[i].Value.Matches(lineIndex, rarity)) count++;
+            return count;
+        }
+
+        public int ConsumeMatching(int lineIndex, Rarity rarity, int maximum)
+        {
+            var consumed = 0;
+            for (var i = 0; i < SlotCount && consumed < maximum; i++)
+            {
+                if (!_slots[i].HasValue || !_slots[i].Value.Matches(lineIndex, rarity)) continue;
+                ClearSlot(i);
+                consumed++;
+            }
+            return consumed;
+        }
+
         public void ApplyBagVisibility(bool prepPhase, bool showBagUnits)
         {
             if (_visualsRoot != null)
@@ -202,6 +222,10 @@ namespace SpinSquad.Core
 
             var pos = BattleGrid.GetInventorySlotCenter(slot);
             var go = _director.CreateBenchAllyVisual(def, tier, hp, atk, lineIndex, pos);
+            // Bag visibility is controlled by this root. Keeping the visual in
+            // world space while parenting preserves its slot position and makes
+            // opening/closing the bag hide the complete unit reliably.
+            go.transform.SetParent(_visualsRoot, true);
             var marker = go.GetComponent<BenchAllyMarker>();
             marker.SlotIndex = slot;
             _visuals[slot] = go;

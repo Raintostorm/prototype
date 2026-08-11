@@ -555,6 +555,8 @@ namespace SpinSquad.Core
         Image[] _rollSlotBacks = new Image[6];
         Text[] _rollSlotTexts = new Text[6];
         Text _buffStatusText;
+        readonly GameObject[] _buffMetricRoots = new GameObject[4];
+        readonly Text[] _buffMetricValues = new Text[4];
         Text _rollSummaryText;
         Text _rollJackpotText;
         GameObject _animationTestPanelRoot;
@@ -584,6 +586,28 @@ namespace SpinSquad.Core
         RewardPrimaryAction _rewardSecondaryAction;
         GameObject _settingsStubRoot;
         Button _settingsStubCloseButton;
+        enum CombatStatsTab { Damage, Taken, Healing }
+        sealed class CombatUnitStats
+        {
+            public string Label;
+            public CombatFaction Faction;
+            public float DamageDealt;
+            public float DamageTaken;
+            public float Healing;
+        }
+        CombatStatsTab _combatStatsTab;
+        GameObject _combatStatsRoot;
+        Text _combatStatsTitle;
+        Text _combatStatsBody;
+        Text _combatStatsEnemyBody;
+        readonly Button[] _combatStatsTabButtons = new Button[3];
+        float _allyDamageDealt;
+        float _enemyDamageDealt;
+        float _allyDamageTaken;
+        float _enemyDamageTaken;
+        float _allyHealing;
+        float _enemyHealing;
+        readonly Dictionary<int, CombatUnitStats> _combatUnitStats = new();
         readonly List<Line1BattleSpriteAnimator> _animationTestTargets = new();
         int _animationTestTargetIndex;
         bool _rollBusy;
@@ -602,7 +626,9 @@ namespace SpinSquad.Core
             if (cam != null)
                 cam.backgroundColor = new Color(0.06f, 0.09f, 0.14f, 1f);
             var uiWorldLift = MetaHudTheme.DuelPrepBottomUiWorldHeight(cam);
-            BattleGrid.ConfigureForCenteredPair(cam, gapBetweenGrids: 0.86f, baseY: -0.74f, extraBaseYOffset: uiWorldLift * 0.55f);
+            // Keep both formations in the lower combat field. This explicit 1.2 world-unit
+            // drop makes the placement stable and predictable across screen aspect ratios.
+            BattleGrid.ConfigureForCenteredPair(cam, gapBetweenGrids: 0.86f, baseY: -1.94f, extraBaseYOffset: uiWorldLift * 0.08f);
             BattleGrid.BuildVisuals(transform);
             RefreshDuelSceneBackground();
 
@@ -740,6 +766,7 @@ namespace SpinSquad.Core
 
             ClearAllySelection();
             SnapshotAllyGridForPostWaveRestore();
+            ResetCombatStats();
 
             CombatStarted = true;
             CombatEngaged = false;
@@ -1324,7 +1351,11 @@ namespace SpinSquad.Core
             }
 
             if (_allyBench != null && _allyBench.TryAdd(def, tier, hp, atk, line))
+            {
+                if (!_suppressAllyAutoMerge)
+                    TryAutoMergeAllAllyBoard();
                 return true;
+            }
 
             return false;
         }
@@ -1852,6 +1883,7 @@ namespace SpinSquad.Core
             _banner.raycastTarget = false;
 
             _buffStatusText = CreateTopBuffStatusText(canvasGo.transform, _banner.font);
+            BuildCombatStatsPanel(canvasGo.transform, _banner.font);
             BuildDuelTopBar(canvasGo.transform, _banner.font);
             BuildPauseOverlay(canvasGo.transform, _banner.font);
             BuildRewardOverlay(canvasGo.transform, _banner.font);
@@ -1877,21 +1909,27 @@ namespace SpinSquad.Core
             _duelInfoStripRoot = infoLane.gameObject;
             infoLane.anchoredPosition = new Vector2(0f, barH);
 
-            _prepCoinText = CreateBottomInfoText(infoLane.transform, font, 80f, 26f);
-            _prepCoinText.fontSize = 20;
+            _prepCoinText = CreateBottomInfoText(infoLane.transform, font, 96f, 32f);
+            _prepCoinText.fontSize = 32;
+            _prepCoinText.fontStyle = FontStyle.Bold;
+            AddTextShadow(_prepCoinText.gameObject);
 
-            _objectiveText = CreateBottomInfoText(infoLane.transform, font, 47f, 28f);
-            _objectiveText.fontSize = 18;
-            _objectiveText.color = new Color(0.76f, 0.88f, 1f, 1f);
+            _objectiveText = CreateBottomInfoText(infoLane.transform, font, 56f, 34f);
+            _objectiveText.fontSize = 31;
+            _objectiveText.fontStyle = FontStyle.Bold;
+            _objectiveText.color = new Color(0.86f, 0.94f, 1f, 1f);
+            AddTextShadow(_objectiveText.gameObject);
 
             _banner.transform.SetParent(infoLane.transform, false);
             var bannerRt = _banner.rectTransform;
             bannerRt.anchorMin = new Vector2(0.5f, 0f);
             bannerRt.anchorMax = new Vector2(0.5f, 0f);
             bannerRt.pivot = new Vector2(0.5f, 0f);
-            bannerRt.anchoredPosition = new Vector2(0f, 7f);
-            bannerRt.sizeDelta = new Vector2(960f, 32f);
-            _banner.fontSize = 20;
+            bannerRt.anchoredPosition = new Vector2(0f, 8f);
+            bannerRt.sizeDelta = new Vector2(960f, 42f);
+            _banner.fontSize = 34;
+            _banner.fontStyle = FontStyle.Bold;
+            AddTextShadow(_banner.gameObject);
 
             var barLane = MetaHudTheme.CreateBottomLanePanel(
                 canvasParent, barH, MetaHudTheme.BottomLaneBand, "DuelBottomBar");
@@ -2290,7 +2328,7 @@ namespace SpinSquad.Core
             var btnGo = new GameObject(string.IsNullOrEmpty(label) ? "CtxBtn" : label + "Btn");
             btnGo.transform.SetParent(parent, false);
             var img = btnGo.AddComponent<Image>();
-            ApplyGeneratedButtonBackground(img, bg);
+            SpinSquadButtonTheme.Apply(img, SpinSquadButtonTheme.FromLabel(label));
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
@@ -2306,7 +2344,7 @@ namespace SpinSquad.Core
             var tx = labelGo.AddComponent<Text>();
             tx.font = font;
             tx.text = label;
-            tx.fontSize = 26;
+            tx.fontSize = 30;
             tx.alignment = TextAnchor.MiddleCenter;
             tx.color = Color.white;
             tx.raycastTarget = false;
@@ -2338,7 +2376,7 @@ namespace SpinSquad.Core
             var btnGo = new GameObject(label + "PanelBtn");
             btnGo.transform.SetParent(parent, false);
             var img = btnGo.AddComponent<Image>();
-            ApplyGeneratedButtonBackground(img, bg);
+            SpinSquadButtonTheme.Apply(img, SpinSquadButtonTheme.FromLabel(label));
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
@@ -2354,7 +2392,7 @@ namespace SpinSquad.Core
             var tx = labelGo.AddComponent<Text>();
             tx.font = font;
             tx.text = label;
-            tx.fontSize = 25;
+            tx.fontSize = 29;
             tx.alignment = TextAnchor.MiddleCenter;
             tx.color = Color.white;
             tx.raycastTarget = false;
@@ -2699,7 +2737,8 @@ namespace SpinSquad.Core
             if (label != null)
             {
                 label.gameObject.SetActive(true);
-                label.fontSize = 20;
+                label.fontSize = 30;
+                label.fontStyle = FontStyle.Bold;
                 label.text = _combatSpeedMode switch
                 {
                     1 => "0.25x",
@@ -2762,7 +2801,7 @@ namespace SpinSquad.Core
             var py = -insetY - h * 0.5f;
 
             _pauseTopButton = CreateTopRightAnchoredTextButton(
-                canvasParent, font, "", new Vector2(px, py), new Vector2(148f, 64f),
+                canvasParent, font, "", new Vector2(px, py), new Vector2(160f, h),
                 MetaHudTheme.ButtonIconBar, OnPauseTopButtonClicked, true, "DuelPauseTop", HudUiSprites.CombatPause);
 
             px -= w + gap;
@@ -3126,7 +3165,7 @@ namespace SpinSquad.Core
             var text = labelGo.AddComponent<Text>();
             text.font = font;
             text.text = label;
-            text.fontSize = 24;
+            text.fontSize = 28;
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
             text.raycastTarget = false;
@@ -3147,23 +3186,351 @@ namespace SpinSquad.Core
             return btn;
         }
 
-        static Text CreateTopBuffStatusText(Transform canvasParent, Font font)
+        Text CreateTopBuffStatusText(Transform canvasParent, Font font)
         {
-            var go = new GameObject("BuffStatusBar");
-            go.transform.SetParent(canvasParent, false);
+            var root = new GameObject("BuffStatusBar");
+            root.transform.SetParent(canvasParent, false);
+            var rootRt = root.AddComponent<RectTransform>();
+            rootRt.anchorMin = rootRt.anchorMax = new Vector2(0.5f, 1f);
+            rootRt.pivot = new Vector2(0.5f, 1f);
+            rootRt.anchoredPosition = new Vector2(0f, -184f);
+            rootRt.sizeDelta = new Vector2(940f, 82f);
+
+            var frame = root.AddComponent<Image>();
+            frame.sprite = MetaHomeUiSprites.ResourcePill;
+            frame.type = Image.Type.Sliced;
+            frame.color = new Color(0.05f, 0.14f, 0.23f, 0.94f);
+            frame.raycastTarget = false;
+
+            var go = new GameObject("Label");
+            go.transform.SetParent(root.transform, false);
             var t = go.AddComponent<Text>();
             t.font = font;
-            t.fontSize = 22;
+            t.fontSize = 36;
+            t.fontStyle = FontStyle.Bold;
             t.alignment = TextAnchor.MiddleCenter;
-            t.color = new Color(0.82f, 0.9f, 1f, 1f);
+            t.color = new Color(0.94f, 0.98f, 1f, 1f);
             t.raycastTarget = false;
             t.text = "Buff: —";
             var rt = t.rectTransform;
-            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 1f);
-            rt.pivot = new Vector2(0.5f, 1f);
-            rt.anchoredPosition = new Vector2(0f, -188f);
-            rt.sizeDelta = new Vector2(980f, 64f);
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = new Vector2(28f, 8f);
+            rt.offsetMax = new Vector2(-28f, -8f);
+            var outline = go.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0.03f, 0.06f, 0.94f);
+            outline.effectDistance = new Vector2(2f, -2f);
+            outline.useGraphicAlpha = true;
+
+            var sprites = new[]
+            {
+                MetaHomeUiSprites.BuffHpIcon,
+                MetaHomeUiSprites.BuffDamageIcon,
+                MetaHomeUiSprites.BuffSpeedIcon,
+                MetaHomeUiSprites.BuffCritIcon
+            };
+            for (var i = 0; i < sprites.Length; i++)
+            {
+                var metric = new GameObject("BuffMetric" + i);
+                metric.transform.SetParent(root.transform, false);
+                var metricRt = metric.AddComponent<RectTransform>();
+                metricRt.anchorMin = metricRt.anchorMax = new Vector2(0.5f, 0.5f);
+                metricRt.pivot = new Vector2(0.5f, 0.5f);
+                metricRt.anchoredPosition = new Vector2((i - 1.5f) * 220f, 0f);
+                metricRt.sizeDelta = new Vector2(210f, 64f);
+
+                var iconGo = new GameObject("Icon");
+                iconGo.transform.SetParent(metric.transform, false);
+                var icon = iconGo.AddComponent<Image>();
+                icon.sprite = sprites[i];
+                icon.color = Color.white;
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                var iconRt = icon.rectTransform;
+                iconRt.anchorMin = iconRt.anchorMax = new Vector2(0f, 0.5f);
+                iconRt.pivot = new Vector2(0f, 0.5f);
+                iconRt.anchoredPosition = new Vector2(10f, 0f);
+                iconRt.sizeDelta = new Vector2(46f, 46f);
+
+                var valueGo = new GameObject("Value");
+                valueGo.transform.SetParent(metric.transform, false);
+                var value = valueGo.AddComponent<Text>();
+                value.font = font;
+                value.fontSize = 30;
+                value.fontStyle = FontStyle.Bold;
+                value.alignment = TextAnchor.MiddleLeft;
+                value.color = Color.white;
+                value.raycastTarget = false;
+                var valueRt = value.rectTransform;
+                valueRt.anchorMin = Vector2.zero;
+                valueRt.anchorMax = Vector2.one;
+                valueRt.offsetMin = new Vector2(64f, 4f);
+                valueRt.offsetMax = new Vector2(-8f, -4f);
+                AddTextShadow(valueGo);
+
+                _buffMetricRoots[i] = metric;
+                _buffMetricValues[i] = value;
+                metric.SetActive(false);
+            }
             return t;
+        }
+
+        void BuildCombatStatsPanel(Transform canvasParent, Font font)
+        {
+            _combatStatsRoot = new GameObject("CombatStats");
+            _combatStatsRoot.transform.SetParent(canvasParent, false);
+            var rootRt = _combatStatsRoot.AddComponent<RectTransform>();
+            rootRt.anchorMin = rootRt.anchorMax = new Vector2(0.5f, 1f);
+            rootRt.pivot = new Vector2(0.5f, 1f);
+            rootRt.anchoredPosition = new Vector2(0f, -282f);
+            rootRt.sizeDelta = new Vector2(940f, 330f);
+
+            var labels = new[] { "DAMAGE", "TAKEN", "HEALING" };
+            for (var i = 0; i < labels.Length; i++)
+            {
+                var tab = (CombatStatsTab)i;
+                var buttonGo = new GameObject(labels[i] + "Tab");
+                buttonGo.transform.SetParent(_combatStatsRoot.transform, false);
+                var buttonRt = buttonGo.AddComponent<RectTransform>();
+                buttonRt.anchorMin = buttonRt.anchorMax = new Vector2(0.5f, 1f);
+                buttonRt.pivot = new Vector2(0.5f, 1f);
+                buttonRt.anchoredPosition = new Vector2((i - 1) * 300f, 0f);
+                buttonRt.sizeDelta = new Vector2(280f, 66f);
+
+                var image = buttonGo.AddComponent<Image>();
+                SpinSquadButtonTheme.Apply(image, i == 0 ? SpinSquadButtonRole.Primary : SpinSquadButtonRole.Secondary);
+                var button = buttonGo.AddComponent<Button>();
+                button.targetGraphic = image;
+                button.onClick.AddListener(() => SelectCombatStatsTab(tab));
+                _combatStatsTabButtons[i] = button;
+
+                var labelGo = new GameObject("Label");
+                labelGo.transform.SetParent(buttonGo.transform, false);
+                var label = labelGo.AddComponent<Text>();
+                label.font = font;
+                label.text = labels[i];
+                label.fontSize = 27;
+                label.fontStyle = FontStyle.Bold;
+                label.alignment = TextAnchor.MiddleCenter;
+                label.color = Color.white;
+                label.raycastTarget = false;
+                var labelRt = label.rectTransform;
+                labelRt.anchorMin = Vector2.zero;
+                labelRt.anchorMax = Vector2.one;
+                labelRt.offsetMin = new Vector2(12f, 6f);
+                labelRt.offsetMax = new Vector2(-12f, -6f);
+                AddTextShadow(labelGo);
+            }
+
+            var panelGo = new GameObject("StatsFrame");
+            panelGo.transform.SetParent(_combatStatsRoot.transform, false);
+            var panelRt = panelGo.AddComponent<RectTransform>();
+            panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 1f);
+            panelRt.pivot = new Vector2(0.5f, 1f);
+            panelRt.anchoredPosition = new Vector2(0f, -76f);
+            panelRt.sizeDelta = new Vector2(900f, 238f);
+            var panelImage = panelGo.AddComponent<Image>();
+            panelImage.sprite = MetaHomeUiSprites.CampaignPanel;
+            panelImage.type = Image.Type.Sliced;
+            panelImage.color = new Color(0.035f, 0.075f, 0.12f, 0.9f);
+            panelImage.raycastTarget = false;
+
+            _combatStatsTitle = CreateCombatStatsText(panelGo.transform, font, 32, FontStyle.Bold);
+            var titleRt = _combatStatsTitle.rectTransform;
+            titleRt.anchorMin = new Vector2(0f, 1f);
+            titleRt.anchorMax = new Vector2(1f, 1f);
+            titleRt.pivot = new Vector2(0.5f, 1f);
+            titleRt.offsetMin = new Vector2(36f, -72f);
+            titleRt.offsetMax = new Vector2(-36f, -18f);
+
+            _combatStatsBody = CreateCombatStatsText(panelGo.transform, font, 23, FontStyle.Bold);
+            _combatStatsBody.alignment = TextAnchor.UpperLeft;
+            _combatStatsBody.lineSpacing = 1.08f;
+            var bodyRt = _combatStatsBody.rectTransform;
+            bodyRt.anchorMin = Vector2.zero;
+            bodyRt.anchorMax = new Vector2(0.5f, 1f);
+            bodyRt.offsetMin = new Vector2(38f, 18f);
+            bodyRt.offsetMax = new Vector2(-12f, -72f);
+
+            _combatStatsEnemyBody = CreateCombatStatsText(panelGo.transform, font, 23, FontStyle.Bold);
+            _combatStatsEnemyBody.alignment = TextAnchor.UpperLeft;
+            _combatStatsEnemyBody.lineSpacing = 1.08f;
+            var enemyBodyRt = _combatStatsEnemyBody.rectTransform;
+            enemyBodyRt.anchorMin = new Vector2(0.5f, 0f);
+            enemyBodyRt.anchorMax = Vector2.one;
+            enemyBodyRt.offsetMin = new Vector2(12f, 18f);
+            enemyBodyRt.offsetMax = new Vector2(-38f, -72f);
+
+            _combatStatsTab = CombatStatsTab.Damage;
+            RefreshCombatStatsPanel();
+        }
+
+        static Text CreateCombatStatsText(Transform parent, Font font, int fontSize, FontStyle style)
+        {
+            var go = new GameObject("Text");
+            go.transform.SetParent(parent, false);
+            var text = go.AddComponent<Text>();
+            text.font = font;
+            text.fontSize = fontSize;
+            text.fontStyle = style;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.color = new Color(0.94f, 0.98f, 1f, 1f);
+            text.raycastTarget = false;
+            AddTextShadow(go);
+            return text;
+        }
+
+        void SelectCombatStatsTab(CombatStatsTab tab)
+        {
+            _combatStatsTab = tab;
+            RefreshCombatStatsPanel();
+        }
+
+        void RefreshCombatStatsPanel()
+        {
+            if (_combatStatsTitle == null || _combatStatsBody == null || _combatStatsEnemyBody == null)
+                return;
+
+            _combatStatsTitle.text = _combatStatsTab switch
+            {
+                CombatStatsTab.Taken => "TOP 4 · DAMAGE TAKEN",
+                CombatStatsTab.Healing => "TOP 4 · HEALING",
+                _ => "TOP 4 · DAMAGE DEALT"
+            };
+
+            _combatStatsBody.text = "ALLIES TOP 4\n" + BuildCombatStatsRanking(_combatStatsTab, CombatFaction.Ally);
+            _combatStatsEnemyBody.text = "ENEMIES TOP 4\n" + BuildCombatStatsRanking(_combatStatsTab, CombatFaction.Enemy);
+
+            for (var i = 0; i < _combatStatsTabButtons.Length; i++)
+            {
+                var button = _combatStatsTabButtons[i];
+                if (button == null)
+                    continue;
+                SpinSquadButtonTheme.Apply(
+                    button.GetComponent<Image>(),
+                    i == (int)_combatStatsTab ? SpinSquadButtonRole.Primary : SpinSquadButtonRole.Secondary);
+            }
+        }
+
+        void ResetCombatStats()
+        {
+            _allyDamageDealt = 0f;
+            _enemyDamageDealt = 0f;
+            _allyDamageTaken = 0f;
+            _enemyDamageTaken = 0f;
+            _allyHealing = 0f;
+            _enemyHealing = 0f;
+            _combatUnitStats.Clear();
+            foreach (var ally in _allies)
+                EnsureCombatUnitStats(ally);
+            foreach (var enemy in _enemies)
+                EnsureCombatUnitStats(enemy);
+            RefreshCombatStatsPanel();
+        }
+
+        internal void RecordCombatDamage(CombatHealth attacker, CombatHealth victim, float amount)
+        {
+            if (attacker == null || victim == null || amount <= 0f)
+                return;
+
+            if (attacker.Faction == CombatFaction.Ally)
+                _allyDamageDealt += amount;
+            else
+                _enemyDamageDealt += amount;
+
+            if (victim.Faction == CombatFaction.Ally)
+                _allyDamageTaken += amount;
+            else
+                _enemyDamageTaken += amount;
+
+            var attackerStats = EnsureCombatUnitStats(attacker);
+            var victimStats = EnsureCombatUnitStats(victim);
+            if (attackerStats != null)
+                attackerStats.DamageDealt += amount;
+            if (victimStats != null)
+                victimStats.DamageTaken += amount;
+
+            RefreshCombatStatsPanel();
+        }
+
+        string BuildCombatStatsRanking(CombatStatsTab tab, CombatFaction faction)
+        {
+            var ranked = new List<CombatUnitStats>(_combatUnitStats.Values);
+            ranked.RemoveAll(entry => entry.Faction != faction || CombatStatsValue(entry, tab) <= 0.001f);
+            ranked.Sort((left, right) =>
+            {
+                var valueOrder = CombatStatsValue(right, tab).CompareTo(CombatStatsValue(left, tab));
+                return valueOrder != 0 ? valueOrder : string.CompareOrdinal(left.Label, right.Label);
+            });
+
+            if (ranked.Count == 0)
+                return tab == CombatStatsTab.Healing ? "No healing" : "No data yet";
+
+            var lines = new System.Text.StringBuilder(128);
+            var count = Mathf.Min(4, ranked.Count);
+            for (var i = 0; i < count; i++)
+            {
+                var entry = ranked[i];
+                lines.Append(i + 1)
+                    .Append(". ")
+                    .Append(ShortCombatStatsLabel(entry.Label).PadRight(16))
+                    .Append(Mathf.RoundToInt(CombatStatsValue(entry, tab)).ToString("N0"));
+                if (i + 1 < count)
+                    lines.Append('\n');
+            }
+            return lines.ToString();
+        }
+
+        static string ShortCombatStatsLabel(string label) =>
+            !string.IsNullOrEmpty(label) && label.Length > 14 ? label.Substring(0, 14) : label;
+
+        static float CombatStatsValue(CombatUnitStats entry, CombatStatsTab tab) => tab switch
+        {
+            CombatStatsTab.Taken => entry.DamageTaken,
+            CombatStatsTab.Healing => entry.Healing,
+            _ => entry.DamageDealt
+        };
+
+        CombatUnitStats EnsureCombatUnitStats(CombatHealth unit)
+        {
+            if (unit == null)
+                return null;
+
+            var instanceId = unit.GetInstanceID();
+            if (_combatUnitStats.TryGetValue(instanceId, out var existing))
+                return existing;
+
+            var ordinal = 1;
+            foreach (var entry in _combatUnitStats.Values)
+            {
+                if (entry.Faction == unit.Faction)
+                    ordinal++;
+            }
+
+            var displayName = ResolveCombatStatsDisplayName(unit);
+            var prefix = unit.Faction == CombatFaction.Ally ? "A" : "E";
+            var created = new CombatUnitStats
+            {
+                Faction = unit.Faction,
+                Label = $"[{prefix}{ordinal}] {displayName}"
+            };
+            _combatUnitStats.Add(instanceId, created);
+            return created;
+        }
+
+        string ResolveCombatStatsDisplayName(CombatHealth unit)
+        {
+            var unitId = unit.GetComponent<AllyInstanceSpec>()?.CatalogUnitId;
+            if (string.IsNullOrWhiteSpace(unitId))
+                unitId = unit.GetComponent<EnemyInstanceSpec>()?.CatalogUnitId;
+
+            var displayName = unit.gameObject.name;
+            if (!string.IsNullOrWhiteSpace(unitId) && unitCatalog != null &&
+                unitCatalog.TryGet(unitId, out var definition) && !string.IsNullOrWhiteSpace(definition.DisplayName))
+                displayName = definition.DisplayName;
+
+            displayName = string.IsNullOrWhiteSpace(displayName) ? "Unit" : displayName.Trim();
+            return displayName.Length <= 15 ? displayName : displayName.Substring(0, 15);
         }
 
         void RefreshBattleGridPrepVisuals()
@@ -3261,17 +3628,29 @@ namespace SpinSquad.Core
             var dmg = BattleRunBuffs.DmgPct;
             var asp = BattleRunBuffs.AtkSpeedPct;
             var cr = BattleRunBuffs.CritChance;
-            var waveFrom = BattleRunBuffs.ActiveFromWave;
             var has =
                 hp > 0.0001f || dmg > 0.0001f || asp > 0.0001f || cr > 0.0001f;
             if (!has)
             {
+                _buffStatusText.gameObject.SetActive(true);
                 _buffStatusText.text = "Buff: none — roll to acquire one";
+                foreach (var metric in _buffMetricRoots)
+                {
+                    if (metric != null)
+                        metric.SetActive(false);
+                }
                 return;
             }
 
-            _buffStatusText.text =
-                $"Buff: HP +{hp * 100f:0.#}%  DMG +{dmg * 100f:0.#}%  ATK SPD +{asp * 100f:0.#}%  CRIT +{cr * 100f:0.#}%  | from wave {waveFrom}";
+            _buffStatusText.gameObject.SetActive(false);
+            var values = new[] { hp, dmg, asp, cr };
+            for (var i = 0; i < _buffMetricRoots.Length; i++)
+            {
+                if (_buffMetricRoots[i] != null)
+                    _buffMetricRoots[i].SetActive(true);
+                if (_buffMetricValues[i] != null)
+                    _buffMetricValues[i].text = $"+{values[i] * 100f:0.#}%";
+            }
         }
 
         static Text CreateBottomInfoText(Transform canvasParent, Font font, float yFromBottom, float height)
@@ -3352,7 +3731,7 @@ namespace SpinSquad.Core
                 var go = new GameObject($"Slot{i}");
                 go.transform.SetParent(_rollUiRoot.transform, false);
                 var img = go.AddComponent<Image>();
-                HudUiSprites.ApplyIcon(img, HudUiSprites.MetaNotSelected, RollSlotAllyBg);
+                ApplySpinSquadRollSlotFrame(img, null);
                 img.raycastTarget = false;
                 _rollSlotBacks[i] = img;
 
@@ -3360,7 +3739,7 @@ namespace SpinSquad.Core
                 labelGo.transform.SetParent(go.transform, false);
                 var t = labelGo.AddComponent<Text>();
                 t.font = font;
-                t.fontSize = 24;
+                t.fontSize = 28;
                 t.alignment = TextAnchor.MiddleCenter;
                 t.color = Color.white;
                 t.text = "—";
@@ -3382,7 +3761,7 @@ namespace SpinSquad.Core
             sumGo.transform.SetParent(_rollUiRoot.transform, false);
             _rollSummaryText = sumGo.AddComponent<Text>();
             _rollSummaryText.font = font;
-            _rollSummaryText.fontSize = 22;
+            _rollSummaryText.fontSize = 30;
             _rollSummaryText.alignment = TextAnchor.MiddleCenter;
             _rollSummaryText.color = new Color(0.85f, 0.92f, 1f, 1f);
             _rollSummaryText.text = string.Empty;
@@ -3397,7 +3776,7 @@ namespace SpinSquad.Core
             jpGo.transform.SetParent(_rollUiRoot.transform, false);
             _rollJackpotText = jpGo.AddComponent<Text>();
             _rollJackpotText.font = font;
-            _rollJackpotText.fontSize = 26;
+            _rollJackpotText.fontSize = 32;
             _rollJackpotText.alignment = TextAnchor.MiddleCenter;
             _rollJackpotText.color = new Color(1f, 0.85f, 0.2f, 1f);
             _rollJackpotText.text = string.Empty;
@@ -3480,17 +3859,11 @@ namespace SpinSquad.Core
             var img = _startCombatButton.GetComponent<Image>();
             if (img != null)
             {
-                var rollSprite = BattleUiSprites.RollButton;
-                if (rollSprite != null && _startCombatButtonLabel != null &&
-                    _startCombatButtonLabel.text.StartsWith("Roll", System.StringComparison.Ordinal))
-                {
-                    HudUiSprites.ApplyIcon(img, rollSprite, bg);
-                }
-                else
-                {
-                    img.sprite = CreateWhiteSprite();
-                    img.color = bg;
-                }
+                var role = _startCombatButtonLabel != null &&
+                           _startCombatButtonLabel.text.StartsWith("START", System.StringComparison.Ordinal)
+                    ? SpinSquadButtonRole.Confirm
+                    : SpinSquadButtonRole.Primary;
+                SpinSquadButtonTheme.Apply(img, role);
             }
             var cb = _startCombatButton.colors;
             cb.normalColor = bg;
@@ -3571,7 +3944,7 @@ namespace SpinSquad.Core
                 }
 
                 if (_rollSlotBacks[i] != null)
-                    HudUiSprites.ApplyIcon(_rollSlotBacks[i], HudUiSprites.MetaNotSelected, new Color(0.18f, 0.22f, 0.32f, 0.95f));
+                    ApplySpinSquadRollSlotFrame(_rollSlotBacks[i], null);
             }
         }
 
@@ -3583,9 +3956,24 @@ namespace SpinSquad.Core
             _rollSlotTexts[index].color = RollCellKindToTextColor(kind);
             if (_rollSlotBacks[index] != null)
             {
-                var slotSprite = kind == RollCellKind.Ally ? HudUiSprites.MetaSelected : HudUiSprites.MetaNotSelected;
-                HudUiSprites.ApplyIcon(_rollSlotBacks[index], slotSprite, RollCellKindToSlotBg(kind));
+                ApplySpinSquadRollSlotFrame(_rollSlotBacks[index], kind);
             }
+        }
+
+        static void ApplySpinSquadRollSlotFrame(Image image, RollCellKind? kind)
+        {
+            if (image == null)
+                return;
+            image.sprite = kind switch
+            {
+                RollCellKind.Ally => MetaHomeUiSprites.RollSlotAlly,
+                RollCellKind.Coin => MetaHomeUiSprites.RollSlotCoin,
+                RollCellKind.Buff => MetaHomeUiSprites.RollSlotBuff,
+                _ => MetaHomeUiSprites.RollSlotIdle
+            };
+            image.type = Image.Type.Sliced;
+            image.preserveAspect = false;
+            image.color = Color.white;
         }
 
         static Color RollCellKindToTextColor(RollCellKind k) => k switch
@@ -3640,7 +4028,7 @@ namespace SpinSquad.Core
             btnGo.transform.SetParent(canvasParent, false);
 
             var image = btnGo.AddComponent<Image>();
-            ApplyGeneratedButtonBackground(image, bg);
+            SpinSquadButtonTheme.Apply(image, SpinSquadButtonTheme.FromLabel(label));
             image.raycastTarget = true;
 
             var btn = btnGo.AddComponent<Button>();
@@ -3679,25 +4067,6 @@ namespace SpinSquad.Core
             btnRt.sizeDelta = iconSprite != null ? new Vector2(480f, 96f) : new Vector2(420f, 88f);
 
             return btn;
-        }
-
-        static void ApplyGeneratedButtonBackground(Image image, Color fallbackColor)
-        {
-            if (image == null)
-                return;
-            var generated = GeneratedUiSprites.PrimaryButton;
-            if (generated == null)
-            {
-                image.sprite = CreateWhiteSprite();
-                image.color = fallbackColor;
-                image.type = Image.Type.Simple;
-                return;
-            }
-
-            image.sprite = generated;
-            image.color = Color.white;
-            image.type = Image.Type.Sliced;
-            image.preserveAspect = false;
         }
 
         static void AddButtonIcon(Transform parent, Sprite iconSprite, bool centered, float size)
@@ -3952,6 +4321,76 @@ namespace SpinSquad.Core
                 if (!TryAutoMergeOneAllyGroup())
                     break;
             }
+
+            _allyBench?.TryAutoMergeAll();
+            safety = 0;
+            while (safety++ < 24)
+            {
+                if (!TryAutoMergeOneCrossStorageGroup())
+                    break;
+                var boardSafety = 0;
+                while (boardSafety++ < 24 && TryAutoMergeOneAllyGroup())
+                {
+                    // Chain upgrades created by the previous cross-storage merge.
+                }
+                _allyBench?.TryAutoMergeAll();
+            }
+        }
+
+        bool TryAutoMergeOneCrossStorageGroup()
+        {
+            if (_allyBench == null)
+                return false;
+
+            var groups = new Dictionary<AllyKey, List<CombatHealth>>();
+            foreach (var ally in _allies)
+            {
+                if (ally == null || ally.IsDead || !TryGetAllyKey(ally, out var key))
+                    continue;
+                if (!groups.TryGetValue(key, out var list))
+                {
+                    list = new List<CombatHealth>(3);
+                    groups[key] = list;
+                }
+                list.Add(ally);
+            }
+
+            foreach (var pair in groups)
+            {
+                var key = pair.Key;
+                var boardUnits = pair.Value;
+                if (!AllyMergeRules.CanMerge(key.RarityTier) ||
+                    boardUnits.Count >= AllyMergeRules.AlliesRequiredForAutoMerge)
+                    continue;
+
+                var neededFromBag = AllyMergeRules.AlliesRequiredForAutoMerge - boardUnits.Count;
+                if (_allyBench.CountMatching(key.LineIndex, key.RarityTier) < neededFromBag)
+                    continue;
+
+                boardUnits.Sort(CompareByWorldPosition);
+                BattleGrid.WorldToAllyCell(AllyGridSampleWorld(boardUnits[0]), out var row, out var col);
+                foreach (var unit in boardUnits)
+                {
+                    unit.Died -= OnUnitDied;
+                    _allies.Remove(unit);
+                    Destroy(unit.gameObject);
+                }
+                _allyBench.ConsumeMatching(key.LineIndex, key.RarityTier, neededFromBag);
+
+                var nextRarity = AllyMergeRules.NextRarity(key.RarityTier);
+                var catalogId = AllyLineCatalog.UnitIdForLine(key.LineIndex, nextRarity);
+                if (unitCatalog == null || !unitCatalog.TryGet(catalogId, out var definition))
+                    return true;
+
+                var (hp, atk) = AllyStatScaling.ScaleStats(definition, nextRarity);
+                _suppressAllyAutoMerge = true;
+                SpawnAllyStackMember(row, col, definition, nextRarity, hp, atk, key.LineIndex);
+                _suppressAllyAutoMerge = false;
+                RepackAllyCell(row, col);
+                SetBanner($"Auto-merged board + bag allies into {nextRarity}.");
+                return true;
+            }
+            return false;
         }
 
         bool TryAutoMergeOneAllyGroup()
@@ -5033,9 +5472,6 @@ namespace SpinSquad.Core
             if (usedFallback)
                 ApplyAllyDefinitionVisualScale(go.transform, def);
 
-            const float benchScale = 0.05f;
-            go.transform.localScale = new Vector3(benchScale, benchScale, 1f);
-
             var spec = go.GetComponent<AllyInstanceSpec>();
             spec.InitFromDefinition(def, tier, hp, atk, lineIndex);
             ConfigureAlly(go, hp, atk, def);
@@ -5052,8 +5488,42 @@ namespace SpinSquad.Core
             if (drag != null)
                 drag.enabled = false;
 
-            EnsurePrepUnitInfoButton(go);
+            var healthBar = go.GetComponent<WorldUnitHealthBar>();
+            if (healthBar != null)
+                Destroy(healthBar);
+
+            FitBenchVisualToSlot(go.transform, BattleGrid.InventoryCell * 0.68f);
+
             return go;
+        }
+
+        static void FitBenchVisualToSlot(Transform root, float targetWorldSize)
+        {
+            if (root == null)
+                return;
+            var renderers = root.GetComponentsInChildren<Renderer>(true);
+            var hasBounds = false;
+            var bounds = new Bounds(root.position, Vector3.zero);
+            foreach (var renderer in renderers)
+            {
+                if (renderer == null || renderer.name.StartsWith("FootGroundDecor"))
+                    continue;
+                if (!hasBounds)
+                {
+                    bounds = renderer.bounds;
+                    hasBounds = true;
+                }
+                else
+                    bounds.Encapsulate(renderer.bounds);
+            }
+            if (!hasBounds)
+                return;
+
+            var current = Mathf.Max(bounds.size.x, bounds.size.y);
+            if (current <= 0.0001f)
+                return;
+            var factor = Mathf.Clamp(targetWorldSize / current, 0.05f, 4f);
+            root.localScale = new Vector3(root.localScale.x * factor, root.localScale.y * factor, 1f);
         }
 
         GameObject CreateCombatUnitVisual(

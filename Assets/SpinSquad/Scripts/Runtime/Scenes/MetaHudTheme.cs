@@ -48,9 +48,9 @@ namespace SpinSquad.Scenes
 
         public static readonly Color OverlayDim = new Color(0f, 0f, 0f, 0.64f);
 
-        public static readonly Vector2 IconBarButtonSize = new Vector2(88f, 76f);
+        public static readonly Vector2 IconBarButtonSize = new Vector2(104f, 88f);
 
-        public const float IconBarGap = 12f;
+        public const float IconBarGap = 14f;
 
         public const int FontTitle = 44;
         public const int FontSection = 22;
@@ -70,7 +70,7 @@ namespace SpinSquad.Scenes
 
         public const float BottomNavHeight = 132f;
         public const float BottomActionBarHeight = 148f;
-        public const float InfoStripHeight = 112f;
+        public const float InfoStripHeight = 136f;
 
         /// <summary>Khoảng tâm–tâm CTA dọc (mép–mép ≥ ActionRowGap).</summary>
         public static float CtaSpacing => CtaSize.y + ActionRowGap;

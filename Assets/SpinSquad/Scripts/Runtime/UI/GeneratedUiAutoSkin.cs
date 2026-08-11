@@ -98,27 +98,18 @@ namespace SpinSquad.UI
             var key = (button.name + " " + text).ToLowerInvariant();
             var rect = image.rectTransform.rect;
             var square = rect.height > 1f && rect.width / rect.height < 1.55f;
-            var danger = ContainsAny(key, "sell", "remove", "delete", "quit", "reroll", "restart", "play again");
+            var danger = ContainsAny(key, "sell", "remove", "delete", "quit", "restart");
             var secondary = ContainsAny(key, "back", "close", "cancel", "settings", "pause", "speed", "bag", "home");
 
-            Sprite sprite;
-            if (!button.interactable)
-                sprite = square ? GeneratedUiSprites.IconDisabled : GeneratedUiSprites.DisabledButton;
-            else if (danger)
-                sprite = square ? GeneratedUiSprites.DangerButton : GeneratedUiSprites.DangerAltButton;
-            else if (square)
-                sprite = secondary ? GeneratedUiSprites.IconDark : GeneratedUiSprites.IconPrimary;
-            else
-                sprite = secondary ? GeneratedUiSprites.SecondaryButton : GeneratedUiSprites.PrimaryButton;
-
-            if (sprite == null)
-                return;
-
             PreserveStandaloneIcon(button, image, label);
-            image.sprite = sprite;
-            image.type = Image.Type.Sliced;
-            image.preserveAspect = false;
-            image.color = Color.white;
+            var role = square
+                ? SpinSquadButtonRole.Icon
+                : danger
+                    ? SpinSquadButtonRole.Danger
+                    : secondary
+                        ? SpinSquadButtonRole.Secondary
+                        : SpinSquadButtonTheme.FromLabel(text);
+            SpinSquadButtonTheme.Apply(image, role);
 
             var colors = button.colors;
             colors.normalColor = Color.white;

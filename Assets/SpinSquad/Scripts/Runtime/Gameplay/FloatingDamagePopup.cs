@@ -28,8 +28,8 @@ namespace SpinSquad.Core
             mesh.text = Mathf.Abs(damageTaken - Mathf.Round(damageTaken)) < 0.01f
                 ? $"-{(int)Mathf.Round(damageTaken)}"
                 : $"-{damageTaken:F1}";
-            mesh.fontSize = strong ? 78 : 64;
-            mesh.characterSize = strong ? 0.064f : 0.055f;
+            mesh.fontSize = strong ? 54 : 45;
+            mesh.characterSize = strong ? 0.045f : 0.038f;
             mesh.anchor = TextAnchor.MiddleCenter;
             mesh.alignment = TextAlignment.Center;
             mesh.color = color;

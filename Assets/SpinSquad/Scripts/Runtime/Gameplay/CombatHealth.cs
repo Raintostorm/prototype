@@ -46,10 +46,10 @@ namespace SpinSquad.Core
             _current = maxHitPoints;
         }
 
-        public void TakeDamage(float amount)
+        public float TakeDamage(float amount)
         {
             if (IsDead || amount <= 0f)
-                return;
+                return 0f;
 
             var applied = Mathf.Min(_current, amount);
             _current -= amount;
@@ -59,6 +59,7 @@ namespace SpinSquad.Core
                 _current = 0f;
                 Died?.Invoke(this);
             }
+            return applied;
         }
     }
 }

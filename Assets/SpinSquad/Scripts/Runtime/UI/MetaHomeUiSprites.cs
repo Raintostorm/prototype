@@ -26,6 +26,9 @@ namespace SpinSquad.UI
         public static Sprite GoldButton => RoundedButton("gold", ButtonWidth, ButtonHeight,
             new Color32(109, 63, 23, 255), new Color32(202, 136, 42, 255), new Color32(255, 215, 94, 255), 26);
 
+        public static Sprite RedButton => RoundedButton("red", ButtonWidth, ButtonHeight,
+            new Color32(91, 24, 35, 255), new Color32(174, 48, 59, 255), new Color32(255, 126, 104, 255), 26);
+
         public static Sprite DarkButton => RoundedButton("dark", ButtonWidth, ButtonHeight,
             new Color32(18, 25, 42, 246), new Color32(45, 59, 87, 246), new Color32(126, 162, 210, 255), 26);
 
@@ -41,6 +44,18 @@ namespace SpinSquad.UI
         public static Sprite CampaignPanel => RoundedPanel("campaign-panel", PanelWidth, PanelHeight,
             new Color32(5, 18, 34, 214), new Color32(41, 127, 205, 110), new Color32(255, 214, 105, 190), 24);
 
+        public static Sprite RollSlotIdle => RoundedPanel("roll-idle", 144, 112,
+            new Color32(10, 20, 36, 248), new Color32(42, 57, 82, 160), new Color32(104, 140, 184, 255), 18);
+
+        public static Sprite RollSlotAlly => RoundedPanel("roll-ally", 144, 112,
+            new Color32(12, 43, 78, 248), new Color32(39, 125, 205, 180), new Color32(255, 210, 92, 255), 18);
+
+        public static Sprite RollSlotCoin => RoundedPanel("roll-coin", 144, 112,
+            new Color32(80, 43, 12, 248), new Color32(190, 126, 30, 180), new Color32(255, 226, 112, 255), 18);
+
+        public static Sprite RollSlotBuff => RoundedPanel("roll-buff", 144, 112,
+            new Color32(8, 58, 45, 248), new Color32(27, 151, 96, 180), new Color32(120, 247, 172, 255), 18);
+
         public static Sprite HomeIcon => AnimalKitUiSprites.Home ?? Icon("home", DrawHome);
         public static Sprite UpgradeIcon => AnimalKitUiSprites.Upgrade ?? Icon("upgrade", DrawUpgrade);
         public static Sprite TreasureIcon => AnimalKitUiSprites.Treasure ?? Icon("treasure", DrawTreasure);
@@ -51,6 +66,10 @@ namespace SpinSquad.UI
         public static Sprite CoinIcon => Icon("coin", DrawCoin);
         public static Sprite KeyIcon => Icon("key", DrawKey);
         public static Sprite EnergyIcon => Icon("energy", DrawEnergy);
+        public static Sprite BuffHpIcon => Icon("buff-hp-white", DrawWhiteHeart);
+        public static Sprite BuffDamageIcon => Icon("buff-damage-white", DrawWhiteSword);
+        public static Sprite BuffSpeedIcon => Icon("buff-speed-white", DrawWhiteBolt);
+        public static Sprite BuffCritIcon => Icon("buff-crit-white", DrawWhiteTarget);
         public static Sprite PrevIcon => Icon("prev", (p, s) => DrawArrow(p, s, false));
         public static Sprite NextIcon => Icon("next", (p, s) => DrawArrow(p, s, true));
         public static Sprite CloseIcon => Icon("close", DrawClose);
@@ -232,6 +251,43 @@ namespace SpinSquad.UI
             DrawLine(tex, 67, 69, 51, 110, c, 16);
             DrawLine(tex, 53, 110, 91, 54, c, 16);
             DrawLine(tex, 91, 54, 65, 54, c, 16);
+        }
+
+        static void DrawWhiteHeart(Texture2D tex, int s)
+        {
+            var c = new Color32(255, 255, 255, 255);
+            DrawCircle(tex, 46, 76, 22, c);
+            DrawCircle(tex, 82, 76, 22, c);
+            DrawLine(tex, 31, 68, 64, 28, c, 25);
+            DrawLine(tex, 97, 68, 64, 28, c, 25);
+        }
+
+        static void DrawWhiteSword(Texture2D tex, int s)
+        {
+            var c = new Color32(255, 255, 255, 255);
+            DrawLine(tex, 34, 28, 91, 96, c, 12);
+            DrawLine(tex, 29, 55, 57, 33, c, 9);
+            DrawLine(tex, 25, 24, 43, 42, c, 12);
+        }
+
+        static void DrawWhiteBolt(Texture2D tex, int s)
+        {
+            var c = new Color32(255, 255, 255, 255);
+            DrawLine(tex, 70, 18, 43, 67, c, 16);
+            DrawLine(tex, 43, 67, 69, 67, c, 16);
+            DrawLine(tex, 69, 67, 52, 110, c, 16);
+            DrawLine(tex, 52, 110, 91, 53, c, 16);
+        }
+
+        static void DrawWhiteTarget(Texture2D tex, int s)
+        {
+            var c = new Color32(255, 255, 255, 255);
+            DrawCircle(tex, 64, 64, 36, c, false, 8);
+            DrawCircle(tex, 64, 64, 15, c, false, 7);
+            DrawLine(tex, 64, 14, 64, 40, c, 7);
+            DrawLine(tex, 64, 88, 64, 114, c, 7);
+            DrawLine(tex, 14, 64, 40, 64, c, 7);
+            DrawLine(tex, 88, 64, 114, 64, c, 7);
         }
 
         static void DrawArrow(Texture2D tex, int s, bool right)

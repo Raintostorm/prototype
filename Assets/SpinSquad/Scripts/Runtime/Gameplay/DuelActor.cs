@@ -466,7 +466,8 @@ namespace SpinSquad.Core
                 {
                     if (_director == null || _director.BattleEnded || enemyHealth == null || enemyHealth.IsDead)
                         return;
-                    enemyHealth.TakeDamage(dmg);
+                    var applied = enemyHealth.TakeDamage(dmg);
+                    _director.RecordCombatDamage(_health, enemyHealth, applied);
                     if (enemyHealth.IsDead || _director.BattleEnded)
                     {
                         if (enemyHealth.IsDead)
@@ -490,7 +491,8 @@ namespace SpinSquad.Core
                 {
                     if (_director == null || _director.BattleEnded || _health == null || Health.IsDead)
                         return;
-                    _health.TakeDamage(otherActor.AttackDamage);
+                    var applied = _health.TakeDamage(otherActor.AttackDamage);
+                    _director.RecordCombatDamage(otherActor.Health, _health, applied);
                     if (Health.IsDead || _director.BattleEnded)
                     {
                         if (Health.IsDead)
@@ -516,7 +518,8 @@ namespace SpinSquad.Core
             {
                 if (_director == null || _director.BattleEnded || enemyHealth == null || enemyHealth.IsDead)
                     return;
-                enemyHealth.TakeDamage(allyDmg);
+                var applied = enemyHealth.TakeDamage(allyDmg);
+                _director.RecordCombatDamage(_health, enemyHealth, applied);
                 if (enemyHealth.IsDead || _director.BattleEnded)
                 {
                     if (enemyHealth.IsDead)
@@ -535,7 +538,8 @@ namespace SpinSquad.Core
             {
                 if (_director == null || _director.BattleEnded || _health == null || Health.IsDead)
                     return;
-                _health.TakeDamage(otherActor.AttackDamage);
+                var applied = _health.TakeDamage(otherActor.AttackDamage);
+                _director.RecordCombatDamage(otherActor.Health, _health, applied);
                 if (Health.IsDead || _director.BattleEnded)
                 {
                     if (Health.IsDead)
@@ -569,7 +573,8 @@ namespace SpinSquad.Core
                 {
                     if (_director == null || _director.BattleEnded || targetHealth == null || targetHealth.IsDead)
                         return;
-                    targetHealth.TakeDamage(outgoing);
+                    var applied = targetHealth.TakeDamage(outgoing);
+                    _director.RecordCombatDamage(_health, targetHealth, applied);
                     if (targetHealth.IsDead || _director.BattleEnded)
                     {
                         if (targetHealth.IsDead)

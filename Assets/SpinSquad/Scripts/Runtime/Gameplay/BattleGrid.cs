@@ -226,7 +226,7 @@ namespace SpinSquad.Core
             var sr = rootGo.AddComponent<SpriteRenderer>();
             sr.sprite = sprite;
             sr.sortingOrder = 2;
-            sr.color = new Color(0.06f, 0.08f, 0.13f, 0.78f);
+            sr.color = new Color(0.035f, 0.065f, 0.11f, 0.9f);
             if (sprite != null)
             {
                 var bounds = sprite.bounds.size;
@@ -312,7 +312,7 @@ namespace SpinSquad.Core
                 var sr = slot.AddComponent<SpriteRenderer>();
                 sr.sprite = sprite;
                 sr.sortingOrder = 3;
-                sr.color = new Color(0.88f, 0.95f, 1f, 0.74f);
+                sr.color = new Color(0.35f, 0.7f, 0.94f, 0.76f);
 
                 if (sprite != null)
                 {
