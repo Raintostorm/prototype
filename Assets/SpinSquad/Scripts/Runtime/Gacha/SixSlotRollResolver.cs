@@ -93,7 +93,7 @@ namespace SpinSquad.Gacha
 
             payout.SummaryLine = sb.ToString().Trim();
             if (string.IsNullOrEmpty(payout.SummaryLine))
-                payout.SummaryLine = "Không đạt thưởng (cụm dưới 3).";
+                payout.SummaryLine = "No reward (fewer than 3 matching slots).";
 
             return payout;
         }

@@ -6,27 +6,27 @@ Mục tiêu file này: giúp AI/đồng đội đọc nhanh logic cốt lõi tr�
 
 ## 1) Điểm vào chính
 
-- `Assets/SpinSquad/Scripts/Core/DuelDirector.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Gameplay/DuelDirector.cs`
   - Điều phối prep/combat, spawn ally/enemy, drag stack, merge/combine, roll UI.
-- `Assets/SpinSquad/Scripts/Core/AllyInstanceSpec.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Gameplay/AllyInstanceSpec.cs`
   - Runtime state của ally (bao gồm `AllyLineIndex`, `RarityTier`, combat stats).
-- `Assets/SpinSquad/Scripts/Gacha/*`
+- `Assets/SpinSquad/Scripts/Runtime/Gacha/*`
   - Roll wallet, roll resolver, grant queue, payout.
-- `Assets/SpinSquad/Scripts/Data/AllyLineCatalog.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Data/AllyLineCatalog.cs`
   - Map chuẩn line `0..4` <-> `UnitId` (5 dòng ngũ hành starter + Knight).
-- `Assets/SpinSquad/Scripts/Meta/*`
+- `Assets/SpinSquad/Scripts/Runtime/Meta/*`
   - Meta save persistent (`Gold`, `TreasureKey`, unlocked level, line upgrades, treasures).
-- `Assets/SpinSquad/Scripts/Scenes/HomepageHub.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/HomepageHub.cs`
   - Trang Home runtime UI: Play / Upgrade / Treasure + chọn level.
-- `Assets/SpinSquad/Scripts/Scenes/UpgradeSceneController.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/UpgradeSceneController.cs`
   - UI card list cho 5 line ally, click card để vào scene chi tiết.
-- `Assets/SpinSquad/Scripts/Scenes/UpgradeDetailSceneController.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/UpgradeDetailSceneController.cs`
   - Scene chi tiết upgrade line (status/cost/chỉ số hiện tại & kế tiếp), nâng cấp trực tiếp.
-- `Assets/SpinSquad/Scripts/Scenes/TreasureSceneController.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/TreasureSceneController.cs`
   - UI card list treasure definitions (owned + not owned), roll bằng key.
-- `Assets/SpinSquad/Scripts/Scenes/TreasureDetailSceneController.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/TreasureDetailSceneController.cs`
   - Scene chi tiết treasure: owned status, cấp hiện tại, duplicate cần thêm.
-- `Assets/SpinSquad/Scripts/Scenes/MetaUiSelectionContext.cs`
+- `Assets/SpinSquad/Scripts/Runtime/Scenes/MetaUiSelectionContext.cs`
   - Handoff id line/treasure giữa list scene và detail scene.
 
 ## 2) Mô hình ally hiện tại (đã rút gọn)

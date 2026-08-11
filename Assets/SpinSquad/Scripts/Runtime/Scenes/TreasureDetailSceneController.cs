@@ -134,7 +134,7 @@ namespace SpinSquad.Scenes
             CreateText(
                 tableGo.transform,
                 "Hint",
-                "Lên cấp bằng cách roll trùng treasure ở màn Treasure.",
+                "Upgrade by rolling duplicate treasures on the Treasure screen.",
                 22,
                 new Vector2(0f, -1040f),
                 new Vector2(900f, 80f));
@@ -172,11 +172,11 @@ namespace SpinSquad.Scenes
 
             _detailText.text =
                 $"<size=30><b>{_def.Name}</b></size>\n" +
-                $"<color=#C5D8EC>Bậc {_def.Rarity}  ·  {FormatEffectName(_def.EffectKind)}</color>\n\n" +
-                $"<color=#B0C8DC><b>Gợi ý</b></color> {FormatStrategyHint(_def.EffectKind)}\n\n" +
+                $"<color=#C5D8EC>Tier {_def.Rarity}  ·  {FormatEffectName(_def.EffectKind)}</color>\n\n" +
+                $"<color=#B0C8DC><b>Strategy</b></color> {FormatStrategyHint(_def.EffectKind)}\n\n" +
                 $"Level: {(snap.IsOwned ? $"{snap.Level}/{snap.MaxLevel}" : "Not owned")}\n" +
-                $"<color=#FFFFFF>Hiện tại: {FormatEffectValue(_def.EffectKind, currentValue)}</color>\n" +
-                $"<color=#7CE89A>Cấp kế: {FormatEffectValue(_def.EffectKind, nextValue)}</color>\n";
+                $"<color=#FFFFFF>Current: {FormatEffectValue(_def.EffectKind, currentValue)}</color>\n" +
+                $"<color=#7CE89A>Next level: {FormatEffectValue(_def.EffectKind, nextValue)}</color>\n";
 
             _statusText.text = snap.Status switch
             {
@@ -212,12 +212,12 @@ namespace SpinSquad.Scenes
         {
             return effectKind switch
             {
-                TreasureEffectKind.AllyHpPct => "Ổn định frontline, wave dài.",
-                TreasureEffectKind.AllyDmgPct => "Tăng DPS tổng, hợp burst / clear nhanh.",
-                TreasureEffectKind.AllyAtkSpeedPct => "Tối ưu đơn vị ranged / DPS theo thời gian.",
-                TreasureEffectKind.AllyCritChanceFlat => "May rủi cao — nhân với buff crit trong trận.",
-                TreasureEffectKind.StartRollCoinBonus => "Mở đầu trận dư coin roll — linh hoạt đội hình sớm.",
-                _ => "Sau mỗi wave thắng — dài hơi, economy roll."
+                TreasureEffectKind.AllyHpPct => "Stabilizes the frontline during long waves.",
+                TreasureEffectKind.AllyDmgPct => "Raises total DPS for burst damage and faster clears.",
+                TreasureEffectKind.AllyAtkSpeedPct => "Best for ranged units and sustained damage.",
+                TreasureEffectKind.AllyCritChanceFlat => "High variance — scales with in-battle critical buffs.",
+                TreasureEffectKind.StartRollCoinBonus => "Extra opening roll coins improve early formation options.",
+                _ => "Builds long-term roll economy after every cleared wave."
             };
         }
 

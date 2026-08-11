@@ -7,7 +7,7 @@ namespace SpinSquad.Scenes
     {
         public static void LogComingSoon(string featureId)
         {
-            Debug.Log("[SpinSquad][Stub] Sắp có: " + featureId);
+            Debug.Log("[SpinSquad][Stub] Coming soon: " + featureId);
         }
     }
 }

@@ -722,19 +722,19 @@ namespace SpinSquad.Core
 
             if (RollWallet.Balance >= SixSlotRollResolver.RollCostCoins)
             {
-                SetBanner("Roll hết coin trước để nhận đủ ally/buff cho wave này.");
+                SetBanner("Spend all roll coins before starting this wave.");
                 return;
             }
 
             if (CountLivingAllies() == 0)
             {
-                SetBanner("Chưa có ally sống — cần ít nhất 1 ally để bắt đầu.");
+                SetBanner("You need at least one living ally to start.");
                 return;
             }
 
             if (CountLivingEnemies() == 0)
             {
-                SetBanner("Wave này chưa có enemy.");
+                SetBanner("This wave has no enemies.");
                 return;
             }
 
@@ -757,7 +757,7 @@ namespace SpinSquad.Core
                 _objectiveText.gameObject.SetActive(false);
             if (_rollUiRoot != null)
                 _rollUiRoot.SetActive(false);
-            SetBanner($"Wave {currentWave} bắt đầu! Chuẩn bị va chạm...");
+            SetBanner($"Wave {currentWave} started! Prepare for contact...");
         }
 
         void SnapshotAllyGridForPostWaveRestore()
@@ -1639,7 +1639,7 @@ namespace SpinSquad.Core
                 return;
 
             _waveCompletePending = true;
-            SetBanner("Wave clear! Đang tổng kết...");
+            SetBanner("Wave cleared! Calculating rewards...");
             _waveCompleteRoutine = StartCoroutine(WaveCompleteAfterDelayRoutine());
         }
 
@@ -1708,13 +1708,13 @@ namespace SpinSquad.Core
             CancelCombatEngageRoutine();
             BattleEnded = true;
             RefreshBattleGridPrepVisuals();
-            SetBanner("Thua! (Ally đã gục)");
+            SetBanner("Defeat! All allies have fallen.");
             if (_startCombatButton != null)
                 _startCombatButton.gameObject.SetActive(false);
             ShowRewardOverlay(
                 "Defeat",
-                $"Level {currentLevel} - Wave {currentWave}\nĐội hình đã gục. Chơi lại để thử sắp xếp khác hoặc roll khác.",
-                "Chơi lại",
+                $"Level {currentLevel} - Wave {currentWave}\nYour squad was defeated. Try a different formation or roll.",
+                "PLAY AGAIN",
                 false,
                 "Home",
                 true);
@@ -1749,15 +1749,15 @@ namespace SpinSquad.Core
                 _prepSnapReadyForAddAlly = true;
 
                 ReviveAlliesFromLastWaveLayout();
-                SetBanner($"Hoàn thành level {currentLevel}! +{goldReward} Gold, +{keyReward} Key.");
+                SetBanner($"Level {currentLevel} complete! +{goldReward} Gold, +{keyReward} Key.");
                 if (_startCombatButton != null)
                     _startCombatButton.gameObject.SetActive(false);
                 ShowRewardOverlay(
                     $"Level {currentLevel} Clear!",
-                    $"+{goldReward} Gold\n+{keyReward} Treasure Keys\nLevel tiếp theo đã mở nếu còn trong prototype.",
-                    "Về Home",
+                    $"+{goldReward} Gold\n+{keyReward} Treasure Keys\nThe next level is now unlocked.",
+                    "HOME",
                     true,
-                    "Chơi lại",
+                    "PLAY AGAIN",
                     false);
                 return;
             }
@@ -1778,11 +1778,11 @@ namespace SpinSquad.Core
                 SpawnEnemiesForWaveWithTint(null);
 
             BuildWaveIntroBannerText();
-            SetBanner($"Thắng L{currentLevel}-W{completed}! Chuẩn bị wave {currentWave}. {_bannerIntroText}  Nhấn Bắt đầu.");
+            SetBanner($"L{currentLevel}-W{completed} cleared! Prepare wave {currentWave}. {_bannerIntroText} Press START.");
             ShowRewardOverlay(
                 $"Wave {completed} Clear",
-                $"+{wavePrepRollCoinGrant + waveCoinBonus} roll coin\nWave {currentWave} đã sẵn sàng. Roll/sắp đội hình rồi tiếp tục.",
-                "Tiếp tục",
+                $"+{wavePrepRollCoinGrant + waveCoinBonus} roll coins\nWave {currentWave} is ready. Roll, arrange your squad, then continue.",
+                "CONTINUE",
                 false,
                 null,
                 false);
@@ -1899,17 +1899,17 @@ namespace SpinSquad.Core
             var row = MetaHudTheme.CreateHorizontalRowParent(barLane, 8f);
 
             _addAllyButton = CreateBottomTextButton(
-                row, font, "Thêm ally", 0f,
+                row, font, "ADD ALLY", 0f,
                 new Color(0.16f, 0.52f, 0.38f, 0.96f));
             _addAllyButton.onClick.AddListener(AddAllyFromButton);
 
             _startCombatButton = CreateBottomTextButton(
-                row, font, "Bắt đầu", 0f, PrepStartButtonColor);
+                row, font, "START", 0f, PrepStartButtonColor);
             _startCombatButton.onClick.AddListener(OnPrepPrimaryClicked);
             _startCombatButtonLabel = _startCombatButton.GetComponentInChildren<Text>();
 
             _alliesBagToggleButton = CreateBottomTextButton(
-                row, font, "Túi 0/16 ▼", 0f,
+                row, font, "BAG 0/16 ▼", 0f,
                 new Color(0.22f, 0.38f, 0.55f, 0.98f));
             _alliesBagToggleButton.onClick.AddListener(OnToggleAlliesBagClicked);
 
@@ -1936,15 +1936,15 @@ namespace SpinSquad.Core
             bg.raycastTarget = true;
 
             float y = 68f;
-            _allyCtxTitleText = CreateCtxLabel(_allyCellMenuRoot.transform, font, "Ô ally", 22, new Vector2(0f, y), new Vector2(300f, 36f));
+            _allyCtxTitleText = CreateCtxLabel(_allyCellMenuRoot.transform, font, "ALLY SLOT", 22, new Vector2(0f, y), new Vector2(300f, 36f));
             y -= 48f;
-            _allyCtxSellButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Bán ally", y, new Color(0.38f, 0.28f, 0.18f, 0.98f), null, new Vector2(280f, 58f));
+            _allyCtxSellButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "SELL ALLY", y, new Color(0.38f, 0.28f, 0.18f, 0.98f), null, new Vector2(280f, 58f));
             _allyCtxSellButton.onClick.AddListener(OnAllyCtxSellClicked);
             y -= 56f;
-            _allyCtxMergeButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Ghép ally", y, new Color(0.22f, 0.42f, 0.28f, 0.98f), null, new Vector2(280f, 58f));
+            _allyCtxMergeButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "MERGE ALLY", y, new Color(0.22f, 0.42f, 0.28f, 0.98f), null, new Vector2(280f, 58f));
             _allyCtxMergeButton.onClick.AddListener(OnAllyCtxMergeClicked);
             y -= 52f;
-            _allyCtxCloseButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "Đóng", y, new Color(0.25f, 0.25f, 0.3f, 0.98f));
+            _allyCtxCloseButton = CreateCtxButton(_allyCellMenuRoot.transform, font, "CLOSE", y, new Color(0.25f, 0.25f, 0.3f, 0.98f));
             _allyCtxCloseButton.onClick.AddListener(OnAllyCtxCloseClicked);
 
             _allyCellMenuRoot.SetActive(false);
@@ -1965,11 +1965,11 @@ namespace SpinSquad.Core
             bg.color = new Color(0.1f, 0.12f, 0.18f, 0.97f);
             bg.raycastTarget = true;
 
-            _prepStatTitleText = CreateCtxLabel(_prepStatPanelRoot.transform, font, "Chỉ số", 28, new Vector2(0f, 118f), new Vector2(520f, 44f));
+            _prepStatTitleText = CreateCtxLabel(_prepStatPanelRoot.transform, font, "UNIT STATS", 28, new Vector2(0f, 118f), new Vector2(520f, 44f));
             _prepStatBodyText = CreateCtxLabel(_prepStatPanelRoot.transform, font, "", 22, new Vector2(0f, 12f), new Vector2(520f, 200f));
             _prepStatBodyText.alignment = TextAnchor.UpperCenter;
 
-            var closeBtn = CreateCtxButton(_prepStatPanelRoot.transform, font, "Đóng", -138f, new Color(0.25f, 0.25f, 0.3f, 0.98f), null, new Vector2(240f, 52f));
+            var closeBtn = CreateCtxButton(_prepStatPanelRoot.transform, font, "CLOSE", -138f, new Color(0.25f, 0.25f, 0.3f, 0.98f), null, new Vector2(240f, 52f));
             closeBtn.onClick.AddListener(ClosePrepUnitStatInspect);
 
             _prepStatPanelRoot.SetActive(false);
@@ -2028,39 +2028,39 @@ namespace SpinSquad.Core
             var interval = def != null ? def.RangedShotIntervalSeconds : 0f;
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine($"Phẩm: {rarity}");
+            sb.AppendLine($"Rarity: {rarity}");
             sb.AppendLine($"HP: {hp.Current:0.#} / {maxHp:0.#}");
-            sb.AppendLine($"Tấn công: {atk:0.#}");
+            sb.AppendLine($"Attack: {atk:0.#}");
 
             if (allySpec != null)
             {
                 var line = AllyLineCatalog.ClampLineIndex(allySpec.ResolveLeader().AllyLineIndex);
-                sb.AppendLine($"Dòng: {PrepLineLabel(line)}");
+                sb.AppendLine($"Line: {PrepLineLabel(line)}");
             }
 
             if (ranged)
-                sb.AppendLine($"Tầm bắn: {range:0.##}  |  Chu kỳ: {interval:0.##}s");
+                sb.AppendLine($"Range: {range:0.##}  |  Interval: {interval:0.##}s");
             else
-                sb.AppendLine("Cận chiến");
+                sb.AppendLine("Melee");
 
             if (def != null && def.RangedAttack)
-                sb.AppendLine("(Định nghĩa: ranged)");
+                sb.AppendLine("(Role: ranged)");
             if (AllyMergeRules.CanMerge(rarity))
-                sb.AppendLine("Có thể auto-merge (3 cùng dòng + phẩm)");
+                sb.AppendLine("Auto-merge available (3 matching line + rarity)");
             else
-                sb.AppendLine("Không merge thêm");
+                sb.AppendLine("Cannot merge further");
 
             body = sb.ToString().TrimEnd();
         }
 
         static string PrepLineLabel(int line) => line switch
         {
-            0 => "Mộc",
-            1 => "Hỏa",
+            0 => "WOOD",
+            1 => "FIRE",
             2 => "Kim",
-            3 => "Thủy",
-            4 => "Thổ / Knight",
-            _ => $"Dòng {line}"
+            3 => "WATER",
+            4 => "EARTH / KNIGHT",
+            _ => $"LINE {line}"
         };
 
         void BuildAnimationTestUi(Transform canvasParent, Font font, float yFromBottom)
@@ -2109,7 +2109,7 @@ namespace SpinSquad.Core
             _animationTestAttackButton = CreatePanelButton(_animationTestPanelRoot.transform, font, "Attack", new Vector2(205f, -44f), new Vector2(180f, 52f), new Color(0.58f, 0.28f, 0.25f, 0.98f));
             _animationTestDieButton = CreatePanelButton(_animationTestPanelRoot.transform, font, "Die", new Vector2(-102f, -112f), new Vector2(180f, 52f), new Color(0.42f, 0.21f, 0.2f, 0.98f));
             _animationTestAutoButton = CreatePanelButton(_animationTestPanelRoot.transform, font, "Auto", new Vector2(102f, -112f), new Vector2(180f, 52f), new Color(0.24f, 0.42f, 0.3f, 0.98f));
-            _animationTestCloseButton = CreatePanelButton(_animationTestPanelRoot.transform, font, "Đóng", new Vector2(0f, -178f), new Vector2(240f, 52f), new Color(0.25f, 0.25f, 0.3f, 0.98f));
+            _animationTestCloseButton = CreatePanelButton(_animationTestPanelRoot.transform, font, "CLOSE", new Vector2(0f, -178f), new Vector2(240f, 52f), new Color(0.25f, 0.25f, 0.3f, 0.98f));
 
             _animationTestPrevButton.onClick.AddListener(OnAnimationTestPrevClicked);
             _animationTestNextButton.onClick.AddListener(OnAnimationTestNextClicked);
@@ -2235,9 +2235,9 @@ namespace SpinSquad.Core
             if (!hasTarget)
             {
                 if (_animationTestTargetText != null)
-                    _animationTestTargetText.text = "Target: (không có ally có animator bridge)";
+                    _animationTestTargetText.text = "Target: (no ally has an animator bridge)";
                 if (_animationTestInfoText != null)
-                    _animationTestInfoText.text = "Info: spawn ally line có animation rồi bấm Test lại";
+                    _animationTestInfoText.text = "Info: spawn an animated ally, then test again";
                 return;
             }
 
@@ -2550,7 +2550,7 @@ namespace SpinSquad.Core
             _selectedAllyCol = col;
             _allyCellMenuRoot.SetActive(true);
             if (_allyCtxTitleText != null)
-                _allyCtxTitleText.text = $"Ô ({row + 1},{col + 1})";
+                _allyCtxTitleText.text = $"SLOT ({row + 1},{col + 1})";
             RefreshAllyCellContextMenuButtons();
         }
 
@@ -2618,7 +2618,7 @@ namespace SpinSquad.Core
 
             RepackAllyCell(row, col);
             TryAutoMergeAllAllyBoard();
-            SetBanner($"Đã bán 1 ally ở ô {CellLabel(row, col)}. +{sellAllyCoinRefund} roll coin.");
+            SetBanner($"Sold one ally from {CellLabel(row, col)}. +{sellAllyCoinRefund} roll coins.");
         }
 
         static int CompareByWorldPosition(CombatHealth a, CombatHealth b)
@@ -2815,7 +2815,7 @@ namespace SpinSquad.Core
             titleGo.transform.SetParent(panelGo.transform, false);
             var title = titleGo.AddComponent<Text>();
             title.font = font;
-            title.text = "Tạm dừng";
+            title.text = "PAUSED";
             title.fontSize = MetaHudTheme.FontOverlayTitle;
             title.alignment = TextAnchor.MiddleCenter;
             title.color = MetaHudTheme.TextPrimary;
@@ -2829,19 +2829,19 @@ namespace SpinSquad.Core
             _pauseResumeButton = CreatePanelButton(
                 panelGo.transform,
                 font,
-                "Tiếp tục",
+                "CONTINUE",
                 new Vector2(0f, 96f),
                 new Vector2(360f, 72f),
                 PrepStartButtonColor);
             _pauseResumeButton.onClick.AddListener(OnPauseResumeClicked);
 
             _pauseRestartButton = CreatePanelButton(
-                panelGo.transform, font, "Chơi lại", new Vector2(0f, 8f), new Vector2(360f, 72f),
+                panelGo.transform, font, "RESTART", new Vector2(0f, 8f), new Vector2(360f, 72f),
                 new Color(0.22f, 0.22f, 0.26f, 0.96f), HudUiSprites.CombatRestart);
             _pauseRestartButton.onClick.AddListener(OnPauseRestartClicked);
 
             _pauseHomeButton = CreatePanelButton(
-                panelGo.transform, font, "Màn hình chính", new Vector2(0f, -80f), new Vector2(360f, 72f),
+                panelGo.transform, font, "HOME", new Vector2(0f, -80f), new Vector2(360f, 72f),
                 new Color(0.2f, 0.26f, 0.4f, 0.96f), HudUiSprites.CombatHomeInBattle);
             _pauseHomeButton.onClick.AddListener(OnPauseHomeClicked);
 
@@ -2892,7 +2892,7 @@ namespace SpinSquad.Core
             _rewardPrimaryButton = CreatePanelButton(
                 panelGo.transform,
                 font,
-                "Tiếp tục",
+                "CONTINUE",
                 new Vector2(0f, -92f),
                 new Vector2(360f, 72f),
                 PrepStartButtonColor);
@@ -3054,7 +3054,7 @@ namespace SpinSquad.Core
             titleGo.transform.SetParent(panelGo.transform, false);
             var title = titleGo.AddComponent<Text>();
             title.font = font;
-            title.text = "Cài đặt";
+            title.text = "SETTINGS";
             title.fontSize = MetaHudTheme.FontOverlayTitle;
             title.alignment = TextAnchor.MiddleCenter;
             title.color = MetaHudTheme.TextPrimary;
@@ -3069,7 +3069,7 @@ namespace SpinSquad.Core
             bodyGo.transform.SetParent(panelGo.transform, false);
             var body = bodyGo.AddComponent<Text>();
             body.font = font;
-            body.text = "Tính năng sắp có — bản build sau sẽ nối menu đầy đủ.";
+            body.text = "More options are coming in a future build.";
             body.fontSize = MetaHudTheme.FontOverlayRow;
             body.alignment = TextAnchor.MiddleCenter;
             body.color = MetaHudTheme.TextSecondary;
@@ -3085,7 +3085,7 @@ namespace SpinSquad.Core
             CreateSettingsStubIconRow(panelGo.transform, new Vector2(120f, 28f), HudUiSprites.MetaOn);
             CreateSettingsStubIconRow(panelGo.transform, new Vector2(0f, -36f), HudUiSprites.MetaTurnOff);
 
-            _settingsStubCloseButton = CreatePanelButton(panelGo.transform, font, "Đóng", new Vector2(0f, -108f), new Vector2(280f, 64f), MetaHudTheme.ButtonBack);
+            _settingsStubCloseButton = CreatePanelButton(panelGo.transform, font, "CLOSE", new Vector2(0f, -108f), new Vector2(280f, 64f), MetaHudTheme.ButtonBack);
             _settingsStubCloseButton.onClick.AddListener(OnSettingsStubCloseClicked);
 
             _settingsStubRoot.SetActive(false);
@@ -3212,8 +3212,8 @@ namespace SpinSquad.Core
                 return;
 
             SetBanner(_alliesBagExpanded
-                ? "Túi allies đã mở — chạm ally dự bị để đưa lên ô trống."
-                : "Túi allies đã đóng. Sắp xếp đội hình rồi bấm Bắt đầu.");
+                ? "Ally bag opened — tap a reserve ally to place it in an empty slot."
+                : "Ally bag closed. Arrange your formation, then press START.");
         }
 
         void RefreshAlliesBagVisibility()
@@ -3231,8 +3231,8 @@ namespace SpinSquad.Core
                 if (label != null)
                 {
                     label.text = _alliesBagExpanded
-                        ? $"Túi {n}/{AllyBenchInventory.SlotCount} ▼"
-                        : $"Túi {n}/{AllyBenchInventory.SlotCount} ▶";
+                        ? $"BAG {n}/{AllyBenchInventory.SlotCount} ▼"
+                        : $"BAG {n}/{AllyBenchInventory.SlotCount} ▶";
                 }
             }
         }
@@ -3266,12 +3266,12 @@ namespace SpinSquad.Core
                 hp > 0.0001f || dmg > 0.0001f || asp > 0.0001f || cr > 0.0001f;
             if (!has)
             {
-                _buffStatusText.text = "Buff: (chưa có — roll để nhận)";
+                _buffStatusText.text = "Buff: none — roll to acquire one";
                 return;
             }
 
             _buffStatusText.text =
-                $"Buff: HP +{hp * 100f:0.#}%  DMG +{dmg * 100f:0.#}%  ATKSPD +{asp * 100f:0.#}%  CRIT +{cr * 100f:0.#}%  | từ wave {waveFrom}";
+                $"Buff: HP +{hp * 100f:0.#}%  DMG +{dmg * 100f:0.#}%  ATK SPD +{asp * 100f:0.#}%  CRIT +{cr * 100f:0.#}%  | from wave {waveFrom}";
         }
 
         static Text CreateBottomInfoText(Transform canvasParent, Font font, float yFromBottom, float height)
@@ -3422,8 +3422,8 @@ namespace SpinSquad.Core
                 {
                     var rollsLeft = RollWallet.Balance / SixSlotRollResolver.RollCostCoins;
                     _prepCoinText.text = rollsLeft > 0
-                        ? $"Roll coin: {RollWallet.Balance}  |  lượt roll còn: {rollsLeft}"
-                        : $"Đội hình: {CountLivingAllies()} ally  |  Enemy: {CountLivingEnemies()}";
+                        ? $"Roll coins: {RollWallet.Balance}  |  Rolls left: {rollsLeft}"
+                        : $"Squad: {CountLivingAllies()} allies  |  Enemies: {CountLivingEnemies()}";
                 }
             }
 
@@ -3451,7 +3451,7 @@ namespace SpinSquad.Core
             }
             else
             {
-                _startCombatButtonLabel.text = "Bắt đầu";
+                _startCombatButtonLabel.text = "START";
                 ApplyPrimaryButtonVisual(PrepStartButtonColor);
                 var canStart = !_rollBusy && _allies.Count > 0 && _enemies.Count > 0;
                 _startCombatButton.interactable = canStart;
@@ -3461,16 +3461,16 @@ namespace SpinSquad.Core
         string PrepObjectiveText()
         {
             if (_rollBusy)
-                return "Đang roll: nhận ally/buff rồi sắp xếp đội hình.";
+                return "Rolling: collect allies and buffs, then arrange your formation.";
             if (RollWallet.Balance >= SixSlotRollResolver.RollCostCoins)
-                return "Bước 1: roll hết coin để nhận thêm ally/buff.";
+                return "STEP 1: spend all roll coins to receive allies and buffs.";
             if (CountLivingAllies() == 0)
-                return "Cần ít nhất 1 ally sống để bắt đầu.";
+                return "At least one living ally is required to start.";
             if (CountLivingEnemies() == 0)
-                return "Không có enemy trong wave này.";
+                return "There are no enemies in this wave.";
             if (_allyBench != null && _allyBench.OccupiedCount > 0)
-                return "Bước 2: kéo/sắp ally, mở Túi để đưa quân dự bị lên bàn, rồi Bắt đầu.";
-            return "Bước 2: kéo/sắp ally trên lưới, chạm unit để xem/chọn, rồi Bắt đầu.";
+                return "STEP 2: arrange allies, open BAG for reserves, then press START.";
+            return "STEP 2: arrange allies on the grid, tap a unit for details, then press START.";
         }
 
         void ApplyPrimaryButtonVisual(Color bg)
@@ -3513,7 +3513,7 @@ namespace SpinSquad.Core
             {
                 ClearRollSlotDisplays();
                 if (_rollSummaryText != null)
-                    _rollSummaryText.text = err ?? "Roll thất bại.";
+                    _rollSummaryText.text = err ?? "Roll failed.";
                 if (_rollJackpotText != null)
                     _rollJackpotText.text = string.Empty;
                 RefreshPrepPrimaryUi();
@@ -3536,7 +3536,7 @@ namespace SpinSquad.Core
                 ApplyRollSlotVisual(i, payout.Cells[i]);
 
             if (_rollJackpotText != null)
-                _rollJackpotText.text = payout.Jackpot ? "Jackpot! 6 ô cùng loại!" : string.Empty;
+                _rollJackpotText.text = payout.Jackpot ? "JACKPOT! Six matching slots!" : string.Empty;
             if (_rollSummaryText != null)
                 _rollSummaryText.text = payout.SummaryLine;
 
@@ -3546,9 +3546,9 @@ namespace SpinSquad.Core
             RefreshPrepPrimaryUi();
             RefreshBuffStatusBar();
             if (RollWallet.Balance < SixSlotRollResolver.RollCostCoins)
-                SetBanner("Roll xong. Sắp xếp đội hình rồi bấm Bắt đầu.");
+                SetBanner("Roll complete. Arrange your formation, then press START.");
             else
-                SetBanner("Nhận thưởng roll. Tiếp tục roll lượt còn lại.");
+                SetBanner("Roll reward collected. Use your remaining rolls.");
             yield return new WaitForSeconds(2f);
 
             RefreshPrepPrimaryUi();
@@ -4004,7 +4004,7 @@ namespace SpinSquad.Core
                 SpawnAllyStackMember(spawnRow, spawnCol, pickedDef, newRarity, hp, atk, key.LineIndex);
                 _suppressAllyAutoMerge = false;
                 RepackAllyCell(spawnRow, spawnCol);
-                SetBanner($"Auto-merge 3 ally thành {newRarity} ở ô {CellLabel(spawnRow, spawnCol)}.");
+                SetBanner($"Auto-merged 3 allies into {newRarity} at {CellLabel(spawnRow, spawnCol)}.");
                 return true;
             }
 
@@ -4327,7 +4327,7 @@ namespace SpinSquad.Core
             SpawnAllyStackMember(spawnRow, spawnCol, pickedDef, newRarity, hp, atk, mergeLine);
             RepackAllyCell(spawnRow, spawnCol);
             ClearAllySelection();
-            SetBanner($"Merge thủ công thành {newRarity} ở ô {CellLabel(spawnRow, spawnCol)}.");
+            SetBanner($"Merged manually into {newRarity} at {CellLabel(spawnRow, spawnCol)}.");
         }
 
         void TryMergeEnemyAt(int row, int col)
@@ -4392,7 +4392,7 @@ namespace SpinSquad.Core
             if (!SandboxCanMutateUnits || !CanCombineAllyAt(row, col))
                 return;
 
-            SetBanner("Combine Mythic (ally): công thức — sắp có");
+            SetBanner("Combine Mythic Ally: recipe coming soon");
             Debug.Log("[DuelDirector] Combine ally — placeholder (3× Mythic cùng unit).");
         }
 
@@ -4401,7 +4401,7 @@ namespace SpinSquad.Core
             if (!SandboxCanMutateUnits || !CanCombineEnemyAt(row, col))
                 return;
 
-            SetBanner("Combine Mythic (enemy): công thức — sắp có");
+            SetBanner("Combine Mythic Enemy: recipe coming soon");
             Debug.Log("[DuelDirector] Combine enemy — placeholder (3× Mythic cùng unit).");
         }
 
@@ -4573,7 +4573,7 @@ namespace SpinSquad.Core
                 if (targetMembers.Count == 0 || !TryGetAllyKey(targetMembers[0], out var targetKey))
                 {
                     SnapStackPositions(members, fromRow, fromCol, revertLeaderWorld);
-                    SetBanner("Không thể đổi ô: ô đích đang có stack không hợp lệ.");
+                    SetBanner("Cannot swap: the target slot contains an invalid stack.");
                     return false;
                 }
 
@@ -4582,7 +4582,7 @@ namespace SpinSquad.Core
                     if (!TryGetAllyKey(tm, out var tmKey) || tmKey.LineIndex != targetKey.LineIndex || tmKey.RarityTier != targetKey.RarityTier)
                     {
                         SnapStackPositions(members, fromRow, fromCol, revertLeaderWorld);
-                        SetBanner("Không thể đổi ô: ô đích có ally khác dòng/phẩm.");
+                        SetBanner("Cannot swap: the target contains a different line or rarity.");
                         return false;
                     }
                 }
@@ -4593,7 +4593,7 @@ namespace SpinSquad.Core
                 RepackAllyCell(fromRow, fromCol);
                 RepackAllyCell(toRow, toCol);
                 TryAutoMergeAllAllyBoard();
-                SetBanner($"Đã đổi vị trí ally {CellLabel(fromRow, fromCol)} ↔ {CellLabel(toRow, toCol)}.");
+                SetBanner($"Swapped allies {CellLabel(fromRow, fromCol)} ↔ {CellLabel(toRow, toCol)}.");
                 return true;
             }
 
@@ -4601,7 +4601,7 @@ namespace SpinSquad.Core
             if (existing + n > AllyMergeRules.MaxStackPerCell)
             {
                 SnapStackPositions(members, fromRow, fromCol, revertLeaderWorld);
-                SetBanner("Ô đích đã đầy — tối đa 3 ally cùng dòng/phẩm.");
+                SetBanner("Target slot is full — maximum 3 matching allies.");
                 return false;
             }
 
@@ -4610,7 +4610,7 @@ namespace SpinSquad.Core
             RepackAllyCell(toRow, toCol);
             TryAutoMergeAllAllyBoard();
             if (toRow != fromRow || toCol != fromCol)
-                SetBanner($"Đã chuyển ally sang ô {CellLabel(toRow, toCol)}.");
+                SetBanner($"Moved ally to {CellLabel(toRow, toCol)}.");
             return true;
         }
 
@@ -4637,7 +4637,7 @@ namespace SpinSquad.Core
             if (other > 0)
             {
                 SnapEnemyStackPositions(members, fromRow, fromCol, revertLeaderWorld);
-                SetBanner("Không thể kéo enemy vào ô đang có loại khác.");
+                SetBanner("Cannot move an enemy into a slot containing another type.");
                 return false;
             }
 
@@ -4645,7 +4645,7 @@ namespace SpinSquad.Core
             if (existing + members.Count > AllyMergeRules.MaxEnemyStackPerCell)
             {
                 SnapEnemyStackPositions(members, fromRow, fromCol, revertLeaderWorld);
-                SetBanner("Ô enemy đã đầy.");
+                SetBanner("Enemy slot is full.");
                 return false;
             }
 

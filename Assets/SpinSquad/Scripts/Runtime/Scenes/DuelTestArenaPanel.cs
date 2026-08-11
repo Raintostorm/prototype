@@ -20,7 +20,7 @@ namespace SpinSquad.Scenes
 
         [SerializeField] private string hubSceneName = "Homepage";
         [SerializeField] private string panelTitle = "Test combat";
-        [SerializeField] private string panelHint = "Preset: chọn loại mặc định rồi «Áp dụng & reset trận». Sandbox: thêm/xóa từng loại (chỉ khi chưa bấm Bắt đầu).";
+        [SerializeField] private string panelHint = "Preset: choose default unit types, then APPLY & RESET. Sandbox controls work before combat starts.";
 
         DuelDirector _director;
         string _allyId = AllyMeleeId;
@@ -75,36 +75,36 @@ namespace SpinSquad.Scenes
                 new Vector2(0f, -108f), new Vector2(1000f, 96f)).color = new Color(0.82f, 0.88f, 1f, 1f);
 
             CreateText(canvasGo.transform, font, "Preset — Ally", 24, new Vector2(0f, -200f), new Vector2(900f, 36f)).color = new Color(0.7f, 0.92f, 1f, 1f);
-            _allyMeleeBg = CreateChoiceButton(canvasGo.transform, font, "Ally cận", new Vector2(-230f, -262f),
+            _allyMeleeBg = CreateChoiceButton(canvasGo.transform, font, "ALLY MELEE", new Vector2(-230f, -262f),
                 () => SetAlly(AllyMeleeId));
-            _allyRangedBg = CreateChoiceButton(canvasGo.transform, font, "Ally xa", new Vector2(230f, -262f),
+            _allyRangedBg = CreateChoiceButton(canvasGo.transform, font, "ALLY RANGED", new Vector2(230f, -262f),
                 () => SetAlly(AllyRangedId));
 
             CreateText(canvasGo.transform, font, "Preset — Enemy", 24, new Vector2(0f, -322f), new Vector2(900f, 36f)).color = new Color(1f, 0.72f, 0.68f, 1f);
-            _enemyMeleeBg = CreateChoiceButton(canvasGo.transform, font, "Enemy cận", new Vector2(-230f, -384f),
+            _enemyMeleeBg = CreateChoiceButton(canvasGo.transform, font, "ENEMY MELEE", new Vector2(-230f, -384f),
                 () => SetEnemy(EnemyMeleeId));
-            _enemyRangedBg = CreateChoiceButton(canvasGo.transform, font, "Enemy xa", new Vector2(230f, -384f),
+            _enemyRangedBg = CreateChoiceButton(canvasGo.transform, font, "ENEMY RANGED", new Vector2(230f, -384f),
                 () => SetEnemy(EnemyRangedId));
 
-            CreateSolidButton(canvasGo.transform, font, "Áp dụng & reset trận", new Vector2(0f, -478f),
+            CreateSolidButton(canvasGo.transform, font, "APPLY & RESET", new Vector2(0f, -478f),
                 new Color(0.18f, 0.5f, 0.36f, 0.98f), ApplyAndRestart);
 
-            CreateText(canvasGo.transform, font, "Thêm (ô trống ngẫu nhiên)", 22, new Vector2(0f, -548f), new Vector2(920f, 32f)).color = new Color(0.9f, 0.95f, 1f, 1f);
+            CreateText(canvasGo.transform, font, "ADD TO A RANDOM EMPTY SLOT", 22, new Vector2(0f, -548f), new Vector2(920f, 32f)).color = new Color(0.9f, 0.95f, 1f, 1f);
             const float addY = -598f;
-            CreateCompactButton(canvasGo.transform, font, "+ Ally cận", new Vector2(-324f, addY), () => SandboxAddAlly(AllyMeleeId));
-            CreateCompactButton(canvasGo.transform, font, "+ Ally xa", new Vector2(-108f, addY), () => SandboxAddAlly(AllyRangedId));
-            CreateCompactButton(canvasGo.transform, font, "+ Enemy cận", new Vector2(108f, addY), () => SandboxAddEnemy(EnemyMeleeId));
-            CreateCompactButton(canvasGo.transform, font, "+ Enemy xa", new Vector2(324f, addY), () => SandboxAddEnemy(EnemyRangedId));
+            CreateCompactButton(canvasGo.transform, font, "+ ALLY MELEE", new Vector2(-324f, addY), () => SandboxAddAlly(AllyMeleeId));
+            CreateCompactButton(canvasGo.transform, font, "+ ALLY RANGED", new Vector2(-108f, addY), () => SandboxAddAlly(AllyRangedId));
+            CreateCompactButton(canvasGo.transform, font, "+ ENEMY MELEE", new Vector2(108f, addY), () => SandboxAddEnemy(EnemyMeleeId));
+            CreateCompactButton(canvasGo.transform, font, "+ ENEMY RANGED", new Vector2(324f, addY), () => SandboxAddEnemy(EnemyRangedId));
 
-            CreateText(canvasGo.transform, font, "Xóa (ngẫu nhiên đúng loại)", 22, new Vector2(0f, -658f), new Vector2(920f, 32f)).color = new Color(0.95f, 0.88f, 0.88f, 1f);
+            CreateText(canvasGo.transform, font, "REMOVE A RANDOM MATCHING UNIT", 22, new Vector2(0f, -658f), new Vector2(920f, 32f)).color = new Color(0.95f, 0.88f, 0.88f, 1f);
             const float rmY = -708f;
             var rmCol = new Color(0.52f, 0.22f, 0.22f, 0.92f);
-            CreateCompactButton(canvasGo.transform, font, "− Ally cận", new Vector2(-324f, rmY), () => SandboxRemove(false, false), rmCol);
-            CreateCompactButton(canvasGo.transform, font, "− Ally xa", new Vector2(-108f, rmY), () => SandboxRemove(false, true), rmCol);
-            CreateCompactButton(canvasGo.transform, font, "− Enemy cận", new Vector2(108f, rmY), () => SandboxRemove(true, false), rmCol);
-            CreateCompactButton(canvasGo.transform, font, "− Enemy xa", new Vector2(324f, rmY), () => SandboxRemove(true, true), rmCol);
+            CreateCompactButton(canvasGo.transform, font, "− ALLY MELEE", new Vector2(-324f, rmY), () => SandboxRemove(false, false), rmCol);
+            CreateCompactButton(canvasGo.transform, font, "− ALLY RANGED", new Vector2(-108f, rmY), () => SandboxRemove(false, true), rmCol);
+            CreateCompactButton(canvasGo.transform, font, "− ENEMY MELEE", new Vector2(108f, rmY), () => SandboxRemove(true, false), rmCol);
+            CreateCompactButton(canvasGo.transform, font, "− ENEMY RANGED", new Vector2(324f, rmY), () => SandboxRemove(true, true), rmCol);
 
-            CreateSolidButton(canvasGo.transform, font, "Về Homepage", new Vector2(0f, -818f),
+            CreateSolidButton(canvasGo.transform, font, "BACK TO HOME", new Vector2(0f, -818f),
                 new Color(0.22f, 0.28f, 0.42f, 0.96f), LoadHub);
         }
 

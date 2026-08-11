@@ -149,7 +149,7 @@ namespace SpinSquad.Scenes
             canvasGo.AddComponent<GraphicRaycaster>();
 
             _statusText = CreateText(canvas.transform, font, new Vector2(0, -80), 28,
-                $"{resourcesPrefabPath} — chỉnh worldScale trong Inspector nếu quá to/nhỏ.");
+                $"{resourcesPrefabPath} — adjust worldScale in the Inspector if the character is too large or small.");
 
             float y = -180f;
             float step = -95f;
@@ -162,7 +162,7 @@ namespace SpinSquad.Scenes
             CreateButton(canvas.transform, font, string.Format("{0} (one-shot)", DiedName), new Vector2(0, y), PlayDieOnce);
 
             CreateButton(canvas.transform, font, "Flip X", new Vector2(0, -560), ToggleFlip);
-            CreateButton(canvas.transform, font, "Về Homepage", new Vector2(0, -660), BackToHomepage);
+            CreateButton(canvas.transform, font, "BACK TO HOME", new Vector2(0, -660), BackToHomepage);
         }
 
         Text CreateText(Transform parent, Font font, Vector2 pos, int size, string msg)
@@ -247,7 +247,7 @@ namespace SpinSquad.Scenes
             if (clip == null)
                 return;
             _state.SetAnimation(0, animName, true);
-            SetStatus($"Đang loop: {animName}");
+            SetStatus($"Looping: {animName}");
         }
 
         void PlayAttackOnce()
@@ -308,7 +308,7 @@ namespace SpinSquad.Scenes
         {
             if (!Application.CanStreamedLevelBeLoaded(homepageSceneName))
             {
-                SetStatus("Không load được scene: " + homepageSceneName);
+                SetStatus("Could not load scene: " + homepageSceneName);
                 return;
             }
             SceneManager.LoadScene(homepageSceneName);

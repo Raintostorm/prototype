@@ -24,6 +24,14 @@ namespace SpinSquad.EditorTools
             Check("Combat Merge", HudUiSprites.CombatMerge, ref ok, ref fail);
             Check("Combat Sell", HudUiSprites.CombatSell, ref ok, ref fail);
             Check("Generated primary button", GeneratedUiSprites.PrimaryButton, ref ok, ref fail);
+            Check("Generated secondary button", GeneratedUiSprites.SecondaryButton, ref ok, ref fail);
+            Check("Generated disabled button", GeneratedUiSprites.DisabledButton, ref ok, ref fail);
+            Check("Generated icon primary", GeneratedUiSprites.IconPrimary, ref ok, ref fail);
+            Check("Generated icon selected", GeneratedUiSprites.IconSelected, ref ok, ref fail);
+            Check("Generated icon dark", GeneratedUiSprites.IconDark, ref ok, ref fail);
+            Check("Generated danger button", GeneratedUiSprites.DangerButton, ref ok, ref fail);
+            Check("Generated danger alternate", GeneratedUiSprites.DangerAltButton, ref ok, ref fail);
+            Check("Generated icon disabled", GeneratedUiSprites.IconDisabled, ref ok, ref fail);
             Debug.Log($"[HudUiSprites] Validate wired assets: {ok} OK, {fail} missing.");
         }
 

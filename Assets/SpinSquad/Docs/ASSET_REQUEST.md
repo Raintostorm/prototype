@@ -118,15 +118,15 @@ Nguồn đặt ngoài `Assets/` sync vào các đường trên qua **mục 0** (
 | Mục | Chi tiết | Repo |
 |:----|:---------|:-----|
 | Đạn ranged Thủy | Texture / Sprite `Resources` | [`Resources/Vfx/AllyThuyProjectile.png`](Assets/SpinSquad/Resources/Vfx/AllyThuyProjectile.png) |
-| Hit / số damage | Style nhất quán | Có thể bổ sung cho [`FloatingDamagePopup`](Assets/SpinSquad/Scripts/Core/FloatingDamagePopup.cs) |
+| Hit / số damage | Style nhất quán | Có thể bổ sung cho [`FloatingDamagePopup`](Assets/SpinSquad/Scripts/Runtime/Gameplay/FloatingDamagePopup.cs) |
 | Merge ally | Pop nhẹ, glow ô | Chưa có asset riêng — cần concept |
-| Roll gacha | Khung 6 ô, highlight jackpot | Runtime trong [`DuelDirector`](Assets/SpinSquad/Scripts/Core/DuelDirector.cs) — có thể thay sprite khung |
+| Roll gacha | Khung 6 ô, highlight jackpot | Runtime trong [`DuelDirector`](Assets/SpinSquad/Scripts/Runtime/Gameplay/DuelDirector.cs) — có thể thay sprite khung |
 
 ---
 
 ## 4. UI — Global (mobile HUD)
 
-**Layout tham chiếu:** `CanvasScaler` **1080×1920**, safe area ~**36px** ngang, ~**40px** trên — [`MetaHudTheme`](Assets/SpinSquad/Scripts/Scenes/MetaHudTheme.cs).
+**Layout tham chiếu:** `CanvasScaler` **1080×1920**, safe area ~**36px** ngang, ~**40px** trên — [`MetaHudTheme`](Assets/SpinSquad/Scripts/Runtime/Scenes/MetaHudTheme.cs).
 
 | Loại asset | Kích thước / ghi chú | Trạng thái code |
 |:-----------|:---------------------|:----------------|
@@ -135,9 +135,9 @@ Nguồn đặt ngoài `Assets/` sync vào các đường trên qua **mục 0** (
 | Icon bar (Pause / Set / Shop / Thư) | ~88×76 (`IconBarButtonSize`) | Đang **chữ trên nền** — cần **PNG** (pressed/disabled) |
 | Panel pause | Dim fullscreen + panel ~560×280 | Có thể 9-slice |
 | Panel settings | ~520×320 | Placeholder |
-| Header / backdrop | Full bleed | [`MetaHudTheme.AddFullScreenBackdrop`](Assets/SpinSquad/Scripts/Scenes/MetaHudTheme.cs) |
+| Header / backdrop | Full bleed | [`MetaHudTheme.AddFullScreenBackdrop`](Assets/SpinSquad/Scripts/Runtime/Scenes/MetaHudTheme.cs) |
 | Menu ô ally (merge / bán) | ~320×220 | Có thể skin |
-| Health bar trên đầu unit | World space | [`WorldUnitHealthBar`](Assets/SpinSquad/Scripts/Core/WorldUnitHealthBar.cs) |
+| Health bar trên đầu unit | World space | [`WorldUnitHealthBar`](Assets/SpinSquad/Scripts/Runtime/Gameplay/WorldUnitHealthBar.cs) |
 
 **Stub (log “sắp có”):** Shop, Thư, Set trên Homepage; x2 tốc độ Duel (disabled).
 
@@ -191,7 +191,7 @@ Nguồn đặt ngoài `Assets/` sync vào các đường trên qua **mục 0** (
 |:-----|:--------|
 | [`Resources/UnitCatalog_Main.asset`](Assets/SpinSquad/Resources/UnitCatalog_Main.asset) | Danh sách `UnitDefinition` |
 | [`Data/Units/*.asset`](Assets/SpinSquad/Data/Units/) | Định nghĩa unit (prefab, portrait, ranged…) |
-| [`Scripts/Data/AllyLineCatalog.cs`](Assets/SpinSquad/Scripts/Data/AllyLineCatalog.cs) | Map 5 dòng ally |
+| [`Scripts/Runtime/Data/AllyLineCatalog.cs`](Assets/SpinSquad/Scripts/Runtime/Data/AllyLineCatalog.cs) | Map 5 dòng ally |
 
 ---
 

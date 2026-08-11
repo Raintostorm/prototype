@@ -12,7 +12,7 @@ namespace SpinSquad.Gacha
 
             if (!RollWallet.TrySpend(SixSlotRollResolver.RollCostCoins))
             {
-                error = $"Không đủ coin (cần {SixSlotRollResolver.RollCostCoins}).";
+                error = $"Not enough coins (requires {SixSlotRollResolver.RollCostCoins}).";
                 return false;
             }
 

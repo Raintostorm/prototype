@@ -197,7 +197,7 @@ namespace SpinSquad.Scenes
             var titleRt = title.rectTransform;
             titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 1f);
             titleRt.pivot = new Vector2(0.5f, 1f);
-            titleRt.anchoredPosition = new Vector2(106f, -MetaHudTheme.SafeEdgeYTop - 10f);
+            titleRt.anchoredPosition = new Vector2(0f, -MetaHudTheme.SafeEdgeYTop - 10f);
             titleRt.sizeDelta = new Vector2(520f, 72f);
         }
 
@@ -406,7 +406,7 @@ namespace SpinSquad.Scenes
             titleGo.transform.SetParent(content.transform, false);
             var pickTitle = titleGo.AddComponent<Text>();
             pickTitle.font = _font;
-            pickTitle.text = "Chọn level";
+            pickTitle.text = "SELECT LEVEL";
             pickTitle.fontSize = MetaHudTheme.FontOverlayTitle;
             pickTitle.alignment = TextAnchor.MiddleCenter;
             pickTitle.color = MetaHudTheme.TextPrimary;

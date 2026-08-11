@@ -262,24 +262,30 @@ namespace SpinSquad.Scenes
             if (widthFractions == null || widthFractions.Count != children.Count)
                 return;
 
-            var rowWidth = row.rect.width;
-            if (rowWidth < 1f)
-                rowWidth = ReferenceWidth - SafeEdgeX * 2f;
+            var totalWeight = 0f;
+            for (var i = 0; i < widthFractions.Count; i++)
+                totalWeight += Mathf.Max(0f, widthFractions[i]);
+            if (totalWeight <= 0f)
+                return;
 
-            var totalGap = gap * Mathf.Max(0, children.Count - 1);
-            var inner = rowWidth - totalGap;
-            var x = 0f;
+            // Anchor every slot to a percentage of the live row instead of
+            // reading row.rect during construction. At that point SafeAreaFitter
+            // may not have applied yet, which previously made the last tab spill
+            // beyond the right edge on iPhone-style safe areas.
+            var cursor = 0f;
             for (var i = 0; i < children.Count; i++)
             {
-                var w = inner * widthFractions[i];
+                var fraction = Mathf.Max(0f, widthFractions[i]) / totalWeight;
+                var start = cursor;
+                var end = cursor + fraction;
                 var child = children[i];
                 child.SetParent(row, false);
-                child.anchorMin = new Vector2(0f, 0f);
-                child.anchorMax = new Vector2(0f, 1f);
-                child.pivot = new Vector2(0f, 0.5f);
-                child.anchoredPosition = new Vector2(x, 0f);
-                child.sizeDelta = new Vector2(w, 0f);
-                x += w + gap;
+                child.anchorMin = new Vector2(start, 0f);
+                child.anchorMax = new Vector2(end, 1f);
+                child.pivot = new Vector2(0.5f, 0.5f);
+                child.offsetMin = new Vector2(i == 0 ? 0f : gap * 0.5f, 0f);
+                child.offsetMax = new Vector2(i == children.Count - 1 ? 0f : -gap * 0.5f, 0f);
+                cursor = end;
             }
         }
     }

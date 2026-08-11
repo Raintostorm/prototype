@@ -212,7 +212,7 @@ namespace SpinSquad.Scenes
                 var snap = MetaProgressionStore.GetTreasureSnapshot(def.Id);
                 var levelLabel = snap.IsOwned
                     ? $"Lv {snap.Level}/{snap.MaxLevel}"
-                    : "Chưa sở hữu";
+                    : "NOT OWNED";
                 _cardTexts[i].text = $"<b>{def.Name}</b>\n<size=20><color=#D0DCE8>{levelLabel}</color></size>";
             }
         }
