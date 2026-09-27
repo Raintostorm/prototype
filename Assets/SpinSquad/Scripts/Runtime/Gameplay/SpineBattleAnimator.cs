@@ -135,6 +135,34 @@ namespace SpinSquad.Core
             ApplyFacing(dirX < 0f ? -1f : 1f);
         }
 
+        /// <summary>
+        /// Applies an asset-specific facing convention after a runtime battle
+        /// driver is created. Some Spine exports are authored facing left at
+        /// positive ScaleX while the shared rigs are authored facing right.
+        /// </summary>
+        public void SetFacingInverted(bool inverted)
+        {
+            invertFacingSign = inverted;
+            ApplyDefaultFacingForFaction();
+        }
+
+        /// <summary>Overrides clip names for a runtime-created driver.</summary>
+        public void ConfigureAnimationNames(string idle, string walk, string attack, string die, float attackSpeed = 2.4f)
+        {
+            if (!string.IsNullOrWhiteSpace(idle))
+                idleAnimationName = idle;
+            if (!string.IsNullOrWhiteSpace(walk))
+                walkAnimationName = walk;
+            if (!string.IsNullOrWhiteSpace(attack))
+                attackAnimationName = attack;
+            if (!string.IsNullOrWhiteSpace(die))
+                dieAnimationName = die;
+            attackAnimationSpeed = Mathf.Max(0.05f, attackSpeed);
+
+            if (!_dead && _state != null)
+                PlayLocomotion();
+        }
+
         public void SetMoving(bool isMoving)
         {
             if (_dead || _state == null)

@@ -66,8 +66,7 @@ namespace SpinSquad.Scenes
             scaler.referenceResolution = new Vector2(1080, 1920);
             canvasGo.AddComponent<GraphicRaycaster>();
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
 
             CreateText(canvasGo.transform, font, panelTitle, 36, new Vector2(0f, -56f), new Vector2(960f, 56f)).color = Color.white;
 

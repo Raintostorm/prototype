@@ -19,7 +19,7 @@ MonoBehaviour:
   attack: 10
   teamKind: 0
   bodyShape: 2
-  battlePrefab: {fileID: 843839173774878869, guid: bf75ccab1b735438f86010c43d081d46, type: 3}
+  battlePrefab: {fileID: 0}
   portraitSprite: {fileID: 2519233111475243274, guid: 7c2f4cfa0da1a484b84b56fb039d8c1c, type: 3}
   cardSprite: {fileID: 2519233111475243274, guid: 7c2f4cfa0da1a484b84b56fb039d8c1c, type: 3}
   iconSprite: {fileID: 2519233111475243274, guid: 7c2f4cfa0da1a484b84b56fb039d8c1c, type: 3}

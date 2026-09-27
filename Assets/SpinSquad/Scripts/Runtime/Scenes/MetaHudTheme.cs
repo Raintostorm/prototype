@@ -75,15 +75,17 @@ namespace SpinSquad.Scenes
         /// <summary>Khoảng tâm–tâm CTA dọc (mép–mép ≥ ActionRowGap).</summary>
         public static float CtaSpacing => CtaSize.y + ActionRowGap;
 
-        public static readonly Vector2 UpgradeCardSize = new Vector2(292f, 168f);
+        // Four upgrade lines must fit inside the 1080-wide portrait safe area.
+        // The old 292/312 layout was wider than the canvas and clipped both edge columns.
+        public static readonly Vector2 UpgradeCardSize = new Vector2(236f, 168f);
         public const float UpgradeCardRowSpacing = 186f;
         public const float UpgradeCardTopY = -348f;
         public const float UpgradeColumnHeaderY = -268f;
         /// <summary>Khoảng cách tâm cột — dùng với <see cref="UpgradeCardSize"/>.</summary>
-        public const float UpgradeColumnSpacingX = 312f;
+        public const float UpgradeColumnSpacingX = 254f;
 
         public const float FooterBackInsetBottom = 56f;
-        public static readonly Vector2 FooterBackButtonSize = new Vector2(120f, 96f);
+        public static readonly Vector2 FooterBackButtonSize = new Vector2(280f, 84f);
 
         public static readonly Color BottomLaneBand = new Color(0.08f, 0.1f, 0.16f, 0.94f);
         public static readonly Color BottomNavTabActive = new Color(0.18f, 0.38f, 0.62f, 0.98f);
@@ -135,15 +137,16 @@ namespace SpinSquad.Scenes
             go.transform.SetParent(parent, false);
             go.transform.SetSiblingIndex(siblingIndex);
             var img = go.AddComponent<Image>();
-            img.sprite = WhiteSprite();
-            img.color = HeaderBand;
+            img.sprite = MetaHomeUiSprites.HeaderPanel;
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
             img.raycastTarget = false;
             var rt = img.rectTransform;
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.anchoredPosition = Vector2.zero;
-            rt.sizeDelta = new Vector2(0f, 168f);
+            rt.sizeDelta = new Vector2(0f, 176f);
         }
 
         /// <summary>Back cố định đáy màn (meta scenes) — luôn trong safe area.</summary>
@@ -157,6 +160,7 @@ namespace SpinSquad.Scenes
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
+            SpinSquadButtonTheme.ApplyInteraction(btn);
 
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(btnGo.transform, false);
@@ -189,9 +193,21 @@ namespace SpinSquad.Scenes
             if (button == null)
                 return;
             var image = button.GetComponent<Image>();
-            HudUiSprites.ApplyIcon(image, HudUiSprites.CombatBack, ButtonBack);
+            var kitSprite = ButtonKitSprites.Back;
+            image.sprite = kitSprite != null ? kitSprite : MetaHomeUiSprites.BlueButton;
+            image.type = kitSprite != null ? Image.Type.Simple : Image.Type.Sliced;
+            image.preserveAspect = true;
+            image.color = Color.white;
+            SpinSquadButtonTheme.ApplyInteraction(button);
             var label = button.GetComponentInChildren<Text>();
-            HudUiButtonHelper.SyncLabelVisibility(label, HudUiSprites.CombatBack, null);
+            if (label != null)
+            {
+                label.gameObject.SetActive(true);
+                label.text = "BACK";
+                label.fontStyle = FontStyle.Bold;
+                // The approved Back sprite already contains its English caption.
+                label.color = kitSprite != null ? Color.clear : Color.white;
+            }
         }
 
         public static void ApplyImageOutline(Image img)
@@ -232,8 +248,10 @@ namespace SpinSquad.Scenes
             rt.anchoredPosition = Vector2.zero;
             rt.sizeDelta = new Vector2(0f, height);
             var img = go.AddComponent<Image>();
-            img.sprite = WhiteSprite();
-            img.color = bg;
+            var isInfo = objectName.IndexOf("Info", System.StringComparison.OrdinalIgnoreCase) >= 0;
+            img.sprite = isInfo ? MetaHomeUiSprites.CampaignPanel : MetaHomeUiSprites.NavigationPanel;
+            img.type = Image.Type.Sliced;
+            img.color = Color.white;
             img.raycastTarget = false;
             return rt;
         }

@@ -34,8 +34,7 @@ namespace SpinSquad.Core
             mesh.alignment = TextAlignment.Center;
             mesh.color = color;
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (font != null)
                 mesh.font = font;
 

@@ -11,11 +11,12 @@ namespace SpinSquad.UI
         const float RowWidth = 270f;
         const float RowHeight = 54f;
         const float RowGap = 8f;
-        const float ValueLeftPad = 76f;
+        const float ValueLeftPad = 70f;
 
         Text _goldValue;
         Text _keysValue;
         Text _energyValue;
+        Image _energyFill;
 
         public void Build(Transform parent, Font font, Vector2 topLeftAnchoredPosition)
         {
@@ -28,19 +29,23 @@ namespace SpinSquad.UI
             rootRt.anchoredPosition = topLeftAnchoredPosition;
             rootRt.sizeDelta = new Vector2(RowWidth, RowHeight * 3f + RowGap * 2f);
 
-            _goldValue = CreateRow(rootGo.transform, font, "GoldRow", MetaHomeUiSprites.CoinIcon, 0f);
+            _goldValue = CreateRow(rootGo.transform, font, "GoldRow", MetaHomeUiSprites.CoinIcon, 0f, false, out _);
             _keysValue = CreateRow(
                 rootGo.transform,
                 font,
                 "KeysRow",
                 MetaHomeUiSprites.KeyIcon,
-                -(RowHeight + RowGap));
+                -(RowHeight + RowGap),
+                false,
+                out _);
             _energyValue = CreateRow(
                 rootGo.transform,
                 font,
                 "EnergyRow",
                 MetaHomeUiSprites.EnergyIcon,
-                -(RowHeight + RowGap) * 2f);
+                -(RowHeight + RowGap) * 2f,
+                true,
+                out _energyFill);
         }
 
         static Text CreateRow(
@@ -48,8 +53,11 @@ namespace SpinSquad.UI
             Font font,
             string rowName,
             Sprite iconSprite,
-            float yOffset)
+            float yOffset,
+            bool showProgress,
+            out Image progressFill)
         {
+            progressFill = null;
             var rowGo = new GameObject(rowName);
             rowGo.transform.SetParent(parent, false);
             var rowRt = rowGo.AddComponent<RectTransform>();
@@ -72,6 +80,25 @@ namespace SpinSquad.UI
             barRt.offsetMin = Vector2.zero;
             barRt.offsetMax = Vector2.zero;
 
+            if (showProgress)
+            {
+                var fillGo = new GameObject("ProgressFill");
+                fillGo.transform.SetParent(barGo.transform, false);
+                progressFill = fillGo.AddComponent<Image>();
+                progressFill.sprite = MetaHudTheme.WhiteSprite();
+                progressFill.type = Image.Type.Filled;
+                progressFill.fillMethod = Image.FillMethod.Horizontal;
+                progressFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+                progressFill.fillAmount = 1f;
+                progressFill.color = new Color(0.12f, 0.7f, 1f, 0.72f);
+                progressFill.raycastTarget = false;
+                var fillRt = progressFill.rectTransform;
+                fillRt.anchorMin = Vector2.zero;
+                fillRt.anchorMax = Vector2.one;
+                fillRt.offsetMin = new Vector2(7f, 7f);
+                fillRt.offsetMax = new Vector2(-7f, -7f);
+            }
+
             var iconGo = new GameObject("Icon");
             iconGo.transform.SetParent(rowGo.transform, false);
             var icon = iconGo.AddComponent<Image>();
@@ -82,8 +109,8 @@ namespace SpinSquad.UI
             var iconRt = icon.rectTransform;
             iconRt.anchorMin = iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(10f, 0f);
-            iconRt.sizeDelta = new Vector2(46f, 46f);
+            iconRt.anchoredPosition = new Vector2(7f, 0f);
+            iconRt.sizeDelta = new Vector2(52f, 52f);
 
             var valueGo = new GameObject("Value");
             valueGo.transform.SetParent(rowGo.transform, false);
@@ -110,6 +137,9 @@ namespace SpinSquad.UI
                 _keysValue.text = MetaProgressionStore.TreasureKeys.ToString();
             if (_energyValue != null)
                 _energyValue.text = $"{MetaProgressionStore.Energy}/{MetaProgressionStore.MaxEnergy}";
+            if (_energyFill != null)
+                _energyFill.fillAmount = Mathf.Clamp01(
+                    MetaProgressionStore.Energy / (float)Mathf.Max(1, MetaProgressionStore.MaxEnergy));
         }
     }
 }

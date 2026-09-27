@@ -53,8 +53,7 @@ namespace SpinSquad.Scenes
 
         void ResolveFont()
         {
-            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         void BuildUi()
@@ -96,8 +95,9 @@ namespace SpinSquad.Scenes
                 RollTreasure);
             rollBtn.GetComponent<RectTransform>().sizeDelta = MetaHudTheme.CtaSize;
             var rollImg = rollBtn.GetComponent<Image>();
-            HudUiSprites.ApplyIcon(rollImg, HudUiSprites.MetaRewardButton, new Color(0.48f, 0.34f, 0.17f, 0.96f));
-            HudUiButtonHelper.SyncLabelVisibility(rollBtn.GetComponentInChildren<Text>(), HudUiSprites.MetaRewardButton, "Roll (1 Key)");
+            rollImg.sprite = MetaHomeUiSprites.GoldButton;
+            rollImg.type = Image.Type.Sliced;
+            rollImg.color = Color.white;
 
             var gap = MetaHudTheme.ActionRowGap;
             _resultText = CreateText(
@@ -186,10 +186,10 @@ namespace SpinSquad.Scenes
             for (var ti = 0; ti < 4; ti++)
             {
                 var selected = (int)_activeTab == ti;
-                var tabSprite = HudUiSprites.TreasureTabSprite(ti);
                 var fallback = RarityPalette.UnitTint((Rarity)ti, UnitTeamKind.Ally);
-                HudUiSprites.ApplyIcon(_tabImages[ti], tabSprite, fallback);
-                _tabImages[ti].color = selected ? Color.white : new Color(0.72f, 0.72f, 0.76f, 0.92f);
+                _tabImages[ti].sprite = selected ? MetaHomeUiSprites.RarityTabActive : MetaHomeUiSprites.RarityTab;
+                _tabImages[ti].type = Image.Type.Sliced;
+                _tabImages[ti].color = selected ? Color.white : Color.Lerp(Color.white, fallback, 0.12f);
             }
 
             var defs = TreasureDefinitions.DefinitionsOrderedForRarity(_activeTab);
@@ -276,10 +276,13 @@ namespace SpinSquad.Scenes
             var go = new GameObject(label + "Tab");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(image, tabSprite, MetaHudTheme.ButtonIconBar);
+            image.sprite = MetaHomeUiSprites.RarityTab;
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
+            SpinSquadButtonTheme.ApplyInteraction(btn);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(go.transform, false);
@@ -290,7 +293,8 @@ namespace SpinSquad.Scenes
             text.alignment = TextAnchor.MiddleCenter;
             text.color = Color.white;
             text.raycastTarget = false;
-            text.gameObject.SetActive(tabSprite == null);
+            text.fontStyle = FontStyle.Bold;
+            text.gameObject.SetActive(true);
             var lrt = text.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
@@ -310,8 +314,10 @@ namespace SpinSquad.Scenes
             var btnGo = new GameObject($"TreasureCard_{slotIndex}");
             btnGo.transform.SetParent(parent, false);
             var bg = btnGo.AddComponent<Image>();
-            bg.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
+            bg.sprite = MetaHomeUiSprites.TreasureCard;
+            bg.type = Image.Type.Sliced;
             bg.color = RarityPalette.UpgradeCardBackground(Rarity.Common);
+            MetaHudTheme.ApplyImageOutline(bg);
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = bg;
             btn.onClick.AddListener(onClick);
@@ -329,14 +335,15 @@ namespace SpinSquad.Scenes
             iconRt.anchorMin = new Vector2(0f, 0.5f);
             iconRt.anchorMax = new Vector2(0f, 0.5f);
             iconRt.pivot = new Vector2(0f, 0.5f);
-            iconRt.anchoredPosition = new Vector2(10f, 0f);
-            iconRt.sizeDelta = new Vector2(72f, 72f);
+            iconRt.anchoredPosition = new Vector2(14f, 0f);
+            iconRt.sizeDelta = new Vector2(84f, 84f);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(btnGo.transform, false);
             var text = textGo.AddComponent<Text>();
             text.font = _font;
-            text.fontSize = 19;
+            text.fontSize = 22;
+            text.fontStyle = FontStyle.Bold;
             text.text = string.Empty;
             text.alignment = TextAnchor.MiddleLeft;
             text.color = Color.white;
@@ -345,8 +352,8 @@ namespace SpinSquad.Scenes
             var lrt = text.rectTransform;
             lrt.anchorMin = Vector2.zero;
             lrt.anchorMax = Vector2.one;
-            lrt.offsetMin = new Vector2(88f, 6f);
-            lrt.offsetMax = new Vector2(-8f, -6f);
+            lrt.offsetMin = new Vector2(108f, 8f);
+            lrt.offsetMax = new Vector2(-12f, -8f);
 
             _cardRoots[slotIndex] = btnGo;
             _cardImages[slotIndex] = bg;
@@ -359,11 +366,11 @@ namespace SpinSquad.Scenes
             var go = new GameObject(label + "Button");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            image.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-            image.color = color;
+            SpinSquadButtonTheme.Apply(image, SpinSquadButtonTheme.FromLabel(label));
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
+            SpinSquadButtonTheme.ApplyInteraction(btn);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(go.transform, false);

@@ -50,6 +50,10 @@ crashlytics-build.properties
 
 # Cursor / local IDE
 .cursor/
+.venv-antigravity/
+/Tools/unitypy/
+/AllyLineCatalog.dll
+/Spin+Squad!_2.5.1_APKPure.xapk
 
 # macOS
 .DS_Store

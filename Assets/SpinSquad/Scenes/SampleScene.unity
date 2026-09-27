@@ -274,7 +274,7 @@ MonoBehaviour:
   allyPrepColliderLocalSize: {x: 4.2, y: 4.2}
   allyCellContextTapMaxSeconds: 0.45
   allyCellContextTapSlopScreenPixels: 28
-  startingRollCoins: 40
+  startingRollCoins: 0
   wavePrepRollCoinGrant: 40
   sellAllyCoinRefund: 12
   showAllyDebugKeyOverlay: 0

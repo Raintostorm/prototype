@@ -13,16 +13,34 @@ namespace SpinSquad.UI
             if (image == null) return;
             image.sprite = role switch
             {
-                SpinSquadButtonRole.Confirm => MetaHomeUiSprites.GreenButton,
-                SpinSquadButtonRole.Reward => MetaHomeUiSprites.GoldButton,
-                SpinSquadButtonRole.Secondary => MetaHomeUiSprites.DarkButton,
-                SpinSquadButtonRole.Danger => MetaHomeUiSprites.RedButton,
-                SpinSquadButtonRole.Icon => MetaHomeUiSprites.SmallIconButton,
-                _ => MetaHomeUiSprites.BlueButton
+                SpinSquadButtonRole.Confirm => GeneratedUiSprites.ConfirmButton,
+                SpinSquadButtonRole.Reward => GeneratedUiSprites.RewardButton,
+                SpinSquadButtonRole.Secondary => GeneratedUiSprites.SecondaryButton,
+                SpinSquadButtonRole.Danger => GeneratedUiSprites.DangerButton,
+                SpinSquadButtonRole.Icon => GeneratedUiSprites.IconPrimary,
+                _ => GeneratedUiSprites.PrimaryButton
             };
             image.type = Image.Type.Sliced;
             image.preserveAspect = false;
             image.color = Color.white;
+        }
+
+        /// <summary>Stable interaction colors shared by every runtime-built screen.</summary>
+        public static void ApplyInteraction(Button button)
+        {
+            if (button == null) return;
+            var colors = button.colors;
+            colors.normalColor = Color.white;
+            colors.highlightedColor = new Color(1f, 1f, 1f, 1f);
+            // ButtonHoldTint owns the held state. Keeping Selectable's pressed
+            // tint neutral prevents the same button from being darkened twice.
+            colors.pressedColor = Color.white;
+            colors.selectedColor = new Color(1f, 0.94f, 0.66f, 1f);
+            colors.disabledColor = new Color(0.55f, 0.58f, 0.64f, 0.72f);
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
+            ButtonHoldTint.Ensure(button);
         }
 
         public static SpinSquadButtonRole FromLabel(string label)

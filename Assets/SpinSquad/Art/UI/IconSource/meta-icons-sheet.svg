@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="256" viewBox="0 0 640 256">
+  <defs>
+    <style>
+      .white{fill:none;stroke:#f7fbff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+      .cyan{fill:none;stroke:#70cfff;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+      .gold{fill:none;stroke:#ffd66b;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+      .green{fill:none;stroke:#78f0a8;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+      .dark{fill:#153453;stroke:#f7fbff;stroke-width:6;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <!-- Gold -->
+  <g transform="translate(0 0)">
+    <circle cx="64" cy="64" r="38" fill="#f3b936" stroke="#fff0a8" stroke-width="7"/>
+    <circle cx="64" cy="64" r="25" fill="#ffd968" stroke="#b87922" stroke-width="5"/>
+    <path d="M64 45v38M54 51h15c13 0 13 13 0 13H58c-13 0-13 14 0 14h16" fill="none" stroke="#9b5d19" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Key -->
+  <g transform="translate(128 0)">
+    <circle cx="43" cy="72" r="18" class="gold"/>
+    <path d="M56 59L96 25M80 40l13 13M70 49l12 12" class="gold"/>
+  </g>
+
+  <!-- Energy -->
+  <g transform="translate(256 0)">
+    <path d="M70 17L38 69h27l-14 42 42-58H66z" fill="#77d8ff" stroke="#f7fbff" stroke-width="6" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Home -->
+  <g transform="translate(384 0)">
+    <path d="M24 63L64 27l40 36M35 58v42h58V58M54 100V72h20v28" class="cyan"/>
+  </g>
+
+  <!-- Upgrade -->
+  <g transform="translate(512 0)">
+    <path d="M64 105V28M34 58l30-30 30 30M30 103h68" class="green"/>
+  </g>
+
+  <!-- Treasure -->
+  <g transform="translate(0 128)">
+    <path d="M28 53h72v50H28z" fill="#8b5427" stroke="#ffd66b" stroke-width="7"/>
+    <path d="M23 53c3-24 18-34 41-34s38 10 41 34z" fill="#bb7a2f" stroke="#ffd66b" stroke-width="7"/>
+    <path d="M24 66h80M64 55v27" class="gold"/>
+    <circle cx="64" cy="77" r="7" fill="#70cfff"/>
+  </g>
+
+  <!-- Settings -->
+  <g transform="translate(128 128)">
+    <circle cx="64" cy="64" r="28" class="white"/>
+    <circle cx="64" cy="64" r="10" fill="#70cfff"/>
+    <path d="M64 17v16M64 95v16M17 64h16M95 64h16M31 31l12 12M85 85l12 12M97 31L85 43M43 85L31 97" class="white"/>
+  </g>
+
+  <!-- Mail -->
+  <g transform="translate(256 128)">
+    <rect x="22" y="35" width="84" height="59" rx="8" class="dark"/>
+    <path d="M27 42l37 30 37-30M27 88l25-24M101 88L76 64" class="cyan"/>
+  </g>
+
+  <!-- Shop -->
+  <g transform="translate(384 128)">
+    <path d="M28 55v49h72V55M22 55l9-28h66l9 28" class="gold"/>
+    <path d="M22 55c0 12 18 12 18 0 0 12 18 12 18 0 0 12 18 12 18 0 0 12 18 12 18 0 0 12 18 12 18 0" class="white"/>
+    <path d="M52 104V75h24v29" class="cyan"/>
+  </g>
+
+  <!-- Battle -->
+  <g transform="translate(512 128)">
+    <path d="M32 103l18-18M43 92l51-61 4-14-14 4-51 61M30 78l20 20" class="white"/>
+    <path d="M26 108l13-13" class="gold"/>
+  </g>
+</svg>

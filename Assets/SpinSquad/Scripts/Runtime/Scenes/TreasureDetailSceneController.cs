@@ -59,8 +59,7 @@ namespace SpinSquad.Scenes
 
         void ResolveFont()
         {
-            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         }
 
         void BuildUi()
@@ -266,11 +265,11 @@ namespace SpinSquad.Scenes
             var go = new GameObject(label + "Button");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            image.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-            image.color = color;
+            SpinSquadButtonTheme.Apply(image, SpinSquadButtonTheme.FromLabel(label));
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
+            SpinSquadButtonTheme.ApplyInteraction(btn);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(go.transform, false);

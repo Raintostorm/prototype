@@ -50,7 +50,7 @@ Không sao chép cùng một asset vào nhiều nơi. Nếu bắt buộc có b�
 
 - Battle loop: `Scripts/Runtime/Gameplay/DuelDirector.cs`
 - Unit data: `Scripts/Runtime/Data/UnitDefinition.cs`
-- Enemy animation: `Scripts/Runtime/Gameplay/AnimalKitEnemyBattleAnimator.cs`
+- Character animation contract: `Scripts/Runtime/Gameplay/IBattleVisualDriver.cs`; bộ animation gameplay mới chưa được dựng.
 - Homepage: `Scripts/Runtime/Scenes/HomepageHub.cs`
 - UI theme: `Scripts/Runtime/Scenes/MetaHudTheme.cs`
 - Shared UI art: `Scripts/Runtime/UI/MetaHomeUiSprites.cs`

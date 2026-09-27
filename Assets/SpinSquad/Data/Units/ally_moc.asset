@@ -20,7 +20,7 @@ MonoBehaviour:
   teamKind: 0
   bodyShape: 1
   battlePrefab: {fileID: 0}
-  battlePrefabResourcesPath: Battle/GreenAllyBattleVisual
+  battlePrefabResourcesPath:
   portraitSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}
   cardSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}
   iconSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}

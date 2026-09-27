@@ -14,35 +14,54 @@ namespace SpinSquad.UI
 
         static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>(StringComparer.Ordinal);
 
-        public static Sprite CtaButton => RoundedButton("cta", ButtonWidth, ButtonHeight,
+        public static Sprite CtaButton => ButtonKitSprites.BattleOn ?? GeneratedUiSprites.RewardButton ?? RoundedButton("cta", ButtonWidth, ButtonHeight,
             new Color32(21, 73, 128, 255), new Color32(38, 130, 223, 255), new Color32(255, 206, 92, 255), 30);
 
-        public static Sprite BlueButton => RoundedButton("blue", ButtonWidth, ButtonHeight,
+        public static Sprite BlueButton => GeneratedUiSprites.PrimaryButton ?? RoundedButton("blue", ButtonWidth, ButtonHeight,
             new Color32(20, 70, 126, 255), new Color32(34, 118, 211, 255), new Color32(111, 199, 255, 255), 26);
 
-        public static Sprite GreenButton => RoundedButton("green", ButtonWidth, ButtonHeight,
+        public static Sprite GreenButton => GeneratedUiSprites.ConfirmButton ?? RoundedButton("green", ButtonWidth, ButtonHeight,
             new Color32(20, 93, 78, 255), new Color32(35, 170, 111, 255), new Color32(113, 245, 169, 255), 26);
 
-        public static Sprite GoldButton => RoundedButton("gold", ButtonWidth, ButtonHeight,
+        public static Sprite GoldButton => GeneratedUiSprites.RewardButton ?? RoundedButton("gold", ButtonWidth, ButtonHeight,
             new Color32(109, 63, 23, 255), new Color32(202, 136, 42, 255), new Color32(255, 215, 94, 255), 26);
 
-        public static Sprite RedButton => RoundedButton("red", ButtonWidth, ButtonHeight,
+        public static Sprite RedButton => GeneratedUiSprites.DangerButton ?? RoundedButton("red", ButtonWidth, ButtonHeight,
             new Color32(91, 24, 35, 255), new Color32(174, 48, 59, 255), new Color32(255, 126, 104, 255), 26);
 
-        public static Sprite DarkButton => RoundedButton("dark", ButtonWidth, ButtonHeight,
+        public static Sprite DarkButton => GeneratedUiSprites.SecondaryButton ?? RoundedButton("dark", ButtonWidth, ButtonHeight,
             new Color32(18, 25, 42, 246), new Color32(45, 59, 87, 246), new Color32(126, 162, 210, 255), 26);
 
-        public static Sprite SmallIconButton => RoundedButton("small-icon", 128, 112,
+        public static Sprite SmallIconButton => GeneratedUiSprites.IconPrimary ?? RoundedButton("small-icon", 128, 112,
             new Color32(18, 31, 50, 245), new Color32(54, 75, 104, 245), new Color32(105, 188, 255, 255), 24);
 
-        public static Sprite NavTab => RoundedButton("nav-idle", 192, 112,
+        public static Sprite NavTab => GeneratedUiSprites.IconPrimary ?? RoundedButton("nav-idle", 192, 112,
             new Color32(18, 24, 38, 236), new Color32(31, 42, 64, 242), new Color32(68, 92, 125, 255), 16);
 
-        public static Sprite NavTabActive => RoundedButton("nav-active", 192, 112,
+        public static Sprite NavTabActive => GeneratedUiSprites.IconSelected ?? RoundedButton("nav-active", 192, 112,
             new Color32(22, 68, 116, 248), new Color32(36, 116, 196, 250), new Color32(255, 206, 88, 255), 16);
 
-        public static Sprite CampaignPanel => RoundedPanel("campaign-panel", PanelWidth, PanelHeight,
+        public static Sprite CampaignPanel => RoundedPanel("campaign-panel-v4", PanelWidth, PanelHeight,
             new Color32(5, 18, 34, 214), new Color32(41, 127, 205, 110), new Color32(255, 214, 105, 190), 24);
+
+        public static Sprite ModalPanel => RoundedPanel("modal-panel-v4", 420, 520,
+            new Color32(5, 18, 34, 238), new Color32(25, 83, 132, 92), new Color32(74, 166, 225, 210), 24);
+        public static Sprite NavigationPanel => RoundedPanel("navigation-panel-v4", 640, 112,
+            new Color32(5, 18, 34, 244), new Color32(20, 72, 120, 80), new Color32(255, 205, 78, 220), 18);
+        public static Sprite HeaderPanel => RoundedPanel("header-panel-v4", 640, 128,
+            new Color32(4, 20, 39, 226), new Color32(19, 83, 132, 66), new Color32(57, 149, 211, 170), 14);
+
+        public static Sprite UpgradeCard => RoundedPanel("upgrade-card-v2", 320, 184,
+            new Color32(7, 21, 39, 244), new Color32(26, 83, 128, 150), new Color32(91, 199, 255, 255), 22);
+
+        public static Sprite TreasureCard => RoundedPanel("treasure-card-v2", 360, 112,
+            new Color32(9, 20, 36, 248), new Color32(77, 52, 18, 150), new Color32(255, 205, 78, 255), 20);
+
+        public static Sprite RarityTab => RoundedButton("rarity-tab-v2", 188, 72,
+            new Color32(13, 26, 45, 248), new Color32(35, 63, 94, 248), new Color32(102, 149, 201, 255), 16);
+
+        public static Sprite RarityTabActive => RoundedButton("rarity-tab-active-v2", 188, 72,
+            new Color32(29, 78, 126, 255), new Color32(42, 132, 206, 255), new Color32(255, 211, 86, 255), 16);
 
         public static Sprite RollSlotIdle => RoundedPanel("roll-idle", 144, 112,
             new Color32(10, 20, 36, 248), new Color32(42, 57, 82, 160), new Color32(104, 140, 184, 255), 18);
@@ -56,16 +75,16 @@ namespace SpinSquad.UI
         public static Sprite RollSlotBuff => RoundedPanel("roll-buff", 144, 112,
             new Color32(8, 58, 45, 248), new Color32(27, 151, 96, 180), new Color32(120, 247, 172, 255), 18);
 
-        public static Sprite HomeIcon => AnimalKitUiSprites.Home ?? Icon("home", DrawHome);
-        public static Sprite UpgradeIcon => AnimalKitUiSprites.Upgrade ?? Icon("upgrade", DrawUpgrade);
-        public static Sprite TreasureIcon => AnimalKitUiSprites.Treasure ?? Icon("treasure", DrawTreasure);
-        public static Sprite SettingsIcon => AnimalKitUiSprites.Settings ?? Icon("settings", DrawSettings);
-        public static Sprite SwordIcon => Icon("sword", DrawSword);
-        public static Sprite MailIcon => AnimalKitUiSprites.Mail ?? Icon("mail", DrawMail);
-        public static Sprite ShopIcon => AnimalKitUiSprites.Shop ?? Icon("shop", DrawShop);
-        public static Sprite CoinIcon => Icon("coin", DrawCoin);
-        public static Sprite KeyIcon => Icon("key", DrawKey);
-        public static Sprite EnergyIcon => Icon("energy", DrawEnergy);
+        public static Sprite HomeIcon => ButtonKitSprites.NavigationHome ?? ButtonKitSprites.Home ?? ImportedIcon("home", DrawHome);
+        public static Sprite UpgradeIcon => ButtonKitSprites.NavigationUpgrade ?? ImportedIcon("upgrade", DrawUpgrade);
+        public static Sprite TreasureIcon => ButtonKitSprites.NavigationTreasure ?? ImportedIcon("treasure", DrawTreasure);
+        public static Sprite SettingsIcon => ButtonKitSprites.NavigationSettings ?? ButtonKitSprites.Settings ?? ImportedIcon("settings", DrawSettings);
+        public static Sprite SwordIcon => Icon("battle-sword-v2", DrawSword);
+        public static Sprite MailIcon => ButtonKitSprites.NavigationMail ?? ButtonKitSprites.Mail ?? ImportedIcon("mail", DrawMail);
+        public static Sprite ShopIcon => ButtonKitSprites.NavigationShop ?? ButtonKitSprites.Shop ?? ImportedIcon("shop", DrawShop);
+        public static Sprite CoinIcon => ButtonKitSprites.Coin ?? ImportedIcon("gold", DrawCoin);
+        public static Sprite KeyIcon => ButtonKitSprites.Key ?? ImportedIcon("key", DrawKey);
+        public static Sprite EnergyIcon => ButtonKitSprites.Energy ?? ImportedIcon("energy", DrawEnergy);
         public static Sprite BuffHpIcon => Icon("buff-hp-white", DrawWhiteHeart);
         public static Sprite BuffDamageIcon => Icon("buff-damage-white", DrawWhiteSword);
         public static Sprite BuffSpeedIcon => Icon("buff-speed-white", DrawWhiteBolt);
@@ -127,6 +146,129 @@ namespace SpinSquad.UI
                 Clear(tex);
                 draw(tex, IconSize);
             }, Vector4.zero);
+        }
+
+        static Sprite ImportedIcon(string resourceName, Action<Texture2D, int> fallbackDraw)
+        {
+            var cacheKey = "imported-icon-" + resourceName;
+            if (Cache.TryGetValue(cacheKey, out var cached) && cached != null)
+                return cached;
+
+            var texture = Resources.Load<Texture2D>("UI/MetaIcons/" + resourceName);
+            if (texture == null)
+                return Icon(resourceName, fallbackDraw);
+
+            var cleanTexture = RemoveConnectedWhiteBackground(texture);
+            cleanTexture.filterMode = FilterMode.Bilinear;
+            cleanTexture.wrapMode = TextureWrapMode.Clamp;
+            var visibleRect = FindVisibleRect(cleanTexture, 3);
+            var sprite = Sprite.Create(cleanTexture,
+                visibleRect,
+                new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect);
+            sprite.name = "MetaHomeUI_imported_" + resourceName;
+            Cache[cacheKey] = sprite;
+            return sprite;
+        }
+
+        static Texture2D RemoveConnectedWhiteBackground(Texture2D source)
+        {
+            Color32[] pixels;
+            try
+            {
+                pixels = source.GetPixels32();
+            }
+            catch (UnityException)
+            {
+                return source;
+            }
+
+            var width = source.width;
+            var height = source.height;
+            var queued = new bool[pixels.Length];
+            var queue = new Queue<int>();
+
+            void Enqueue(int x, int y)
+            {
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                    return;
+
+                var index = y * width + x;
+                var color = pixels[index];
+                if (queued[index] || color.r < 224 || color.g < 224 || color.b < 224)
+                    return;
+
+                queued[index] = true;
+                queue.Enqueue(index);
+            }
+
+            for (var x = 0; x < width; x++)
+            {
+                Enqueue(x, 0);
+                Enqueue(x, height - 1);
+            }
+            for (var y = 0; y < height; y++)
+            {
+                Enqueue(0, y);
+                Enqueue(width - 1, y);
+            }
+
+            while (queue.Count > 0)
+            {
+                var index = queue.Dequeue();
+                var x = index % width;
+                var y = index / width;
+                var color = pixels[index];
+                color.a = 0;
+                pixels[index] = color;
+                Enqueue(x - 1, y);
+                Enqueue(x + 1, y);
+                Enqueue(x, y - 1);
+                Enqueue(x, y + 1);
+            }
+
+            var clean = new Texture2D(width, height, TextureFormat.RGBA32, false)
+            {
+                name = source.name + "_Transparent",
+                filterMode = FilterMode.Bilinear,
+                wrapMode = TextureWrapMode.Clamp
+            };
+            clean.SetPixels32(pixels);
+            clean.Apply(false, false);
+            return clean;
+        }
+
+        static Rect FindVisibleRect(Texture2D texture, int padding)
+        {
+            var pixels = texture.GetPixels32();
+            var width = texture.width;
+            var height = texture.height;
+            var minX = width;
+            var minY = height;
+            var maxX = -1;
+            var maxY = -1;
+
+            for (var y = 0; y < height; y++)
+            {
+                for (var x = 0; x < width; x++)
+                {
+                    if (pixels[y * width + x].a <= 12)
+                        continue;
+
+                    minX = Mathf.Min(minX, x);
+                    minY = Mathf.Min(minY, y);
+                    maxX = Mathf.Max(maxX, x);
+                    maxY = Mathf.Max(maxY, y);
+                }
+            }
+
+            if (maxX < minX || maxY < minY)
+                return new Rect(0f, 0f, width, height);
+
+            minX = Mathf.Max(0, minX - padding);
+            minY = Mathf.Max(0, minY - padding);
+            maxX = Mathf.Min(width - 1, maxX + padding);
+            maxY = Mathf.Min(height - 1, maxY + padding);
+            return new Rect(minX, minY, maxX - minX + 1, maxY - minY + 1);
         }
 
         static Sprite GetOrCreate(string key, int width, int height, Action<Texture2D> draw, Vector4 border)
@@ -200,10 +342,15 @@ namespace SpinSquad.UI
         {
             var blade = new Color32(230, 244, 255, 255);
             var gold = new Color32(255, 204, 74, 255);
-            DrawLine(tex, 34, 28, 88, 96, blade, 11);
-            DrawLine(tex, 44, 26, 94, 86, new Color32(99, 193, 255, 230), 4);
-            DrawLine(tex, 32, 54, 58, 34, gold, 9);
-            DrawLine(tex, 27, 25, 42, 40, new Color32(45, 72, 118, 255), 11);
+            var shadow = new Color32(48, 101, 151, 255);
+            var grip = new Color32(63, 49, 70, 255);
+            DrawLine(tex, 64, 45, 64, 101, shadow, 18);
+            DrawLine(tex, 64, 48, 64, 101, blade, 12);
+            DrawLine(tex, 64, 108, 52, 94, blade, 9);
+            DrawLine(tex, 64, 108, 76, 94, blade, 9);
+            DrawLine(tex, 36, 43, 92, 43, gold, 10);
+            DrawLine(tex, 64, 18, 64, 42, grip, 12);
+            DrawCircle(tex, 64, 16, 8, gold);
         }
 
         static void DrawMail(Texture2D tex, int s)

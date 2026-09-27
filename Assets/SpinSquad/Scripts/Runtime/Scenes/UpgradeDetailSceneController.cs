@@ -57,8 +57,7 @@ namespace SpinSquad.Scenes
 
         void ResolveFont()
         {
-            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             _unitCatalog = Resources.Load<UnitCatalog>("UnitCatalog_Main");
             _unitCatalog?.RebuildIndex();
         }
@@ -104,27 +103,51 @@ namespace SpinSquad.Scenes
             var portRt = _portraitImage.rectTransform;
             portRt.anchorMin = portRt.anchorMax = new Vector2(0.5f, 1f);
             portRt.pivot = new Vector2(0.5f, 1f);
-            portRt.anchoredPosition = new Vector2(0f, -258f);
-            portRt.sizeDelta = new Vector2(128f, 128f);
+            portRt.anchoredPosition = new Vector2(0f, -270f);
+            // Large inspection portrait: exactly 4x the previous 128x128 size.
+            // This is intentionally generous so idle-frame compositing problems
+            // are easy to spot while tuning the ally assets.
+            portRt.sizeDelta = new Vector2(512f, 512f);
             _portraitImage.sprite = UnitSpriteFactory.GetSprite(UnitBodyShape.Square);
             _portraitImage.color = RarityPalette.UnitTint(_rarityTier, UnitTeamKind.Ally);
 
-            _detailText = CreateText(canvasGo.transform, "Detail", string.Empty, 22, new Vector2(0f, -418f), new Vector2(1020f, 600f));
+            _detailText = CreateText(canvasGo.transform, "Detail", string.Empty, 22, new Vector2(0f, -790f), new Vector2(1020f, 430f));
             _detailText.alignment = TextAnchor.UpperLeft;
             _detailText.supportRichText = true;
             _detailText.lineSpacing = 1.08f;
-            _statusText = CreateText(canvasGo.transform, "Status", string.Empty, 24, new Vector2(0f, -880f), new Vector2(980f, 120f));
+            _statusText = CreateText(canvasGo.transform, "Status", string.Empty, 24, new Vector2(0f, -1220f), new Vector2(980f, 120f));
             _statusText.alignment = TextAnchor.MiddleCenter;
 
             _upgradeButton = CreateButton(
                 canvasGo.transform,
                 "Upgrade",
-                new Vector2(0f, -1050f),
+                new Vector2(0f, -1370f),
                 new Color(0.2f, 0.58f, 0.34f, 0.95f),
                 OnUpgradeClicked);
             var upgradeImg = _upgradeButton.GetComponent<Image>();
-            HudUiSprites.ApplyIcon(upgradeImg, HudUiSprites.MetaGreenButton, new Color(0.2f, 0.58f, 0.34f, 0.95f));
-            HudUiButtonHelper.SyncLabelVisibility(_upgradeButton.GetComponentInChildren<Text>(), HudUiSprites.MetaGreenButton, "Upgrade");
+            var kitUpgrade = ButtonKitSprites.UpgradeOn;
+            if (kitUpgrade != null)
+            {
+                upgradeImg.sprite = kitUpgrade;
+                upgradeImg.type = Image.Type.Simple;
+                upgradeImg.preserveAspect = true;
+                upgradeImg.color = Color.white;
+                _upgradeButton.transition = Selectable.Transition.SpriteSwap;
+                var states = _upgradeButton.spriteState;
+                states.highlightedSprite = kitUpgrade;
+                states.pressedSprite = ButtonKitSprites.UpgradeOff ?? kitUpgrade;
+                states.selectedSprite = kitUpgrade;
+                states.disabledSprite = ButtonKitSprites.UpgradeOff ?? kitUpgrade;
+                _upgradeButton.spriteState = states;
+                var label = _upgradeButton.GetComponentInChildren<Text>();
+                if (label != null)
+                    label.color = Color.clear;
+            }
+            else
+            {
+                HudUiSprites.ApplyIcon(upgradeImg, HudUiSprites.MetaGreenButton, new Color(0.2f, 0.58f, 0.34f, 0.95f));
+                HudUiButtonHelper.SyncLabelVisibility(_upgradeButton.GetComponentInChildren<Text>(), HudUiSprites.MetaGreenButton, "Upgrade");
+            }
             MetaHudTheme.CreateFooterBackButton(canvasGo.transform, _font, BackToList);
         }
 
@@ -182,12 +205,11 @@ namespace SpinSquad.Scenes
             {
                 var shape = def != null ? def.BodyShape : UnitBodyShape.Square;
                 var resolvedPortrait = (Sprite)null;
-                if (def != null)
-                {
-                    var allowCustomVisualAtThisTier = _rarityTier >= def.Rarity;
-                    if (allowCustomVisualAtThisTier)
-                        resolvedPortrait = def.PortraitSprite != null ? def.PortraitSprite : def.CardSprite;
-                }
+                resolvedPortrait = AllyUpgradePortraitResolver.Resolve(
+                    _unitCatalog,
+                    _lineIndex,
+                    _rarityTier,
+                    def);
                 if (resolvedPortrait != null)
                 {
                     _portraitImage.sprite = resolvedPortrait;
@@ -325,11 +347,11 @@ namespace SpinSquad.Scenes
             var go = new GameObject(label + "Button");
             go.transform.SetParent(parent, false);
             var image = go.AddComponent<Image>();
-            image.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f), 1f);
-            image.color = color;
+            SpinSquadButtonTheme.Apply(image, SpinSquadButtonTheme.FromLabel(label));
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = image;
             btn.onClick.AddListener(onClick);
+            SpinSquadButtonTheme.ApplyInteraction(btn);
 
             var textGo = new GameObject("Label");
             textGo.transform.SetParent(go.transform, false);

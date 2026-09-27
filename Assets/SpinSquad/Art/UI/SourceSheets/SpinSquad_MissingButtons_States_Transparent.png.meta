@@ -1,0 +1,975 @@
+fileFormatVersion: 2
+guid: 47b092c6a47d34a11810d23c9036579c
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -4736082903244140038
+    second: SpinSquad_MissingButtons_States_Transparent_0
+  - first:
+      213: 2860621172800133092
+    second: SpinSquad_MissingButtons_States_Transparent_1
+  - first:
+      213: -6600175038277742018
+    second: SpinSquad_MissingButtons_States_Transparent_2
+  - first:
+      213: -5635980733434883258
+    second: SpinSquad_MissingButtons_States_Transparent_3
+  - first:
+      213: 2941294697859249575
+    second: SpinSquad_MissingButtons_States_Transparent_4
+  - first:
+      213: 2970550413850544617
+    second: SpinSquad_MissingButtons_States_Transparent_5
+  - first:
+      213: 5626198088966168012
+    second: SpinSquad_MissingButtons_States_Transparent_6
+  - first:
+      213: 7411036695459454936
+    second: SpinSquad_MissingButtons_States_Transparent_7
+  - first:
+      213: -7689033841620710801
+    second: SpinSquad_MissingButtons_States_Transparent_8
+  - first:
+      213: 6954125168080556031
+    second: SpinSquad_MissingButtons_States_Transparent_9
+  - first:
+      213: 6132322934532149979
+    second: SpinSquad_MissingButtons_States_Transparent_10
+  - first:
+      213: -6835702513646349041
+    second: SpinSquad_MissingButtons_States_Transparent_11
+  - first:
+      213: 7948034675039050500
+    second: SpinSquad_MissingButtons_States_Transparent_12
+  - first:
+      213: -5512013648728624893
+    second: SpinSquad_MissingButtons_States_Transparent_13
+  - first:
+      213: -2537668010253304248
+    second: SpinSquad_MissingButtons_States_Transparent_14
+  - first:
+      213: 2557237774564509143
+    second: SpinSquad_MissingButtons_States_Transparent_15
+  - first:
+      213: -6530796842024008708
+    second: SpinSquad_MissingButtons_States_Transparent_16
+  - first:
+      213: -2341188609591173683
+    second: SpinSquad_MissingButtons_States_Transparent_17
+  - first:
+      213: 2423986168894097193
+    second: SpinSquad_MissingButtons_States_Transparent_18
+  - first:
+      213: 7868833123864508325
+    second: SpinSquad_MissingButtons_States_Transparent_19
+  - first:
+      213: -1001143274910510705
+    second: SpinSquad_MissingButtons_States_Transparent_20
+  - first:
+      213: -2385569568594218581
+    second: SpinSquad_MissingButtons_States_Transparent_21
+  - first:
+      213: 3422225117005235664
+    second: SpinSquad_MissingButtons_States_Transparent_22
+  - first:
+      213: -1748412154911424765
+    second: SpinSquad_MissingButtons_States_Transparent_23
+  - first:
+      213: -4337557886256097740
+    second: SpinSquad_MissingButtons_States_Transparent_24
+  - first:
+      213: 5183782998733477278
+    second: SpinSquad_MissingButtons_States_Transparent_25
+  - first:
+      213: 6314979953467768519
+    second: SpinSquad_MissingButtons_States_Transparent_26
+  - first:
+      213: -8489526017009423314
+    second: SpinSquad_MissingButtons_States_Transparent_27
+  - first:
+      213: -7422460481018456786
+    second: SpinSquad_MissingButtons_States_Transparent_28
+  - first:
+      213: 7724547473329836121
+    second: SpinSquad_MissingButtons_States_Transparent_29
+  - first:
+      213: 6972509194349461596
+    second: SpinSquad_MissingButtons_States_Transparent_30
+  - first:
+      213: -2523524888321957762
+    second: SpinSquad_MissingButtons_States_Transparent_31
+  - first:
+      213: -4254689917052057768
+    second: SpinSquad_MissingButtons_States_Transparent_32
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_0
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 848
+        width: 282
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: af1155d31bd064eb0800000000000000
+      internalID: -4736082903244140038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_1
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 848
+        width: 280
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e796b9ecc7f2b720800000000000000
+      internalID: 2860621172800133092
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_2
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 848
+        width: 288
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e321e0c95c77764a0800000000000000
+      internalID: -6600175038277742018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_3
+      rect:
+        serializedVersion: 2
+        x: 918
+        y: 842
+        width: 183
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6431ba63269f8c1b0800000000000000
+      internalID: -5635980733434883258
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_4
+      rect:
+        serializedVersion: 2
+        x: 1109
+        y: 842
+        width: 188
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7a5f3ada1f391d820800000000000000
+      internalID: 2941294697859249575
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_5
+      rect:
+        serializedVersion: 2
+        x: 1308
+        y: 842
+        width: 193
+        height: 149
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e983fcdcd3893920800000000000000
+      internalID: 2970550413850544617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_6
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 690
+        width: 283
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ccd5fc06a55441e40800000000000000
+      internalID: 5626198088966168012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_7
+      rect:
+        serializedVersion: 2
+        x: 314
+        y: 688
+        width: 281
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8dfde32fb9a49d660800000000000000
+      internalID: 7411036695459454936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_8
+      rect:
+        serializedVersion: 2
+        x: 600
+        y: 687
+        width: 286
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6a8d3495701b4590800000000000000
+      internalID: -7689033841620710801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_9
+      rect:
+        serializedVersion: 2
+        x: 913
+        y: 686
+        width: 188
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fff8b0feef3028060800000000000000
+      internalID: 6954125168080556031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_10
+      rect:
+        serializedVersion: 2
+        x: 1106
+        y: 685
+        width: 192
+        height: 141
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bd215c0f7336a1550800000000000000
+      internalID: 6132322934532149979
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_11
+      rect:
+        serializedVersion: 2
+        x: 1305
+        y: 685
+        width: 197
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f055ddbe7c4b221a0800000000000000
+      internalID: -6835702513646349041
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_12
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 530
+        width: 284
+        height: 143
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 40b903c2d671d4e60800000000000000
+      internalID: 7948034675039050500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_13
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 528
+        width: 281
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 301fc665ac46183b0800000000000000
+      internalID: -5512013648728624893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_14
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 528
+        width: 289
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 84ebafac36468ccd0800000000000000
+      internalID: -2537668010253304248
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_15
+      rect:
+        serializedVersion: 2
+        x: 914
+        y: 532
+        width: 190
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d5c02705322d7320800000000000000
+      internalID: 2557237774564509143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_16
+      rect:
+        serializedVersion: 2
+        x: 1107
+        y: 532
+        width: 191
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf38ae2bfd2fd55a0800000000000000
+      internalID: -6530796842024008708
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_17
+      rect:
+        serializedVersion: 2
+        x: 1302
+        y: 531
+        width: 198
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dcd902d1d5d628fd0800000000000000
+      internalID: -2341188609591173683
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_18
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 373
+        width: 282
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9278469e39ab3a120800000000000000
+      internalID: 2423986168894097193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_19
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 371
+        width: 282
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a775c80906b33d60800000000000000
+      internalID: 7868833123864508325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_20
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 371
+        width: 290
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8110b9ee793b12f0800000000000000
+      internalID: -1001143274910510705
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_21
+      rect:
+        serializedVersion: 2
+        x: 911
+        y: 376
+        width: 194
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba1b5fcdd11c4eed0800000000000000
+      internalID: -2385569568594218581
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_22
+      rect:
+        serializedVersion: 2
+        x: 1107
+        y: 376
+        width: 191
+        height: 137
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0d54488bc9f2e7f20800000000000000
+      internalID: 3422225117005235664
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_23
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 376
+        width: 204
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 30f778998646cb7e0800000000000000
+      internalID: -1748412154911424765
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_24
+      rect:
+        serializedVersion: 2
+        x: 25
+        y: 214
+        width: 281
+        height: 142
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 436d2057516edc3c0800000000000000
+      internalID: -4337557886256097740
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_25
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 212
+        width: 282
+        height: 144
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e95d7382c2f70f740800000000000000
+      internalID: 5183782998733477278
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_26
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 212
+        width: 287
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7ceb82a3fc053a750800000000000000
+      internalID: 6314979953467768519
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_27
+      rect:
+        serializedVersion: 2
+        x: 907
+        y: 219
+        width: 194
+        height: 139
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2c67b421152f2a80800000000000000
+      internalID: -8489526017009423314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_28
+      rect:
+        serializedVersion: 2
+        x: 1103
+        y: 218
+        width: 196
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e251585b48f1ef890800000000000000
+      internalID: -7422460481018456786
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_29
+      rect:
+        serializedVersion: 2
+        x: 1304
+        y: 218
+        width: 203
+        height: 140
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9505776200b133b60800000000000000
+      internalID: 7724547473329836121
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_30
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 50
+        width: 283
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c50485a9b2453c060800000000000000
+      internalID: 6972509194349461596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_31
+      rect:
+        serializedVersion: 2
+        x: 312
+        y: 50
+        width: 282
+        height: 146
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7066b9fb73aafcd0800000000000000
+      internalID: -2523524888321957762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: SpinSquad_MissingButtons_States_Transparent_32
+      rect:
+        serializedVersion: 2
+        x: 599
+        y: 49
+        width: 289
+        height: 147
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8570da0101e44f4c0800000000000000
+      internalID: -4254689917052057768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      SpinSquad_MissingButtons_States_Transparent_0: -4736082903244140038
+      SpinSquad_MissingButtons_States_Transparent_1: 2860621172800133092
+      SpinSquad_MissingButtons_States_Transparent_10: 6132322934532149979
+      SpinSquad_MissingButtons_States_Transparent_11: -6835702513646349041
+      SpinSquad_MissingButtons_States_Transparent_12: 7948034675039050500
+      SpinSquad_MissingButtons_States_Transparent_13: -5512013648728624893
+      SpinSquad_MissingButtons_States_Transparent_14: -2537668010253304248
+      SpinSquad_MissingButtons_States_Transparent_15: 2557237774564509143
+      SpinSquad_MissingButtons_States_Transparent_16: -6530796842024008708
+      SpinSquad_MissingButtons_States_Transparent_17: -2341188609591173683
+      SpinSquad_MissingButtons_States_Transparent_18: 2423986168894097193
+      SpinSquad_MissingButtons_States_Transparent_19: 7868833123864508325
+      SpinSquad_MissingButtons_States_Transparent_2: -6600175038277742018
+      SpinSquad_MissingButtons_States_Transparent_20: -1001143274910510705
+      SpinSquad_MissingButtons_States_Transparent_21: -2385569568594218581
+      SpinSquad_MissingButtons_States_Transparent_22: 3422225117005235664
+      SpinSquad_MissingButtons_States_Transparent_23: -1748412154911424765
+      SpinSquad_MissingButtons_States_Transparent_24: -4337557886256097740
+      SpinSquad_MissingButtons_States_Transparent_25: 5183782998733477278
+      SpinSquad_MissingButtons_States_Transparent_26: 6314979953467768519
+      SpinSquad_MissingButtons_States_Transparent_27: -8489526017009423314
+      SpinSquad_MissingButtons_States_Transparent_28: -7422460481018456786
+      SpinSquad_MissingButtons_States_Transparent_29: 7724547473329836121
+      SpinSquad_MissingButtons_States_Transparent_3: -5635980733434883258
+      SpinSquad_MissingButtons_States_Transparent_30: 6972509194349461596
+      SpinSquad_MissingButtons_States_Transparent_31: -2523524888321957762
+      SpinSquad_MissingButtons_States_Transparent_32: -4254689917052057768
+      SpinSquad_MissingButtons_States_Transparent_4: 2941294697859249575
+      SpinSquad_MissingButtons_States_Transparent_5: 2970550413850544617
+      SpinSquad_MissingButtons_States_Transparent_6: 5626198088966168012
+      SpinSquad_MissingButtons_States_Transparent_7: 7411036695459454936
+      SpinSquad_MissingButtons_States_Transparent_8: -7689033841620710801
+      SpinSquad_MissingButtons_States_Transparent_9: 6954125168080556031
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

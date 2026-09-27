@@ -30,6 +30,7 @@ namespace SpinSquad.Core
         public readonly float RangedInterval;
         public readonly UnitBodyShape Shape;
         public readonly int AllyLineIndex;
+        public readonly string BattlePrefabResourceOverride;
 
         public AllyWaveSnapshot(
             int row,
@@ -42,7 +43,8 @@ namespace SpinSquad.Core
             float attackRange,
             float rangedInterval,
             UnitBodyShape shape,
-            int allyLineIndex)
+            int allyLineIndex,
+            string battlePrefabResourceOverride)
         {
             Row = row;
             Col = col;
@@ -55,6 +57,7 @@ namespace SpinSquad.Core
             RangedInterval = rangedInterval;
             Shape = shape;
             AllyLineIndex = allyLineIndex;
+            BattlePrefabResourceOverride = battlePrefabResourceOverride;
         }
     }
 
@@ -142,8 +145,8 @@ namespace SpinSquad.Core
 
         [SerializeField] private float allyCellContextTapSlopScreenPixels = 28f;
 
-        [Tooltip("Coin roll khi vào / restart trận (40 = 2 lần roll × 20).")]
-        [SerializeField] private int startingRollCoins = 40;
+        [Tooltip("Coin roll khi vào / restart trận. Mặc định 0 để có thể bấm START và test battle ngay.")]
+        [SerializeField] private int startingRollCoins;
 
         [Tooltip("Cộng coin roll sau mỗi wave thắng (prep wave kế).")]
         [SerializeField] private int wavePrepRollCoinGrant = 40;
@@ -434,7 +437,7 @@ namespace SpinSquad.Core
             return null;
         }
 
-        void SpawnEnemyStackMember(int row, int col, UnitDefinition def, Rarity tier, float hp, float atk)
+        void SpawnEnemyStackMember(int row, int col, UnitDefinition def, Rarity tier, float hp, float atk, string battlePrefabResourceOverride = null)
         {
             var unitId = EnemyStackUnitId(def);
             var before = CountEnemyStackInCell(row, col, unitId, tier);
@@ -456,7 +459,9 @@ namespace SpinSquad.Core
                 false,
                 out var enemyUsedFallbackSprite,
                 currentWave,
-                idx - 1);
+                idx - 1,
+                tier,
+                battlePrefabResourceOverride);
             if (enemyUsedFallbackSprite)
                 ApplyEnemyDefinitionVisualScale(enemyGo.transform, def, shape);
             EnsureBattleVisualDriver(enemyGo);
@@ -465,7 +470,7 @@ namespace SpinSquad.Core
             es.InitFromDefinition(def, tier, hp, atk);
             ConfigureEnemy(enemyGo, def);
             var rootSr = enemyGo.GetComponent<SpriteRenderer>();
-            if (rootSr != null && enemyGo.GetComponent<AnimalKitEnemyVisualMarker>() == null)
+            if (rootSr != null)
                 rootSr.color = tint;
             ApplyFootGroundDecorIfEnabled(enemyGo.transform, tier);
 
@@ -724,19 +729,19 @@ namespace SpinSquad.Core
 
         void RefreshAddAllyButton()
         {
-            if (_addAllyButton == null)
-                return;
-
             var prepPhase = !CombatStarted && !BattleEnded;
-            _addAllyButton.gameObject.SetActive(prepPhase);
+            if (_addAllyButton != null)
+            {
+                _addAllyButton.gameObject.SetActive(prepPhase);
+                _addAllyButton.interactable = prepPhase &&
+                    _prepSnapReadyForAddAlly && CanAcceptMoreAllies();
+            }
             if (_duelBottomBarRoot != null)
                 _duelBottomBarRoot.SetActive(prepPhase);
             if (_duelInfoStripRoot != null)
                 _duelInfoStripRoot.SetActive(!BattleEnded);
             if (prepPhase)
             {
-                _addAllyButton.interactable =
-                    _prepSnapReadyForAddAlly && CanAcceptMoreAllies();
                 RefreshAlliesBagVisibility();
             }
         }
@@ -807,11 +812,12 @@ namespace SpinSquad.Core
                         spec.RarityTier,
                         spec.CombatMaxHitPoints,
                         spec.CombatAttack,
-                        def.RangedAttack,
+                        a.GetComponent<DuelActor>()?.IsRangedCombat ?? def.RangedAttack,
                         def.AttackRange,
                         def.RangedShotIntervalSeconds,
                         spec.BodyShape,
-                        spec.AllyLineIndex));
+                        spec.AllyLineIndex,
+                        null));
                 }
                 else if (unitCatalog != null && unitCatalog.TryGet(allyUnitId, out var d2))
                 {
@@ -826,7 +832,8 @@ namespace SpinSquad.Core
                         d2.AttackRange,
                         d2.RangedShotIntervalSeconds,
                         d2.BodyShape,
-                        AllyLineCatalog.LineIndexFromUnitId(allyUnitId)));
+                        AllyLineCatalog.LineIndexFromUnitId(allyUnitId),
+                        null));
                 }
             }
         }
@@ -852,7 +859,10 @@ namespace SpinSquad.Core
             {
                 if (unitCatalog == null || !unitCatalog.TryGet(s.UnitId, out var def))
                     continue;
-                SpawnAllyStackMember(s.Row, s.Col, def, s.Rarity, s.MaxHp, s.Attack, s.AllyLineIndex);
+                SpawnAllyStackMember(
+                    s.Row, s.Col, def, s.Rarity, s.MaxHp, s.Attack, s.AllyLineIndex,
+                    battlePrefabResourceOverride: s.BattlePrefabResourceOverride,
+                    rangedOverride: s.Ranged);
             }
 
             _suppressAllyAutoMerge = false;
@@ -950,8 +960,6 @@ namespace SpinSquad.Core
         }
 
         const string LearningCampaignAllyUnitId = "unit_legends_melee_robot";
-        const string Line1BattleControllerResourcesPath = "Animations/Battle/LegendsMeleeRobot/LegendsMeleeRobot_Battle";
-        static bool _line1BattleControllerMissingWarned;
         static bool _line1RigPrefabMissingWarned;
 
         /// <summary>
@@ -997,17 +1005,19 @@ namespace SpinSquad.Core
             }
         }
 
-        /// <summary>Spawn một nhóm starter nhỏ + enemy wave 1 — trả false nếu thiếu id trong catalog.</summary>
-        bool TrySpawnFiveStarterElementAllies(UnitDefinition waveEnemyDef, float wave1TestHpMultiplier, int enemySpawnCount)
+        /// <summary>Spawn đúng starter Wave 1 + enemy để vào test battle nhanh.</summary>
+        bool TrySpawnStarterTestAllies(UnitDefinition waveEnemyDef, float wave1TestHpMultiplier, int enemySpawnCount)
         {
             if (unitCatalog == null || waveEnemyDef == null)
                 return false;
 
-            var placements = new (string id, int line, int row, int col)[]
+            var placements = new (string id, Rarity rarity, int line, int row, int col)[]
             {
-                (AllyLineCatalog.Line0Id, 0, 0, 0),
-                (AllyLineCatalog.Line1Id, 1, 1, 0),
-                (AllyLineCatalog.Line2Id, 2, 2, 0),
+                (AllyLineCatalog.Line0Id, Rarity.Common, 0, 0, 0),
+                (AllyLineCatalog.Line1Id, Rarity.Common, 1, 0, 1),
+                (AllyLineCatalog.Line2Id, Rarity.Epic,   2, 1, 0),
+                (AllyLineCatalog.Line3Id, Rarity.Common, 3, 1, 1),
+                (AllyLineCatalog.Line4Id, Rarity.Common, 4, 2, 0),
             };
 
             var defs = new UnitDefinition[placements.Length];
@@ -1025,22 +1035,26 @@ namespace SpinSquad.Core
             {
                 var p = placements[i];
                 var def = defs[i];
-                var (awHp, awAtk) = AllyStatScaling.ScaleStats(def, Rarity.Common);
+                var (awHp, awAtk) = AllyStatScaling.ScaleStats(def, p.rarity);
                 awHp *= wave1TestHpMultiplier;
-                SpawnAllyStackMember(p.row, p.col, def, Rarity.Common, awHp, awAtk, p.line);
+                // This is a melee animation benchmark. Force every catalog ally to
+                // close distance; gameplay roles outside this review roster remain unchanged.
+                SpawnAllyStackMember(p.row, p.col, def, p.rarity, awHp, awAtk, p.line, rangedOverride: false);
             }
 
             _suppressAllyAutoMerge = false;
             TryAutoMergeAllAllyBoard();
 
             ClearEnemiesOnly();
-            var er = BattleGrid.DefaultEnemyRow;
-            var ec = BattleGrid.DefaultEnemyCol;
             var et = waveEnemyDef.Rarity;
             var ehp = waveEnemyDef.MaxHitPoints * CurrentLevelEnemyHpMultiplier() * wave1TestHpMultiplier;
             var eatk = waveEnemyDef.Attack * CurrentLevelEnemyAtkMultiplier();
-            for (var i = 0; i < enemySpawnCount; i++)
-                SpawnEnemyStackMember(er, ec, waveEnemyDef, et, ehp, eatk);
+            var enemyPlacements = new (int row, int col)[]
+            {
+                (0, 0), (0, 1), (1, 0), (1, 1), (2, 0),
+            };
+            foreach (var p in enemyPlacements)
+                SpawnEnemyStackMember(p.row, p.col, waveEnemyDef, et, ehp, eatk);
 
             return true;
         }
@@ -1051,8 +1065,9 @@ namespace SpinSquad.Core
 
             BattleRunBuffs.Clear();
             PendingRollGrants.Clear();
-            var metaPassives = MetaProgressionStore.GetTreasurePassiveTotals();
-            RollWallet.ResetForNewBattle(startingRollCoins + metaPassives.StartRollCoinBonus);
+            // Fast Wave-1 review setup: no starting roll currency, including
+            // Treasure bonuses. Later waves still receive wavePrepRollCoinGrant.
+            RollWallet.ResetForNewBattle(0);
 
             var maxPlayable = Mathf.Min(MaxLevels, MetaProgressionStore.UnlockedLevel);
             currentLevel = Mathf.Clamp(MetaProgressionStore.SelectedLevel, 1, maxPlayable);
@@ -1078,7 +1093,7 @@ namespace SpinSquad.Core
                 if (waveEnemyDef != null)
                 {
                     if (spawnFiveStarterElementAlliesOnWave1 && isLevel1Wave1 &&
-                        TrySpawnFiveStarterElementAllies(waveEnemyDef, wave1TestHpMultiplier, wave1TestSpawnCount))
+                        TrySpawnStarterTestAllies(waveEnemyDef, wave1TestHpMultiplier, wave1TestSpawnCount))
                     {
                         spawnedFromCatalog = true;
                     }
@@ -1173,7 +1188,7 @@ namespace SpinSquad.Core
             return baseDamage;
         }
 
-        void ConfigureAlly(GameObject allyGo, float maxHp, float strike, UnitDefinition def = null)
+        void ConfigureAlly(GameObject allyGo, float maxHp, float strike, UnitDefinition def = null, bool? rangedOverride = null)
         {
             var hp = maxHp;
             var stk = strike;
@@ -1203,7 +1218,7 @@ namespace SpinSquad.Core
 
             var h = allyGo.GetComponent<CombatHealth>();
             h.Configure(CombatFaction.Ally, hp);
-            var ranged = def != null && def.RangedAttack;
+            var ranged = rangedOverride ?? (def != null && def.RangedAttack);
             var atkRange = def != null ? def.AttackRange : 1.65f;
             var interval = def != null ? def.RangedShotIntervalSeconds : 0.52f;
             var lineAtkSpeed = MetaProgressionStore.GetLineUpgradeAtkSpeedPct(lineIndex, rarityTier);
@@ -1273,10 +1288,9 @@ namespace SpinSquad.Core
 
         void EnsurePrepUnitInfoButton(GameObject unitGo)
         {
-            var btn = unitGo.GetComponent<PrepUnitInfoButton>();
-            if (btn == null)
-                btn = unitGo.AddComponent<PrepUnitInfoButton>();
-            btn.Init(this);
+            // This debug/inspection affordance obscures small battle sprites in prep.
+            // Keep the inspector accessible from the normal UI instead of placing an
+            // exclamation badge over every character.
         }
 
         void SpawnEnemiesForWaveWithTint(UnitDefinition enemyDef)
@@ -1873,8 +1887,7 @@ namespace SpinSquad.Core
             var textGo = new GameObject("ResultBanner");
             textGo.transform.SetParent(canvasGo.transform, false);
             _banner = textGo.AddComponent<Text>();
-            _banner.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            _banner.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (_banner.font == null)
                 Debug.LogWarning("[DuelDirector] Không tìm thấy font built-in cho UI — chữ có thể không hiện; Console vẫn có log [Duel].");
             _banner.fontSize = 34;
@@ -1936,11 +1949,6 @@ namespace SpinSquad.Core
             _duelBottomBarRoot = barLane.gameObject;
             var row = MetaHudTheme.CreateHorizontalRowParent(barLane, 8f);
 
-            _addAllyButton = CreateBottomTextButton(
-                row, font, "ADD ALLY", 0f,
-                new Color(0.16f, 0.52f, 0.38f, 0.96f));
-            _addAllyButton.onClick.AddListener(AddAllyFromButton);
-
             _startCombatButton = CreateBottomTextButton(
                 row, font, "START", 0f, PrepStartButtonColor);
             _startCombatButton.onClick.AddListener(OnPrepPrimaryClicked);
@@ -1953,11 +1961,13 @@ namespace SpinSquad.Core
 
             var children = new List<RectTransform>
             {
-                _addAllyButton.GetComponent<RectTransform>(),
                 _startCombatButton.GetComponent<RectTransform>(),
                 _alliesBagToggleButton.GetComponent<RectTransform>()
             };
-            var fracs = new List<float> { 0.3f, 0.4f, 0.3f };
+            // START and BAG are both complete authored sprites with a similar
+            // footprint. Equal cells keep their visible centres symmetric;
+            // Image.preserveAspect then fits each sprite without distortion.
+            var fracs = new List<float> { 0.5f, 0.5f };
             MetaHudTheme.LayoutHorizontalRow(row, 16f, children, fracs);
         }
 
@@ -2332,6 +2342,7 @@ namespace SpinSquad.Core
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
+            SpinSquadButtonTheme.ApplyInteraction(btn);
             var colors = btn.colors;
             colors.highlightedColor = new Color(1f, 0.96f, 0.82f, 1f);
             colors.pressedColor = new Color(0.72f, 0.76f, 0.86f, 1f);
@@ -2380,6 +2391,7 @@ namespace SpinSquad.Core
             img.raycastTarget = true;
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = img;
+            SpinSquadButtonTheme.ApplyInteraction(btn);
             var colors = btn.colors;
             colors.highlightedColor = new Color(1f, 0.96f, 0.82f, 1f);
             colors.pressedColor = new Color(0.72f, 0.76f, 0.86f, 1f);
@@ -2730,9 +2742,10 @@ namespace SpinSquad.Core
                 return;
             var canChooseSpeed = !BattleEnded;
             _speed2xStubButton.interactable = canChooseSpeed;
-            var image = _speed2xStubButton.GetComponent<Image>();
-            var sprite = _combatSpeedMode == 2 && canChooseSpeed ? HudUiSprites.CombatSpeed2On : HudUiSprites.CombatSpeed2Off;
-            HudUiSprites.ApplyIcon(image, sprite, canChooseSpeed ? MetaHudTheme.ButtonIconBar : MetaHudTheme.ButtonStubDisabled);
+            var sprite = ButtonKitSprites.Speed ?? (_combatSpeedMode == 2 && canChooseSpeed
+                ? HudUiSprites.CombatSpeed2On
+                : HudUiSprites.CombatSpeed2Off);
+            SetTopBarButtonIcon(_speed2xStubButton, sprite, canChooseSpeed ? Color.white : new Color(1f, 1f, 1f, 0.45f));
             var label = _speed2xStubButton.GetComponentInChildren<Text>(true);
             if (label != null)
             {
@@ -2801,18 +2814,18 @@ namespace SpinSquad.Core
             var py = -insetY - h * 0.5f;
 
             _pauseTopButton = CreateTopRightAnchoredTextButton(
-                canvasParent, font, "", new Vector2(px, py), new Vector2(160f, h),
-                MetaHudTheme.ButtonIconBar, OnPauseTopButtonClicked, true, "DuelPauseTop", HudUiSprites.CombatPause);
+                canvasParent, font, "", new Vector2(px, py), MetaHudTheme.IconBarButtonSize,
+                MetaHudTheme.ButtonIconBar, OnPauseTopButtonClicked, true, "DuelPauseTop", ButtonKitSprites.Pause ?? HudUiSprites.CombatPause);
 
             px -= w + gap;
             _settingsTopButton = CreateTopRightAnchoredTextButton(
                 canvasParent, font, "", new Vector2(px, py), MetaHudTheme.IconBarButtonSize,
-                MetaHudTheme.ButtonIconBar, OnSettingsTopButtonClicked, true, "DuelSettingsTop", HudUiSprites.MetaSetting);
+                MetaHudTheme.ButtonIconBar, OnSettingsTopButtonClicked, true, "DuelSettingsTop", ButtonKitSprites.NavigationSettings ?? ButtonKitSprites.Settings ?? HudUiSprites.MetaSetting);
 
             px -= w + gap;
             _speed2xStubButton = CreateTopRightAnchoredTextButton(
                 canvasParent, font, "", new Vector2(px, py), MetaHudTheme.IconBarButtonSize,
-                MetaHudTheme.ButtonIconBar, OnSpeed2xClicked, false, "DuelSpeed2Stub", HudUiSprites.CombatSpeed2Off);
+                MetaHudTheme.ButtonIconBar, OnSpeed2xClicked, false, "DuelSpeed2Stub", ButtonKitSprites.Speed ?? HudUiSprites.CombatSpeed2Off);
             RefreshSpeed2xButton();
         }
 
@@ -2844,7 +2857,7 @@ namespace SpinSquad.Core
             panelRt.anchorMin = panelRt.anchorMax = new Vector2(0.5f, 0.5f);
             panelRt.pivot = new Vector2(0.5f, 0.5f);
             panelRt.anchoredPosition = Vector2.zero;
-            panelRt.sizeDelta = new Vector2(580f, 480f);
+            panelRt.sizeDelta = new Vector2(620f, 520f);
             var panelBg = panelGo.AddComponent<Image>();
             panelBg.sprite = CreateWhiteSprite();
             panelBg.color = new Color(0.1f, 0.12f, 0.18f, 0.96f);
@@ -2862,26 +2875,26 @@ namespace SpinSquad.Core
             var titleRt = title.rectTransform;
             titleRt.anchorMin = titleRt.anchorMax = new Vector2(0.5f, 0.5f);
             titleRt.pivot = new Vector2(0.5f, 0.5f);
-            titleRt.anchoredPosition = new Vector2(0f, 188f);
+            titleRt.anchoredPosition = new Vector2(0f, 210f);
             titleRt.sizeDelta = new Vector2(520f, 48f);
 
             _pauseResumeButton = CreatePanelButton(
                 panelGo.transform,
                 font,
                 "CONTINUE",
-                new Vector2(0f, 96f),
-                new Vector2(360f, 72f),
+                new Vector2(0f, 112f),
+                new Vector2(400f, 82f),
                 PrepStartButtonColor);
             _pauseResumeButton.onClick.AddListener(OnPauseResumeClicked);
 
             _pauseRestartButton = CreatePanelButton(
-                panelGo.transform, font, "RESTART", new Vector2(0f, 8f), new Vector2(360f, 72f),
+                panelGo.transform, font, "RESTART", new Vector2(0f, 12f), new Vector2(400f, 82f),
                 new Color(0.22f, 0.22f, 0.26f, 0.96f), HudUiSprites.CombatRestart);
             _pauseRestartButton.onClick.AddListener(OnPauseRestartClicked);
 
             _pauseHomeButton = CreatePanelButton(
-                panelGo.transform, font, "HOME", new Vector2(0f, -80f), new Vector2(360f, 72f),
-                new Color(0.2f, 0.26f, 0.4f, 0.96f), HudUiSprites.CombatHomeInBattle);
+                panelGo.transform, font, "HOME", new Vector2(0f, -88f), new Vector2(400f, 82f),
+                new Color(0.2f, 0.26f, 0.4f, 0.96f), ButtonKitSprites.NavigationHome ?? HudUiSprites.CombatHomeInBattle);
             _pauseHomeButton.onClick.AddListener(OnPauseHomeClicked);
 
             _pauseOverlayRoot.SetActive(false);
@@ -3146,11 +3159,12 @@ namespace SpinSquad.Core
             btnGo.transform.SetParent(canvasParent, false);
 
             var image = btnGo.AddComponent<Image>();
-            HudUiSprites.ApplyIcon(image, iconSprite, bg);
+            SpinSquadButtonTheme.Apply(image, SpinSquadButtonRole.Secondary);
             image.raycastTarget = true;
 
             var btn = btnGo.AddComponent<Button>();
             btn.targetGraphic = image;
+            SpinSquadButtonTheme.ApplyInteraction(btn);
             var colors = btn.colors;
             colors.highlightedColor = bg * 1.12f;
             colors.pressedColor = bg * 0.82f;
@@ -3182,6 +3196,8 @@ namespace SpinSquad.Core
             btnRt.pivot = new Vector2(1f, 1f);
             btnRt.anchoredPosition = anchoredTopRight;
             btnRt.sizeDelta = size;
+
+            AddButtonIcon(btnGo.transform, iconSprite, true, Mathf.Min(58f, size.y * 0.64f));
 
             return btn;
         }
@@ -3315,11 +3331,28 @@ namespace SpinSquad.Core
                 label.color = Color.white;
                 label.raycastTarget = false;
                 var labelRt = label.rectTransform;
-                labelRt.anchorMin = Vector2.zero;
+                labelRt.anchorMin = new Vector2(0.25f, 0f);
                 labelRt.anchorMax = Vector2.one;
                 labelRt.offsetMin = new Vector2(12f, 6f);
                 labelRt.offsetMax = new Vector2(-12f, -6f);
                 AddTextShadow(labelGo);
+
+                var tabIcon = i == 0 ? ButtonKitSprites.Attack :
+                    i == 1 ? ButtonKitSprites.Armor : ButtonKitSprites.Healing;
+                if (tabIcon != null)
+                {
+                    var iconGo = new GameObject("Icon");
+                    iconGo.transform.SetParent(buttonGo.transform, false);
+                    var icon = iconGo.AddComponent<Image>();
+                    icon.sprite = tabIcon;
+                    icon.preserveAspect = true;
+                    icon.raycastTarget = false;
+                    var iconRt = icon.rectTransform;
+                    iconRt.anchorMin = new Vector2(0.04f, 0.14f);
+                    iconRt.anchorMax = new Vector2(0.27f, 0.86f);
+                    iconRt.offsetMin = Vector2.zero;
+                    iconRt.offsetMax = Vector2.zero;
+                }
             }
 
             var panelGo = new GameObject("StatsFrame");
@@ -3332,7 +3365,7 @@ namespace SpinSquad.Core
             var panelImage = panelGo.AddComponent<Image>();
             panelImage.sprite = MetaHomeUiSprites.CampaignPanel;
             panelImage.type = Image.Type.Sliced;
-            panelImage.color = new Color(0.035f, 0.075f, 0.12f, 0.9f);
+            panelImage.color = Color.white;
             panelImage.raycastTarget = false;
 
             _combatStatsTitle = CreateCombatStatsText(panelGo.transform, font, 32, FontStyle.Bold);
@@ -3601,6 +3634,12 @@ namespace SpinSquad.Core
                         ? $"BAG {n}/{AllyBenchInventory.SlotCount} ▼"
                         : $"BAG {n}/{AllyBenchInventory.SlotCount} ▶";
                 }
+
+                // The bag has distinct open/closed artwork. Refresh the exact
+                // sprite immediately when the state changes instead of waiting
+                // for a scene-wide styling pass (which deliberately styles each
+                // generated control only once).
+                SpinSquad.UI.GeneratedUiAutoSkin.Apply(_alliesBagToggleButton);
             }
         }
 
@@ -3872,6 +3911,7 @@ namespace SpinSquad.Core
             cb.selectedColor = bg;
             cb.disabledColor = new Color(bg.r * 0.55f, bg.g * 0.55f, bg.b * 0.55f, 0.55f);
             _startCombatButton.colors = cb;
+            GeneratedUiAutoSkin.Apply(_startCombatButton);
         }
 
         IEnumerator RollGachaRoutine()
@@ -4101,9 +4141,29 @@ namespace SpinSquad.Core
         {
             if (_pauseTopButton == null)
                 return;
-            var image = _pauseTopButton.GetComponent<Image>();
-            var sprite = paused ? HudUiSprites.CombatContinue : HudUiSprites.CombatPause;
-            HudUiSprites.ApplyIcon(image, sprite, MetaHudTheme.ButtonIconBar);
+            var sprite = paused
+                ? (ButtonKitSprites.Resume ?? HudUiSprites.CombatContinue)
+                : (ButtonKitSprites.Pause ?? HudUiSprites.CombatPause);
+            SetTopBarButtonIcon(_pauseTopButton, sprite, Color.white);
+        }
+
+        static void SetTopBarButtonIcon(Button button, Sprite sprite, Color tint)
+        {
+            if (button == null || sprite == null)
+                return;
+            var child = button.transform.Find("Icon");
+            var icon = child != null ? child.GetComponent<Image>() : null;
+            if (icon == null)
+            {
+                AddButtonIcon(button.transform, sprite, true, 58f);
+                child = button.transform.Find("Icon");
+                icon = child != null ? child.GetComponent<Image>() : null;
+            }
+            if (icon == null)
+                return;
+            icon.sprite = sprite;
+            icon.color = tint;
+            icon.preserveAspect = true;
         }
 
         static void CreateSettingsStubIconRow(Transform parent, Vector2 anchoredPos, Sprite sprite)
@@ -4279,7 +4339,9 @@ namespace SpinSquad.Core
             return true;
         }
 
-        void SpawnAllyStackMember(int row, int col, UnitDefinition def, Rarity tier, float hp, float atk, int allyLineIndex)
+        void SpawnAllyStackMember(
+            int row, int col, UnitDefinition def, Rarity tier, float hp, float atk, int allyLineIndex,
+            string battlePrefabResourceOverride = null, bool? rangedOverride = null)
         {
             var key = MakeAllyKey(allyLineIndex, tier);
             var before = CountStackInCell(row, col, key);
@@ -4289,14 +4351,14 @@ namespace SpinSquad.Core
             var center = BattleGrid.GetAllyUnitAnchor(row, col);
             var pos = center + StackVisualOffset(before);
             var tint = RarityPalette.UnitTint(tier, def.TeamKind);
-            var go = CreateCombatUnitVisual(def.DisplayName, pos, tint, def, def.BodyShape, true, out var allyUsedFallbackSprite);
+            var go = CreateCombatUnitVisual(def.DisplayName, pos, tint, def, def.BodyShape, true, out var allyUsedFallbackSprite, tier: tier, battlePrefabResourceOverride: battlePrefabResourceOverride);
             if (allyUsedFallbackSprite)
                 ApplyAllyDefinitionVisualScale(go.transform, def);
             EnsureBattleVisualDriver(go);
             WarnIfMissingBattleVisualDriver(go, def, "ally");
             var spec = go.GetComponent<AllyInstanceSpec>();
             spec.InitFromDefinition(def, tier, hp, atk, key.LineIndex);
-            ConfigureAlly(go, hp, atk, def);
+            ConfigureAlly(go, hp, atk, def, rangedOverride);
             var rootSr = go.GetComponent<SpriteRenderer>();
             if (rootSr != null)
                 rootSr.color = tint;
@@ -5207,14 +5269,23 @@ namespace SpinSquad.Core
                 visualObj.transform.localRotation = Quaternion.identity;
                 visualObj.transform.localScale = Vector3.one;
 
+                // Read the authored profile before nested visual drivers are removed.
+                // The spawned root owns the only runtime driver, but keeps the exact
+                // clip, facing and anchor settings of this particular art export.
+                var rigProfile = visualObj.GetComponentInChildren<SpineBattleRigProfile>(true);
+
                 var allRenderers = visualObj.GetComponentsInChildren<SpriteRenderer>(true);
                 for (var i = 0; i < allRenderers.Length; i++)
+                {
                     allRenderers[i].color = tint;
+                }
 
                 var hasSpine = visualObj.GetComponentInChildren<SkeletonAnimation>(true) != null;
                 RemoveNestedBattleVisualDrivers(visualObj.transform);
                 if (hasSpine && autoCenterRigVisualByBounds)
                     AlignRigVisualToAnchor(go.transform, visualObj.transform, rigAnchorChildName);
+                if (rigProfile != null)
+                    visualObj.transform.localPosition += (Vector3)rigProfile.AnchorOffset;
                 if (!hasSpine)
                 {
                     var meshRenderers = visualObj.GetComponentsInChildren<MeshRenderer>(true);
@@ -5231,7 +5302,19 @@ namespace SpinSquad.Core
                 go.AddComponent<CombatHealth>();
 
                 if (hasSpine && go.GetComponent<SpineBattleAnimator>() == null)
-                    go.AddComponent<SpineBattleAnimator>();
+                {
+                    var spineDriver = go.AddComponent<SpineBattleAnimator>();
+                    if (rigProfile != null)
+                    {
+                        spineDriver.SetFacingInverted(rigProfile.InvertFacing);
+                        spineDriver.ConfigureAnimationNames(
+                            rigProfile.IdleAnimationName,
+                            rigProfile.WalkAnimationName,
+                            rigProfile.AttackAnimationName,
+                            rigProfile.DieAnimationName,
+                            rigProfile.AttackAnimationSpeed);
+                    }
+                }
                 var box = go.AddComponent<BoxCollider2D>();
                 box.size = attachAllySpec ? allyPrepColliderLocalSize : new Vector2(0.48f, 0.48f);
                 if (attachAllySpec)
@@ -5436,7 +5519,7 @@ namespace SpinSquad.Core
                 go.transform.localScale = new Vector3(0.32f, 0.32f, 1f);
         }
 
-        static UnityEngine.Object TryResolveBattlePrefabSource(UnitDefinition def, string ownerTag)
+        static UnityEngine.Object TryResolveBattlePrefabSource(UnitDefinition def, string ownerTag, Rarity tier = Rarity.Common)
         {
             if (def == null)
                 return null;
@@ -5468,7 +5551,8 @@ namespace SpinSquad.Core
                 def,
                 def.BodyShape,
                 true,
-                out var usedFallback);
+                out var usedFallback,
+                tier: tier);
             if (usedFallback)
                 ApplyAllyDefinitionVisualScale(go.transform, def);
 
@@ -5535,19 +5619,19 @@ namespace SpinSquad.Core
             bool attachAllySpec,
             out bool usedFallbackSprite,
             int waveForEnemySprite = 1,
-            int spawnIndexForEnemySprite = 0)
+            int spawnIndexForEnemySprite = 0,
+            Rarity tier = Rarity.Common,
+            string battlePrefabResourceOverride = null)
         {
-            var prefabSource = TryResolveBattlePrefabSource(def, attachAllySpec ? "ally" : "enemy");
+            var prefabSource = string.IsNullOrWhiteSpace(battlePrefabResourceOverride)
+                ? TryResolveBattlePrefabSource(def, attachAllySpec ? "ally" : "enemy", tier)
+                : Resources.Load<GameObject>(battlePrefabResourceOverride);
             GameObject go = null;
             if (prefabSource != null)
                 go = CreateRigFighter(displayName, pos, tint, prefabSource, attachAllySpec);
             usedFallbackSprite = go == null;
             if (usedFallbackSprite)
-            {
                 go = CreateFighter(displayName, pos, tint, fallbackShape, attachAllySpec);
-                if (!attachAllySpec)
-                    usedFallbackSprite = !ApplyAnimalKitEnemySprite(go, def, waveForEnemySprite, spawnIndexForEnemySprite);
-            }
 
             if (attachAllySpec)
             {
@@ -5555,53 +5639,6 @@ namespace SpinSquad.Core
             }
 
             return go;
-        }
-
-        static bool ApplyAnimalKitEnemySprite(GameObject go, UnitDefinition def, int wave, int spawnIndex)
-        {
-            if (go == null)
-                return false;
-
-            var profile = AnimalKitEnemySprites.PickProfile(def, wave, spawnIndex);
-            var sprite = profile?.Idle;
-            if (sprite == null)
-                return false;
-
-            var rootSr = go.GetComponent<SpriteRenderer>();
-            if (rootSr != null)
-                rootSr.sprite = null;
-
-            var visualGo = new GameObject("AnimalKitSprite");
-            visualGo.transform.SetParent(go.transform, false);
-            visualGo.transform.localPosition = Vector3.zero;
-            visualGo.transform.localRotation = Quaternion.identity;
-            visualGo.transform.localScale = Vector3.one;
-
-            var sr = visualGo.AddComponent<SpriteRenderer>();
-
-            if (go.GetComponent<AnimalKitEnemyVisualMarker>() == null)
-                go.AddComponent<AnimalKitEnemyVisualMarker>();
-
-            sr.sprite = sprite;
-            sr.color = Color.white;
-            sr.sortingOrder = Mathf.Max(sr.sortingOrder, 7);
-
-            var bounds = sprite.bounds.size;
-            var maxAxis = Mathf.Max(bounds.x, bounds.y, 0.01f);
-            var targetWorldHeight = wave >= 5 && spawnIndex == 0 ? 0.56f : 0.42f;
-            var scale = targetWorldHeight / maxAxis;
-            go.transform.localScale = new Vector3(scale, scale, 1f);
-
-            var collider = go.GetComponent<BoxCollider2D>();
-            if (collider != null)
-                collider.size = new Vector2(0.42f / Mathf.Max(scale, 0.01f), 0.42f / Mathf.Max(scale, 0.01f));
-
-            var frameAnimator = go.GetComponent<AnimalKitEnemyBattleAnimator>();
-            if (frameAnimator == null)
-                frameAnimator = go.AddComponent<AnimalKitEnemyBattleAnimator>();
-            frameAnimator.ConfigureProfile(profile);
-
-            return true;
         }
 
         void EnsureBattleVisualDriver(GameObject go)
@@ -5613,38 +5650,7 @@ namespace SpinSquad.Core
             {
                 if (go.GetComponent<SpineBattleAnimator>() == null)
                     go.AddComponent<SpineBattleAnimator>();
-                return;
             }
-
-            if (go.GetComponent<AnimalKitEnemyVisualMarker>() != null)
-            {
-                if (go.GetComponent<AnimalKitEnemyBattleAnimator>() == null)
-                    go.AddComponent<AnimalKitEnemyBattleAnimator>();
-                return;
-            }
-
-            var animator = go.GetComponent<Animator>();
-            if (animator == null)
-                animator = go.GetComponentInChildren<Animator>();
-            if (animator == null)
-                animator = go.AddComponent<Animator>();
-
-            var controller = Resources.Load<RuntimeAnimatorController>(Line1BattleControllerResourcesPath);
-            if (controller != null)
-            {
-                if (animator.runtimeAnimatorController != controller)
-                    animator.runtimeAnimatorController = controller;
-            }
-            else if (!_line1BattleControllerMissingWarned)
-            {
-                _line1BattleControllerMissingWarned = true;
-                Debug.LogWarning("[DuelDirector] Missing line1 battle animator controller at Resources/" + Line1BattleControllerResourcesPath);
-            }
-
-            var bridge = go.GetComponent<Line1BattleSpriteAnimator>();
-            if (bridge == null)
-                bridge = go.AddComponent<Line1BattleSpriteAnimator>();
-            bridge.Configure(animator);
         }
 
         static void WarnIfMissingBattleVisualDriver(GameObject go, UnitDefinition def, string side)

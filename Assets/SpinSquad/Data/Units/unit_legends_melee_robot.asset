@@ -19,8 +19,8 @@ MonoBehaviour:
   attack: 19
   teamKind: 0
   bodyShape: 0
-  battlePrefab: {fileID: 100100000, guid: 2e62ca3d023da4f7e835ad3a5f154b4f, type: 3}
-  battlePrefabResourcesPath: Battle/KnightBattleVisual
+  battlePrefab: {fileID: 0}
+  battlePrefabResourcesPath:
   portraitSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}
   cardSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}
   iconSprite: {fileID: -3251233695883967156, guid: 000d04ea0e330445db5de1d47fb2e94c, type: 3}

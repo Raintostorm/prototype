@@ -87,8 +87,7 @@ namespace SpinSquad.UI
             var go = new GameObject(label + "Button");
             go.transform.SetParent(parent, false);
             var img = go.AddComponent<Image>();
-            img.sprite = MetaHudTheme.WhiteSprite();
-            img.color = new Color(0.18f, 0.28f, 0.42f, 0.94f);
+            SpinSquadButtonTheme.Apply(img, SpinSquadButtonTheme.FromLabel(label));
             var btn = go.AddComponent<Button>();
             btn.targetGraphic = img;
             btn.onClick.AddListener(() => onClick());
